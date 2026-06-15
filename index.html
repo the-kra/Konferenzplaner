@@ -67,6 +67,8 @@ html,body{margin:0;color:var(--ink);font-family:'Lexend',ui-sans-serif,system-ui
 .topbar-btn{flex:0 0 auto;align-self:center;display:inline-flex;align-items:center;gap:7px;padding:10px 16px;font-size:13px;font-weight:600;
   border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);cursor:pointer}
 .topbar-btn:hover{border-color:var(--brand)}
+.topbar-btn.icon-only{padding:0;width:46px;height:46px;justify-content:center;border-radius:14px}
+.topbar-btn.icon-only .ico{width:22px;height:22px;margin:0}
 
 /* Retro 7-Segment Digitaluhr */
 .clock{flex:0 0 auto;padding:4px 6px;position:relative;text-align:center}
@@ -92,6 +94,10 @@ html,body{margin:0;color:var(--ink);font-family:'Lexend',ui-sans-serif,system-ui
 .panel h2 .pill.active::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);margin-right:6px;vertical-align:1px}
 label{display:block;font-size:12px;color:var(--muted);font-weight:500;margin:0 0 5px}
 input,select{width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:#fbfcfe;border:1px solid var(--line);border-radius:10px;padding:9px 11px;outline:none}
+/* Startzeit + Dauer einheitlich: zentriert, gleiche Höhe, ohne Spinner-Pfeile */
+#startTime,#slotMinutes{text-align:center;height:42px;appearance:textfield;-moz-appearance:textfield}
+#slotMinutes::-webkit-inner-spin-button,#slotMinutes::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+#startTime::-webkit-date-and-time-value{text-align:center}
 input:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent)}
 .row{margin-bottom:14px}
 .row.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -133,6 +139,8 @@ button.icon{padding:6px 9px;border-radius:8px;line-height:1}
 .ord-input::-webkit-inner-spin-button,.ord-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 /* Add-Form: Abteilung-Auswahl gleich hoch & zentriert wie die Nachbarfelder */
 .add-form select,.add-form input{text-align:center;text-align-last:center}
+/* alle Add-Form-Felder + Button exakt gleiche Höhe */
+.add-form input,.add-form select,.add-form button{height:44px;padding-top:0;padding-bottom:0;border-radius:12px}
 
 /* Live-Karten */
 .live-card{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px;display:flex;flex-direction:column;gap:4px}
@@ -539,9 +547,9 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 </svg></span>
     <div class="title-stack">
       <h1>Klassenkonferenz-Planung</h1>
-      <p class="sub"><b>Master</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit</p>
+      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit</p>
     </div>
-    <button class="topbar-btn" id="openBeamerBtn" type="button"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg> Beamer-Ansicht</button>
+    <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
     <div class="clock">
       <div class="time"><span class="off">88:88:88</span><span class="lit" id="clockTime">00:00:00</span></div>
       <div class="meta"><span class="date" id="clockDate">—</span><span class="sep">·</span><span class="lbl">Live</span></div>
@@ -550,7 +558,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 
   <main class="layout">
     <section class="panel controls">
-      <h2>Steuerung <span class="pill" id="rolePill">Master</span></h2>
+      <h2>Steuerung <span class="pill" id="rolePill">Main</span></h2>
 
       <div class="row">
         <label for="teacherInput">Kürzel oder Nachname (eigene Klassen hervorheben)</label>
@@ -574,7 +582,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
         <button id="exportBtn" class="ghost" type="button" title="Aktuellen Stand als Datei sichern">Stand sichern</button>
         <label class="file-btn" id="importLabel" for="importInput" title="Gesicherten Stand laden">Stand laden</label>
         <input id="importInput" type="file" accept=".json">
-        <button id="cloudLoadBtn" class="btn-wide" type="button" title="Den vom PC vorbereiteten Stand aus der Cloud auf dieses Gerät holen und hier weitersteuern"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><line x1="10.5" y1="18.5" x2="13.5" y2="18.5"/></svg> Master übernehmen</button>
+        <button id="cloudLoadBtn" class="btn-wide" type="button" title="Den vom PC vorbereiteten Stand aus der Cloud auf dieses Gerät holen und hier weitersteuern"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><line x1="10.5" y1="18.5" x2="13.5" y2="18.5"/></svg> Main übernehmen</button>
       </div>
 
       <label class="inline"><input type="checkbox" id="hideDone"> Fertige Konferenzen ausblenden</label>
@@ -829,7 +837,7 @@ function renderAll(){
 
 function applyRoleUi(){
   const master=canControl();
-  dom.rolePill.textContent = ROLE==="master" ? (passiveMaster?"Master · passiv":"Master · aktiv") : (ROLE==="locked"?"Gesperrt":"Anzeige");
+  dom.rolePill.textContent = ROLE==="master" ? (passiveMaster?"Main · passiv":"Main · aktiv") : (ROLE==="locked"?"Gesperrt":"Anzeige");
   dom.rolePill.classList.toggle("active", ROLE==="master" && !passiveMaster);
   // „Master übernehmen" bleibt auch für passiven Master klickbar:
   dom.cloudLoadBtn.disabled = ROLE!=="master";
@@ -838,7 +846,7 @@ function applyRoleUi(){
   // Teacher-Filter bleibt für ALLE nutzbar (Lehrer/Schüler an Anzeige-Geräten); Export ebenso.
   dom.teacherInput.disabled=false;
   dom.syncHint.textContent = master
-    ? "Master aktiv: Änderungen werden live an alle Clients gesendet."
+    ? "Main aktiv: Änderungen werden live an alle Clients gesendet."
     : passiveMaster ? "Passiv: ein anderes Gerät steuert. Oben „Steuerung übernehmen“."
     : "Client/Anzeige: nur Live-Anzeige, keine Steuerung.";
 }
@@ -1028,7 +1036,9 @@ function byId(id){ return state.conferences.find(c=>c.id===id); }
 function bumpRevision(){ state.revision=(state.revision||0)+1; }
 function isMaster(){ return ROLE==="master"; }
 let passiveMaster=false;                          // Master, der gerade NICHT steuert (anderes Gerät aktiv)
-function canControl(){ return ROLE==="master" && !passiveMaster; }
+// Bedienelemente sind für JEDEN Master nutzbar (auch passiv). Die erste Steueraktion
+// übernimmt automatisch die Kontrolle (siehe pushNow). passiveMaster steuert nur Anzeige/Banner.
+function canControl(){ return ROLE==="master"; }
 window.__kfSetPassive = p=>{ passiveMaster=!!p; applyRoleUi(); renderConferenceTable(); renderLiveCards(); };
 
 /* Lehrer-Modell: {k:"KRA", n:"Kranz"}  (Kürzel + Nachname) */
@@ -1380,10 +1390,14 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
     return { v:2, sessionActive, sessionDate, owner:{id:MASTER_ID, ts:Date.now()}, snapshot: window.__kfSnapshot() };
   }
   async function pushNow(force){
-    if(!amOwner) return;                              // passiver Master schreibt nicht
     const pl=buildPayload();
     const cmp=JSON.stringify({s:pl.sessionActive,d:pl.sessionDate,snap:pl.snapshot});  // owner.ts NICHT vergleichen
-    if(!force && cmp===lastSent) return; lastSent=cmp;
+    if(force){ if(!amOwner) return; }                 // Heartbeat nur als aktiver Master
+    else{
+      if(cmp===lastSent) return;                      // keine echte Änderung
+      if(!amOwner) setOwner(true);                    // erste echte Steueraktion -> Kontrolle automatisch übernehmen
+    }
+    lastSent=cmp;
     try{ await SB.rpc(RPC_NAME,{p_payload:pl,p_key:LIVE_KEY}); setStatus(true); }
     catch(e){ setStatus(false); }
   }
