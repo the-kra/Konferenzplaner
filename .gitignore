@@ -1,0 +1,23 @@
+# ============================================================
+#  Whitelist-Prinzip: ALLES ignorieren ...
+# ============================================================
+*
+
+# ... AUSSER den folgenden Dateien/Ordnern:
+!.gitignore
+!README.md
+!DEPLOYMENT.md
+!index.html
+
+# Ordner müssen erst „durchlässig" gemacht werden, damit die
+# Whitelist-Regeln darin greifen:
+!tools/
+tools/*
+!tools/untis-export.js
+
+# ------------------------------------------------------------
+# Bewusst NICHT im Repo (lokale Daten / Müll):
+#   *.csv  *.xlsx  *.xls   -> echte Lehrer-/Klassendaten (Datenschutz!)
+#   .DS_Store              -> macOS-Müll
+#   node_modules, *.log    -> falls je vorhanden
+# ------------------------------------------------------------

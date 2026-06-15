@@ -1,0 +1,1081 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTL1 · Klassenkonferenz-Planung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Live-Spiegelung (optional/additiv): supabase-js v2 + QR-Code. Ohne Konfiguration bleibt alles rein lokal. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+@font-face{font-family:"DSEG7 Classic";src:url(data:font/woff2;base64,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) format("woff2");font-weight:bold;font-style:normal;font-display:swap;}
+:root{
+  --ink:#1b2330; --paper:#eef2f7; --line:#d8dee8; --panel:#ffffff; --muted:#7c879a;
+  --accent:#d33c3c; --accent-soft:#d33c3c22;
+  --good:#2bb6a8; --bad:#ef5d70; --warn:#e0972a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;color:var(--ink);font-family:'Lexend',ui-sans-serif,system-ui,sans-serif;font-weight:400;background:transparent;min-height:100%}
+.bg{position:fixed;inset:0;z-index:-2;overflow:hidden;background:radial-gradient(130% 100% at 78% 8%, #f3e9f6 0%, #e7ecf6 38%, #dde4ee 100%)}
+.bg::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 50% at 80% 110%, var(--accent-soft) 0, transparent 60%),radial-gradient(50% 40% at 12% 0%, var(--accent-soft) 0, transparent 60%)}
+.wrap{max-width:1300px;margin:0 auto;padding:0 22px 90px;position:relative;z-index:1}
+
+/* ---- Kopf mit Logo + Uhr ---- */
+.topbar{display:flex;align-items:center;gap:18px;padding:18px 22px;flex-wrap:wrap;position:sticky;top:0;z-index:50;margin:0 -22px;
+  background:rgba(238,242,247,0.82);backdrop-filter:blur(12px) saturate(1.2);-webkit-backdrop-filter:blur(12px) saturate(1.2);
+  border-bottom:1px solid rgba(180,195,215,.5);box-shadow:0 6px 20px -16px rgba(20,30,50,.5)}
+.title-stack{display:flex;flex-direction:column;gap:2px;margin-right:auto}
+.title-stack h1{font-size:24px;font-weight:600;letter-spacing:-.4px;margin:0}
+.title-stack .sub{color:var(--muted);font-size:13.5px;font-weight:300}
+.title-stack .sub b{font-weight:500;color:var(--accent)}
+.logo-badge{background:rgba(255,255,255,0.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border:1px solid var(--accent-soft);border-radius:16px;padding:0;line-height:0;box-shadow:0 8px 24px -18px rgba(20,30,50,.35);flex:0 0 auto;transition:border-color .4s}
+.logo-badge svg{height:54px;width:auto;display:block;border-radius:16px;padding:6px 12px;box-sizing:border-box}
+.topbar-btn{flex:0 0 auto;align-self:center;display:inline-flex;align-items:center;gap:7px;padding:10px 16px;font-size:13px;font-weight:600;
+  border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);cursor:pointer}
+.topbar-btn:hover{border-color:var(--accent)}
+
+/* Retro 7-Segment Digitaluhr */
+.clock{flex:0 0 auto;padding:4px 6px;position:relative;text-align:center}
+.clock .time{font-family:"DSEG7 Classic",ui-monospace,monospace;font-weight:700;font-size:46px;line-height:1;letter-spacing:3px;position:relative;display:inline-block}
+.clock .time .lit{color:var(--accent);position:relative;z-index:2;text-shadow:0 0 6px var(--accent),0 0 16px var(--accent-soft);transition:color .4s,text-shadow .4s}
+.clock .time .off{color:var(--accent);opacity:.12;position:absolute;left:0;top:0;z-index:1;text-shadow:none;transition:color .4s}
+.clock .meta{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:6px;flex-wrap:wrap}
+.clock .date{font-family:'Lexend',sans-serif;font-size:12px;letter-spacing:.5px;color:var(--muted);font-weight:600}
+.clock .meta .sep{color:var(--muted);opacity:.5;font-size:11px}
+.clock .lbl{font-family:'Lexend',sans-serif;font-size:9.5px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;font-weight:500}
+@media(max-width:900px){.clock .time{font-size:34px}}
+
+/* ---- Layout / Panels ---- */
+.layout{display:grid;grid-template-columns:360px 1fr;gap:20px;margin-top:24px;align-items:start}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 18px 50px -32px rgba(20,30,50,.5)}
+.panel h2{margin:0 0 14px;font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.panel h2 .pill{font-size:11px;font-weight:600;color:var(--muted);background:var(--paper);border-radius:999px;padding:3px 9px;margin-left:auto}
+label{display:block;font-size:12px;color:var(--muted);font-weight:500;margin:0 0 5px}
+input,select{width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:#fbfcfe;border:1px solid var(--line);border-radius:10px;padding:9px 11px;outline:none}
+input:focus,select:focus{border-color:var(--accent)}
+.row{margin-bottom:14px}
+.row.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.inline{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);font-weight:500;cursor:pointer}
+.inline input{width:auto}
+button{font-family:inherit;font-weight:600;font-size:14px;border:none;border-radius:10px;padding:9px 14px;cursor:pointer;background:var(--accent);color:#fff;transition:filter .15s,opacity .15s}
+button:hover{filter:brightness(1.06)}
+button:disabled{opacity:.4;cursor:not-allowed;filter:none}
+button.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+button.warn{background:var(--warn)}
+button.small{padding:6px 10px;font-size:12.5px;border-radius:8px}
+button.icon{padding:6px 9px;border-radius:8px;line-height:1}
+.button-row{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0}
+.file-btn{display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;border-radius:10px;padding:9px 14px;cursor:pointer;background:#fff;color:var(--ink);border:1px solid var(--line)}
+.file-btn:hover{border-color:var(--accent)}
+#excelInput,#importInput{display:none}
+.hint{font-size:12px;color:var(--muted);margin:10px 0 0;line-height:1.5}
+
+/* Abteilungen */
+.dept-head{font-size:12px;color:var(--muted);font-weight:600;margin:6px 0 8px}
+.dept-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.dept-row .dname{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:500}
+.dept-row .swatch{width:14px;height:14px;border-radius:4px;flex:0 0 auto}
+.dept-row input[type=color]{width:38px;height:32px;padding:2px;cursor:pointer}
+.dept-row input[type=number]{width:64px;text-align:center}
+.dept-row .ord-lbl{font-size:11px;color:var(--muted)}
+
+/* Live-Karten */
+.live-card{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px;display:flex;flex-direction:column;gap:4px}
+.live-card.current{border-color:var(--accent);background:var(--accent-soft)}
+.live-tag{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.live-card strong{font-size:18px;font-weight:600}
+.live-card small{color:var(--muted);font-size:12.5px}
+.quick-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:4px}
+
+/* Tabelle */
+.table-wrap{overflow:auto;border-radius:12px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:9px 11px;text-align:left;white-space:nowrap}
+thead th{background:var(--paper);color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;position:sticky;top:0}
+tbody tr{border-top:1px solid var(--line)}
+tbody tr.current{background:var(--accent-soft)}
+tbody tr.current td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+tbody tr.next td{font-weight:500}
+tbody tr.done{opacity:.42}
+tbody tr.mine{outline:2px solid var(--accent);outline-offset:-2px}
+tbody tr.mine td:nth-child(3)::after{content:" ★";color:var(--accent)}
+.badge{display:inline-block;font-size:11px;font-weight:600;border-radius:999px;padding:3px 9px;color:#fff}
+.badge.waiting{background:#8893a5}
+.badge.running{background:var(--good)}
+.badge.done{background:#b8c0cd}
+.actions{display:flex;gap:6px}
+.kv-input{width:74px;padding:5px 7px;font-size:12.5px;text-transform:uppercase;border-radius:7px}
+.add-form{display:grid;grid-template-columns:150px 1fr 110px 1fr auto;gap:9px;margin-bottom:14px;align-items:end}
+@media(max-width:760px){.add-form{grid-template-columns:1fr 1fr}}
+
+/* ---- Beamer / Anzeige Vollbild ---- */
+#beamerView{position:fixed;inset:0;z-index:9000;display:none;flex-direction:column;padding:3vh 4vw;gap:2.4vh;
+  background:radial-gradient(circle at 50% 30%,#fbfcfe,#dde4ee);color:var(--ink)}
+#beamerView.on{display:flex}
+.beamer-top{display:flex;align-items:center;gap:20px}
+.beamer-top .logo-badge svg{height:64px}
+.beamer-top .btitle{font-size:clamp(20px,2.4vw,34px);font-weight:600;margin-right:auto}
+.beamer-top .btitle small{display:block;font-size:13px;color:var(--muted);font-weight:400}
+.bclock .time{font-size:clamp(40px,5vw,70px)}
+.beamer-now{display:grid;grid-template-columns:1fr 1fr;gap:2vw}
+.bcard{border:2px solid var(--line);border-radius:20px;padding:2.4vh 2vw;background:#fff;box-shadow:0 20px 50px -34px rgba(20,30,50,.6);min-height:14vh;display:flex;flex-direction:column;justify-content:center}
+.bcard.current{border-color:var(--accent);background:var(--accent-soft)}
+.blabel{font-size:clamp(11px,1.1vw,15px);letter-spacing:3px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.bname{font-size:clamp(30px,4.4vw,64px);font-weight:700;line-height:1.05;margin-top:6px}
+.bsub{font-size:clamp(15px,1.7vw,24px);color:var(--muted);margin-top:8px;font-weight:500}
+.bdept{display:inline-block;font-size:clamp(12px,1.2vw,17px);font-weight:600;color:#fff;border-radius:999px;padding:4px 14px;margin-top:10px}
+.beamer-list{flex:1;overflow:auto;border-top:1px solid var(--line);padding-top:1.4vh}
+.brow{display:grid;grid-template-columns:auto 110px 1.1fr 90px 1.4fr auto;gap:1.4vw;align-items:center;padding:1vh 0.4vw;border-bottom:1px solid var(--line);font-size:clamp(13px,1.4vw,21px)}
+.brow.current{background:var(--accent-soft);font-weight:600;border-radius:10px}
+.brow.done{opacity:.4}
+.brow .bdot{width:12px;height:12px;border-radius:4px}
+.brow.mine{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+.beamer-foot{text-align:center;color:var(--muted);font-size:13px}
+.beamer-close{position:fixed;top:14px;right:16px;z-index:9100;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:600;color:var(--ink)}
+.beamer-teacher{position:fixed;bottom:14px;left:16px;z-index:9100;display:flex;gap:8px;align-items:center;background:#ffffffcc;border:1px solid var(--line);border-radius:12px;padding:7px 11px}
+.beamer-teacher input{width:120px;padding:6px 9px;font-size:13px}
+.beamer-teacher span{font-size:12px;color:var(--muted);font-weight:600}
+body.anzeige .wrap{display:none!important}
+
+/* Ruhe-Bildschirm (Anzeige ohne aktive Session) */
+#ruheView{position:fixed;inset:0;z-index:8000;display:none;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 38%,#f5f8fc,#e4ebf3);color:#56657a;gap:28px;text-align:center;padding:24px}
+#ruheView.on{display:flex}
+#ruheView svg{height:min(26vh,180px);width:auto}
+#ruheView .rt{font-size:clamp(18px,3vw,28px);font-weight:300;letter-spacing:.5px}
+
+/* Live-Statuspunkt + Master-Panel */
+#liveStatus{position:fixed;top:14px;left:16px;z-index:9200;font-size:13px;font-weight:600;color:#9fb3cc;background:#111927cc;border:1px solid #1e2a3a;border-radius:12px;padding:6px 12px;display:none}
+#liveStatus.show{display:inline-flex;align-items:center;gap:7px}
+#liveStatus .dot{width:9px;height:9px;border-radius:50%;background:#ff5a5a}
+#liveStatus.live .dot{background:#4fd6bf}
+#lockBanner{position:fixed;top:0;left:0;right:0;z-index:9300;background:#3a1416;color:#ff9b9b;text-align:center;font-weight:600;padding:10px 14px}
+#livePanel{position:fixed;right:16px;bottom:16px;z-index:8800;width:300px;background:#0e1622;border:1px solid #24344a;border-radius:14px;padding:14px 16px;color:#dce6f2;box-shadow:0 12px 40px -16px #000;display:none;cursor:move;touch-action:none}
+#livePanel.show{display:block}
+#livePanel.dragging{opacity:.92}
+#livePanel button,#livePanel input{cursor:auto}#livePanel button{cursor:pointer}
+#livePanel h4{margin:0 0 10px;font-size:14px;color:#9fb3cc;font-weight:600;display:flex;align-items:center;gap:8px;cursor:move;user-select:none}
+#livePanel h4 .lp-grip{color:#46566b;font-size:13px;letter-spacing:1px}
+#livePanel .lp-dot{width:14px;height:14px;border-radius:50%;background:#ff5a5a;margin-left:auto;cursor:pointer}
+#livePanel.live .lp-dot{background:#4fd6bf}
+#livePanel.min{width:auto;padding:9px 13px}
+#livePanel.min h4{margin:0}
+#livePanel.min .lp-main,#livePanel.min .lp-sub,#livePanel.min .lp-link,#livePanel.min #lpQR{display:none}
+#livePanel button.lp-main{width:100%;padding:11px;border:none;border-radius:10px;font-weight:600;font-size:14px;color:#fff;background:#2bb673}
+#livePanel.active button.lp-main{background:#cc4444}
+#livePanel .lp-sub{font-size:11px;color:#6a83a3;margin:9px 0 3px}
+#livePanel .lp-link{display:flex;gap:6px}
+#livePanel .lp-link input{flex:1;font-size:11px;background:#0a121d;border:1px solid #24344a;color:#aebfd4;border-radius:8px;padding:6px 8px;min-width:0}
+#livePanel .lp-link button{border:none;background:#1e2a3a;color:#cfe3f2;border-radius:8px;padding:0 10px;font-size:12px}
+#livePanel #lpQR{margin-top:10px;display:flex;justify-content:center;background:#fff;padding:8px;border-radius:8px}
+#livePanel #lpQR img,#livePanel #lpQR canvas{display:block}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+
+<!-- Vollbild Beamer / Anzeige -->
+<div id="beamerView">
+  <div class="beamer-top">
+    <span class="logo-badge" id="bLogo"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 432.46 202.88" class="htl-logo-anim" role="img" aria-label="HTL1 Klagenfurt">
+  <defs>
+    
+    <clipPath id="clippathha">
+      <rect fill="none" x="0" y="0" width="432.46" height="202.88"/>
+    </clipPath>
+    <clipPath id="clippath-1ha">
+      <rect fill="none" x="0" y="0" width="432.46" height="202.88"/>
+    </clipPath>
+  <clipPath id="globeClipha"><circle cx="373.8" cy="79.24" r="49.0"/></clipPath><mask id="orbitMaskha"><path id="orbitWedgeha" fill="#fff"/></mask><mask id="standMaskha"><path id="standStrokeha" d="M189.1,196.3 L187.6,192.8 L185.9,189.2 L184.4,185.7 L182.9,182.1 L181.4,178.6 L179.9,175.1 L178.4,171.4 L177.1,167.8 L175.8,164.6 L171.0,134.0 L169.7,124.6 L168.6,115.5 L167.6,106.8 L166.8,98.5 L166.2,90.5 L165.8,82.9 L165.5,75.6 L165.4,68.7 L165.5,62.2 L165.8,56.0 L166.2,50.2 L166.8,44.7 L167.6,39.6 L168.6,34.9 L169.7,30.5 L171.0,26.5 L172.5,22.8 L174.2,19.5 L176.0,16.6 L178.0,14.0 L181.2,14.9 L184.3,16.2 L187.3,17.9 L190.1,20.0 L192.9,22.4 L195.5,25.2 L198.1,28.4 L200.5,32.0 L202.8,35.9 L205.0,40.2 L207.1,44.9 L209.1,50.0 L211.0,55.4 L212.8,61.2 L214.4,67.4 L216.0,74.0" pathLength="1000" stroke-dasharray="0 2000" style="fill:none;stroke:#fff;stroke-width:22;stroke-linecap:butt;stroke-linejoin:round"/></mask></defs><g mask="url(#orbitMaskha)"><path fill="#0083aa" d="M106.38,47.07c-9.46,.97-19,2.75-28.58,4.95-9.58,2.19-19.18,4.98-28.64,8.62-4.72,1.82-9.41,3.86-13.99,6.23-4.58,2.36-9.08,5.01-13.33,8.19-4.23,3.18-8.29,6.84-11.56,11.44-1.62,2.3-3.06,4.83-4.05,7.62-.52,1.38-.89,2.84-1.16,4.31l-.18,1.11c-.06,.37-.08,.79-.12,1.19l-.05,.6c-.01,.2-.01,.34-.02,.51l-.03,.98c.02,6.32,2.48,11.89,5.78,16.39,3.31,4.53,7.39,8.1,11.64,11.2,4.27,3.09,8.78,5.67,13.37,7.93,4.59,2.27,9.28,4.22,14.01,5.95,9.3,3.41,16.61,5.96,26.01,8,.05-.59,.09-1.19,.15-1.78,.04-2.12,.07-4.23,.11-6.35-10.88-3-19.12-6.58-28.06-10.82C10.92,115.92-.57,83.24,79.35,59.67c36.89-10.88,97.71-8.88,123.88-9.01-5.82-1.5-48.44-8.58-96.85-3.59"/><path fill="#0083aa" d="M349.67,129.76c-3.3,1.09-11.78,4.56-20.09,6.88-10.09,2.81-19.92,4.4-19.92,4.4,3.58,2.58,5.34,6.48,5.34,6.48,.19,0,.39-.03,.64-.1,12.05-3.2,24.39-8.15,34.89-14.85,.96-.61,1.9-1.27,2.88-1.94-1.87-1.58-1.85-1.51-3.74-.88"/></g><g id="standGroupha" mask="url(#standMaskha)" style="opacity:0"><path fill="#0083aa" d="M189.44,195.11c-2.2-5.29-6.67-16.81-6.67-16.81-1.85-4.75-3.62-9.8-5.3-15.13-.04-.11-.07-.22-.1-.33-.86,1.24-1.89,2.35-3.05,3.28,3.2,8.33,14.13,31.13,14.68,31.83,.06-.08,.1-.15,.16-.22,.03,.05,.07,.11,.1,.16,0-.1,0-.19,0-.29,.79-1.12,.71-1.23,.19-2.47"/><path fill="#0083aa" d="M207.77,35.93c-1.7-3.31-3.53-6.59-5.54-9.8-2-3.21-4.17-6.35-6.63-9.34-2.47-2.98-5.22-5.83-8.6-8.19-1.71-1.15-3.58-2.19-5.71-2.84-1.06-.33-2.18-.57-3.34-.64-.29-.03-.58-.03-.87-.03-.29,0-.58,0-.92,.02l-.49,.04c-.17,.01-.33,.03-.42,.05l-.8,.13c-2.32,.47-4.45,1.59-6.13,3.01-1.71,1.41-3.02,3.08-4.15,4.79-2.2,3.45-3.63,7.12-4.75,10.8-2.2,7.37-3.2,14.85-3.79,22.23-.56,7.39-.63,14.73-.41,21.95,.22,7.22,.75,14.33,1.5,21.29,1.5,13.93,3.79,27.27,6.66,39.76,.79,3.44,2.69,7.88,3.56,11.19,1.92,.16,3.75,.65,5.44,1.4-.94-3.97-2.91-9.1-3.76-13.26-1.25-6.23-2.41-12.65-3.41-19.24-.99-6.59-1.83-13.35-2.44-20.24-.62-6.89-1.02-13.91-1.12-21.01-.1-7.1,.09-11.08,.76-18.25,.69-7.15,1.8-12.22,3.95-18.99,1.08-3.37,2.46-6.64,4.3-9.42,1.84-2.76,4.23-5.27,6.94-5.36,16.17-.49,35.36,47.2,36.49,50.73h5.19c-1.38-4.32-8.11-24.15-11.51-30.78"/></g>
+  <g id="logoha">
+    <g clip-path="url(#clippathha)">
+      <g clip-path="url(#clippath-1ha)">
+        
+        
+        <polygon fill="#d87b0b" points="81.02 161.87 81.02 138.44 88.71 138.44 88.71 156.4 99.25 156.4 99.25 161.87 81.02 161.87"/>
+        <path fill="#d87b0b" d="M114.03,161.87l-.33-1.82c-1.92,1.79-3.87,2.31-6.41,2.31-3.22,0-6.09-1.59-6.09-5.14,0-7.75,12.14-4.23,12.14-7.42,0-1.24-1.5-1.4-2.21-1.4-.94,0-2.21,.2-2.38,1.66h-6.51c0-3.61,2.57-5.73,9.31-5.73,8.07,0,8.56,2.99,8.56,7.06v7.98c0,.98,.03,1.46,.91,2.18v.32h-7Zm-.68-7.55c-2.21,1.07-5.14,.55-5.14,2.77,0,.85,.81,1.43,2.15,1.43,2.38,0,3.16-1.86,3-4.2"/>
+        <path fill="#d87b0b" d="M129.37,156.57c0,.68,.26,1.21,.72,1.56,.42,.33,1.01,.52,1.66,.52,1.04,0,2.15-.32,2.15-1.53,0-2.73-10.45-.55-10.45-7.16,0-4.36,4.52-5.63,8.07-5.63s8.07,.85,8.46,5.37h-6.15c-.07-.55-.29-.94-.65-1.24-.36-.29-.85-.42-1.37-.42-1.17,0-1.92,.36-1.92,1.2,0,2.38,10.78,.78,10.78,7.16,0,3.55-2.93,5.96-9.18,5.96-3.91,0-8.2-1.2-8.56-5.79h6.45Z"/>
+        <path fill="#d87b0b" d="M154.42,161.87c-8.89,.49-9.96-.13-9.96-6.02v-7.13h-2.41v-3.91h2.51v-5.31h6.67v5.31h3.26v3.91h-3.26v6.19c0,1.56,.23,2.12,2.12,2.12h1.07v4.85Z"/>
+        <path fill="#d87b0b" d="M163.25,154.87c0,2.02,1.56,3.35,3.35,3.35,1.07,0,2.05-.49,2.54-1.5h6.48c-1.17,4.23-5.47,5.63-9.44,5.63-5.47,0-9.7-3.12-9.7-8.85s4.2-9.18,9.67-9.18c6.31,0,10.12,4.36,10.03,10.55h-12.92Zm6.15-3.45c0-1.56-1.4-2.96-3-2.96-2.02,0-3.16,1.14-3.16,2.96h6.15Z"/>
+        <path fill="#d87b0b" d="M178.71,144.82h6.19v2.67c1.53-2.05,3.19-3.16,5.76-3.16,4.49,0,6.61,2.64,6.61,7.32v10.22h-6.77v-9.02c0-1.69-.46-3.19-2.38-3.19-2.08,0-2.64,1.33-2.64,3.52v8.69h-6.77v-17.06Z"/>
+        <path fill="#d87b0b" d="M206.31,156.57c0,.68,.26,1.21,.72,1.56,.42,.33,1.01,.52,1.66,.52,1.04,0,2.15-.32,2.15-1.53,0-2.73-10.45-.55-10.45-7.16,0-4.36,4.52-5.63,8.07-5.63s8.07,.85,8.46,5.37h-6.15c-.06-.55-.29-.94-.65-1.24-.36-.29-.85-.42-1.37-.42-1.17,0-1.92,.36-1.92,1.2,0,2.38,10.78,.78,10.78,7.16,0,3.55-2.93,5.96-9.18,5.96-3.91,0-8.2-1.2-8.56-5.79h6.45Z"/>
+        <path fill="#d87b0b" d="M231.35,161.87c-8.89,.49-9.96-.13-9.96-6.02v-7.13h-2.41v-3.91h2.51v-5.31h6.67v5.31h3.26v3.91h-3.26v6.19c0,1.56,.23,2.12,2.12,2.12h1.07v4.85Z"/>
+        <path fill="#d87b0b" d="M234.59,144.82h6.15v3.45h.07c.94-2.67,2.6-3.94,5.24-3.94,.29,0,.59,.07,.88,.1v6.77c-.46-.07-.94-.2-1.4-.2-2.77,0-4.17,1.3-4.17,4.98v5.89h-6.77v-17.06Z"/>
+        <path fill="#d87b0b" d="M260.81,161.87l-.33-1.82c-1.92,1.79-3.87,2.31-6.41,2.31-3.22,0-6.09-1.59-6.09-5.14,0-7.75,12.14-4.23,12.14-7.42,0-1.24-1.5-1.4-2.21-1.4-.94,0-2.21,.2-2.38,1.66h-6.51c0-3.61,2.57-5.73,9.31-5.73,8.07,0,8.56,2.99,8.56,7.06v7.98c0,.98,.03,1.46,.91,2.18v.32h-7Zm-.68-7.55c-2.21,1.07-5.14,.55-5.14,2.77,0,.85,.81,1.43,2.15,1.43,2.38,0,3.16-1.86,3-4.2"/>
+        <path fill="#d87b0b" d="M279.08,147.16c1.63,.03,2.57-.68,2.57-2.34,0-1.37-.68-2.44-2.21-2.44-2.18,0-2.15,1.63-2.15,3.35v16.15h-6.77v-15.92c0-5.89,3.45-8.14,8.98-8.14,4.88,0,8.5,2.08,8.5,6.09,0,2.18-.94,3.71-2.9,4.62,3.09,1.17,4.26,3.03,4.26,6.31,0,4.92-3.52,7.52-7.55,7.52-.94,0-1.86-.1-2.8-.29v-4.2c2.73,.46,3.58-.85,3.58-3.35s-.91-3.71-3.52-3.65v-3.71Z"/>
+        <path fill="#d87b0b" d="M298.28,154.87c0,2.02,1.56,3.35,3.35,3.35,1.07,0,2.05-.49,2.54-1.5h6.48c-1.17,4.23-5.47,5.63-9.44,5.63-5.47,0-9.7-3.12-9.7-8.85s4.2-9.18,9.67-9.18c6.31,0,10.12,4.36,10.03,10.55h-12.92Zm6.15-3.45c0-1.56-1.4-2.96-3-2.96-2.02,0-3.16,1.14-3.16,2.96h6.15Z"/>
+        
+        
+        <path fill="#d87b0b" d="M310.91,133.97V68.02h-13.81c-.64,5.11-2.89,8.88-6.99,11.47-4,2.52-8.55,3.13-13.18,3.41v11.75h16.01v39.32h17.98Z"/>
+        <path fill="#222" d="M233.23,68.82v48.96h29.13v14.85h-47.22v-63.81h18.09Zm-92.66,0v63.72h-18.13v-26.04h-21.1v25.96h-18.2v-63.62h18.15v22.7h21.09v-22.72h18.19m64.83,0v14.66h-18.36v49.11h-18.3v-48.99h-18.42v-14.78h55.07m29.97-2.15h-22.36v68.08h51.49v-19.12h-29.13v-48.96Zm-92.66,0h-22.46v22.72h-16.82v-22.7h-22.42v67.89h22.47v-25.96h16.82v26.04h22.4V66.69Zm64.83,0h-59.35v19.05h18.42v48.99h22.57v-49.11h18.36v-18.93Z"/>
+        <circle cx="373.8" cy="79.24" r="51.4" style="fill:none;stroke:#0083aa;stroke-width:2.5"/><g id="globeGridha" clip-path="url(#globeClipha)"></g>
+        <path fill="#16223e" d="M205.4,68.83h-55.07v14.78h18.42v48.99h18.3v-49.11h18.36v-14.66Zm27.83,48.95v-48.96h-18.09v63.81h47.22v-14.85h-29.13Zm-92.66,14.77v-63.72h-18.19v22.72h-21.09v-22.7h-18.15v63.62h18.2v-25.96h21.1v26.04h18.13Z"/>
+      </g>
+    </g>
+  </g>
+</svg></span>
+    <div class="btitle">Klassenkonferenzen<small id="bDate">—</small></div>
+    <div class="clock bclock"><div class="time"><span class="off">88:88:88</span><span class="lit" id="bClockTime">00:00:00</span></div></div>
+  </div>
+  <div class="beamer-now">
+    <div class="bcard current" id="bCurrent"><div class="blabel">Jetzt in Konferenz</div><div class="bname">—</div></div>
+    <div class="bcard" id="bNext"><div class="blabel">Als Nächstes</div><div class="bname">—</div></div>
+  </div>
+  <div class="beamer-list" id="bList"></div>
+  <div class="beamer-foot">Live-Ansicht · aktualisiert automatisch</div>
+</div>
+<button class="beamer-close" id="bClose" style="display:none">✕ Schließen</button>
+<div class="beamer-teacher" id="bTeacher" style="display:none"><span>Mein Kürzel:</span><input id="bTeacherInput" placeholder="z. B. KRA" maxlength="20"></div>
+
+<!-- Ruhe-Bildschirm -->
+<div id="ruheView"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 432.46 202.88" class="htl-logo-anim" role="img" aria-label="HTL1 Klagenfurt">
+  <defs>
+    
+    <clipPath id="clippathhb">
+      <rect fill="none" x="0" y="0" width="432.46" height="202.88"/>
+    </clipPath>
+    <clipPath id="clippath-1hb">
+      <rect fill="none" x="0" y="0" width="432.46" height="202.88"/>
+    </clipPath>
+  <clipPath id="globeCliphb"><circle cx="373.8" cy="79.24" r="49.0"/></clipPath><mask id="orbitMaskhb"><path id="orbitWedgehb" fill="#fff"/></mask><mask id="standMaskhb"><path id="standStrokehb" d="M189.1,196.3 L187.6,192.8 L185.9,189.2 L184.4,185.7 L182.9,182.1 L181.4,178.6 L179.9,175.1 L178.4,171.4 L177.1,167.8 L175.8,164.6 L171.0,134.0 L169.7,124.6 L168.6,115.5 L167.6,106.8 L166.8,98.5 L166.2,90.5 L165.8,82.9 L165.5,75.6 L165.4,68.7 L165.5,62.2 L165.8,56.0 L166.2,50.2 L166.8,44.7 L167.6,39.6 L168.6,34.9 L169.7,30.5 L171.0,26.5 L172.5,22.8 L174.2,19.5 L176.0,16.6 L178.0,14.0 L181.2,14.9 L184.3,16.2 L187.3,17.9 L190.1,20.0 L192.9,22.4 L195.5,25.2 L198.1,28.4 L200.5,32.0 L202.8,35.9 L205.0,40.2 L207.1,44.9 L209.1,50.0 L211.0,55.4 L212.8,61.2 L214.4,67.4 L216.0,74.0" pathLength="1000" stroke-dasharray="0 2000" style="fill:none;stroke:#fff;stroke-width:22;stroke-linecap:butt;stroke-linejoin:round"/></mask></defs><g mask="url(#orbitMaskhb)"><path fill="#0083aa" d="M106.38,47.07c-9.46,.97-19,2.75-28.58,4.95-9.58,2.19-19.18,4.98-28.64,8.62-4.72,1.82-9.41,3.86-13.99,6.23-4.58,2.36-9.08,5.01-13.33,8.19-4.23,3.18-8.29,6.84-11.56,11.44-1.62,2.3-3.06,4.83-4.05,7.62-.52,1.38-.89,2.84-1.16,4.31l-.18,1.11c-.06,.37-.08,.79-.12,1.19l-.05,.6c-.01,.2-.01,.34-.02,.51l-.03,.98c.02,6.32,2.48,11.89,5.78,16.39,3.31,4.53,7.39,8.1,11.64,11.2,4.27,3.09,8.78,5.67,13.37,7.93,4.59,2.27,9.28,4.22,14.01,5.95,9.3,3.41,16.61,5.96,26.01,8,.05-.59,.09-1.19,.15-1.78,.04-2.12,.07-4.23,.11-6.35-10.88-3-19.12-6.58-28.06-10.82C10.92,115.92-.57,83.24,79.35,59.67c36.89-10.88,97.71-8.88,123.88-9.01-5.82-1.5-48.44-8.58-96.85-3.59"/><path fill="#0083aa" d="M349.67,129.76c-3.3,1.09-11.78,4.56-20.09,6.88-10.09,2.81-19.92,4.4-19.92,4.4,3.58,2.58,5.34,6.48,5.34,6.48,.19,0,.39-.03,.64-.1,12.05-3.2,24.39-8.15,34.89-14.85,.96-.61,1.9-1.27,2.88-1.94-1.87-1.58-1.85-1.51-3.74-.88"/></g><g id="standGrouphb" mask="url(#standMaskhb)" style="opacity:0"><path fill="#0083aa" d="M189.44,195.11c-2.2-5.29-6.67-16.81-6.67-16.81-1.85-4.75-3.62-9.8-5.3-15.13-.04-.11-.07-.22-.1-.33-.86,1.24-1.89,2.35-3.05,3.28,3.2,8.33,14.13,31.13,14.68,31.83,.06-.08,.1-.15,.16-.22,.03,.05,.07,.11,.1,.16,0-.1,0-.19,0-.29,.79-1.12,.71-1.23,.19-2.47"/><path fill="#0083aa" d="M207.77,35.93c-1.7-3.31-3.53-6.59-5.54-9.8-2-3.21-4.17-6.35-6.63-9.34-2.47-2.98-5.22-5.83-8.6-8.19-1.71-1.15-3.58-2.19-5.71-2.84-1.06-.33-2.18-.57-3.34-.64-.29-.03-.58-.03-.87-.03-.29,0-.58,0-.92,.02l-.49,.04c-.17,.01-.33,.03-.42,.05l-.8,.13c-2.32,.47-4.45,1.59-6.13,3.01-1.71,1.41-3.02,3.08-4.15,4.79-2.2,3.45-3.63,7.12-4.75,10.8-2.2,7.37-3.2,14.85-3.79,22.23-.56,7.39-.63,14.73-.41,21.95,.22,7.22,.75,14.33,1.5,21.29,1.5,13.93,3.79,27.27,6.66,39.76,.79,3.44,2.69,7.88,3.56,11.19,1.92,.16,3.75,.65,5.44,1.4-.94-3.97-2.91-9.1-3.76-13.26-1.25-6.23-2.41-12.65-3.41-19.24-.99-6.59-1.83-13.35-2.44-20.24-.62-6.89-1.02-13.91-1.12-21.01-.1-7.1,.09-11.08,.76-18.25,.69-7.15,1.8-12.22,3.95-18.99,1.08-3.37,2.46-6.64,4.3-9.42,1.84-2.76,4.23-5.27,6.94-5.36,16.17-.49,35.36,47.2,36.49,50.73h5.19c-1.38-4.32-8.11-24.15-11.51-30.78"/></g>
+  <g id="logohb">
+    <g clip-path="url(#clippathhb)">
+      <g clip-path="url(#clippath-1hb)">
+        
+        
+        <polygon fill="#d87b0b" points="81.02 161.87 81.02 138.44 88.71 138.44 88.71 156.4 99.25 156.4 99.25 161.87 81.02 161.87"/>
+        <path fill="#d87b0b" d="M114.03,161.87l-.33-1.82c-1.92,1.79-3.87,2.31-6.41,2.31-3.22,0-6.09-1.59-6.09-5.14,0-7.75,12.14-4.23,12.14-7.42,0-1.24-1.5-1.4-2.21-1.4-.94,0-2.21,.2-2.38,1.66h-6.51c0-3.61,2.57-5.73,9.31-5.73,8.07,0,8.56,2.99,8.56,7.06v7.98c0,.98,.03,1.46,.91,2.18v.32h-7Zm-.68-7.55c-2.21,1.07-5.14,.55-5.14,2.77,0,.85,.81,1.43,2.15,1.43,2.38,0,3.16-1.86,3-4.2"/>
+        <path fill="#d87b0b" d="M129.37,156.57c0,.68,.26,1.21,.72,1.56,.42,.33,1.01,.52,1.66,.52,1.04,0,2.15-.32,2.15-1.53,0-2.73-10.45-.55-10.45-7.16,0-4.36,4.52-5.63,8.07-5.63s8.07,.85,8.46,5.37h-6.15c-.07-.55-.29-.94-.65-1.24-.36-.29-.85-.42-1.37-.42-1.17,0-1.92,.36-1.92,1.2,0,2.38,10.78,.78,10.78,7.16,0,3.55-2.93,5.96-9.18,5.96-3.91,0-8.2-1.2-8.56-5.79h6.45Z"/>
+        <path fill="#d87b0b" d="M154.42,161.87c-8.89,.49-9.96-.13-9.96-6.02v-7.13h-2.41v-3.91h2.51v-5.31h6.67v5.31h3.26v3.91h-3.26v6.19c0,1.56,.23,2.12,2.12,2.12h1.07v4.85Z"/>
+        <path fill="#d87b0b" d="M163.25,154.87c0,2.02,1.56,3.35,3.35,3.35,1.07,0,2.05-.49,2.54-1.5h6.48c-1.17,4.23-5.47,5.63-9.44,5.63-5.47,0-9.7-3.12-9.7-8.85s4.2-9.18,9.67-9.18c6.31,0,10.12,4.36,10.03,10.55h-12.92Zm6.15-3.45c0-1.56-1.4-2.96-3-2.96-2.02,0-3.16,1.14-3.16,2.96h6.15Z"/>
+        <path fill="#d87b0b" d="M178.71,144.82h6.19v2.67c1.53-2.05,3.19-3.16,5.76-3.16,4.49,0,6.61,2.64,6.61,7.32v10.22h-6.77v-9.02c0-1.69-.46-3.19-2.38-3.19-2.08,0-2.64,1.33-2.64,3.52v8.69h-6.77v-17.06Z"/>
+        <path fill="#d87b0b" d="M206.31,156.57c0,.68,.26,1.21,.72,1.56,.42,.33,1.01,.52,1.66,.52,1.04,0,2.15-.32,2.15-1.53,0-2.73-10.45-.55-10.45-7.16,0-4.36,4.52-5.63,8.07-5.63s8.07,.85,8.46,5.37h-6.15c-.06-.55-.29-.94-.65-1.24-.36-.29-.85-.42-1.37-.42-1.17,0-1.92,.36-1.92,1.2,0,2.38,10.78,.78,10.78,7.16,0,3.55-2.93,5.96-9.18,5.96-3.91,0-8.2-1.2-8.56-5.79h6.45Z"/>
+        <path fill="#d87b0b" d="M231.35,161.87c-8.89,.49-9.96-.13-9.96-6.02v-7.13h-2.41v-3.91h2.51v-5.31h6.67v5.31h3.26v3.91h-3.26v6.19c0,1.56,.23,2.12,2.12,2.12h1.07v4.85Z"/>
+        <path fill="#d87b0b" d="M234.59,144.82h6.15v3.45h.07c.94-2.67,2.6-3.94,5.24-3.94,.29,0,.59,.07,.88,.1v6.77c-.46-.07-.94-.2-1.4-.2-2.77,0-4.17,1.3-4.17,4.98v5.89h-6.77v-17.06Z"/>
+        <path fill="#d87b0b" d="M260.81,161.87l-.33-1.82c-1.92,1.79-3.87,2.31-6.41,2.31-3.22,0-6.09-1.59-6.09-5.14,0-7.75,12.14-4.23,12.14-7.42,0-1.24-1.5-1.4-2.21-1.4-.94,0-2.21,.2-2.38,1.66h-6.51c0-3.61,2.57-5.73,9.31-5.73,8.07,0,8.56,2.99,8.56,7.06v7.98c0,.98,.03,1.46,.91,2.18v.32h-7Zm-.68-7.55c-2.21,1.07-5.14,.55-5.14,2.77,0,.85,.81,1.43,2.15,1.43,2.38,0,3.16-1.86,3-4.2"/>
+        <path fill="#d87b0b" d="M279.08,147.16c1.63,.03,2.57-.68,2.57-2.34,0-1.37-.68-2.44-2.21-2.44-2.18,0-2.15,1.63-2.15,3.35v16.15h-6.77v-15.92c0-5.89,3.45-8.14,8.98-8.14,4.88,0,8.5,2.08,8.5,6.09,0,2.18-.94,3.71-2.9,4.62,3.09,1.17,4.26,3.03,4.26,6.31,0,4.92-3.52,7.52-7.55,7.52-.94,0-1.86-.1-2.8-.29v-4.2c2.73,.46,3.58-.85,3.58-3.35s-.91-3.71-3.52-3.65v-3.71Z"/>
+        <path fill="#d87b0b" d="M298.28,154.87c0,2.02,1.56,3.35,3.35,3.35,1.07,0,2.05-.49,2.54-1.5h6.48c-1.17,4.23-5.47,5.63-9.44,5.63-5.47,0-9.7-3.12-9.7-8.85s4.2-9.18,9.67-9.18c6.31,0,10.12,4.36,10.03,10.55h-12.92Zm6.15-3.45c0-1.56-1.4-2.96-3-2.96-2.02,0-3.16,1.14-3.16,2.96h6.15Z"/>
+        
+        
+        <path fill="#d87b0b" d="M310.91,133.97V68.02h-13.81c-.64,5.11-2.89,8.88-6.99,11.47-4,2.52-8.55,3.13-13.18,3.41v11.75h16.01v39.32h17.98Z"/>
+        <path fill="#222" d="M233.23,68.82v48.96h29.13v14.85h-47.22v-63.81h18.09Zm-92.66,0v63.72h-18.13v-26.04h-21.1v25.96h-18.2v-63.62h18.15v22.7h21.09v-22.72h18.19m64.83,0v14.66h-18.36v49.11h-18.3v-48.99h-18.42v-14.78h55.07m29.97-2.15h-22.36v68.08h51.49v-19.12h-29.13v-48.96Zm-92.66,0h-22.46v22.72h-16.82v-22.7h-22.42v67.89h22.47v-25.96h16.82v26.04h22.4V66.69Zm64.83,0h-59.35v19.05h18.42v48.99h22.57v-49.11h18.36v-18.93Z"/>
+        <circle cx="373.8" cy="79.24" r="51.4" style="fill:none;stroke:#0083aa;stroke-width:2.5"/><g id="globeGridhb" clip-path="url(#globeCliphb)"></g>
+        <path fill="#16223e" d="M205.4,68.83h-55.07v14.78h18.42v48.99h18.3v-49.11h18.36v-14.66Zm27.83,48.95v-48.96h-18.09v63.81h47.22v-14.85h-29.13Zm-92.66,14.77v-63.72h-18.19v22.72h-21.09v-22.7h-18.15v63.62h18.2v-25.96h21.1v26.04h18.13Z"/>
+      </g>
+    </g>
+  </g>
+</svg><div class="rt">Keine laufende Konferenz</div></div>
+
+<div class="wrap">
+  <header class="topbar">
+    <span class="logo-badge"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 432.46 202.88" class="htl-logo-anim" role="img" aria-label="HTL1 Klagenfurt">
+  <defs>
+    
+    <clipPath id="clippathhc">
+      <rect fill="none" x="0" y="0" width="432.46" height="202.88"/>
+    </clipPath>
+    <clipPath id="clippath-1hc">
+      <rect fill="none" x="0" y="0" width="432.46" height="202.88"/>
+    </clipPath>
+  <clipPath id="globeCliphc"><circle cx="373.8" cy="79.24" r="49.0"/></clipPath><mask id="orbitMaskhc"><path id="orbitWedgehc" fill="#fff"/></mask><mask id="standMaskhc"><path id="standStrokehc" d="M189.1,196.3 L187.6,192.8 L185.9,189.2 L184.4,185.7 L182.9,182.1 L181.4,178.6 L179.9,175.1 L178.4,171.4 L177.1,167.8 L175.8,164.6 L171.0,134.0 L169.7,124.6 L168.6,115.5 L167.6,106.8 L166.8,98.5 L166.2,90.5 L165.8,82.9 L165.5,75.6 L165.4,68.7 L165.5,62.2 L165.8,56.0 L166.2,50.2 L166.8,44.7 L167.6,39.6 L168.6,34.9 L169.7,30.5 L171.0,26.5 L172.5,22.8 L174.2,19.5 L176.0,16.6 L178.0,14.0 L181.2,14.9 L184.3,16.2 L187.3,17.9 L190.1,20.0 L192.9,22.4 L195.5,25.2 L198.1,28.4 L200.5,32.0 L202.8,35.9 L205.0,40.2 L207.1,44.9 L209.1,50.0 L211.0,55.4 L212.8,61.2 L214.4,67.4 L216.0,74.0" pathLength="1000" stroke-dasharray="0 2000" style="fill:none;stroke:#fff;stroke-width:22;stroke-linecap:butt;stroke-linejoin:round"/></mask></defs><g mask="url(#orbitMaskhc)"><path fill="#0083aa" d="M106.38,47.07c-9.46,.97-19,2.75-28.58,4.95-9.58,2.19-19.18,4.98-28.64,8.62-4.72,1.82-9.41,3.86-13.99,6.23-4.58,2.36-9.08,5.01-13.33,8.19-4.23,3.18-8.29,6.84-11.56,11.44-1.62,2.3-3.06,4.83-4.05,7.62-.52,1.38-.89,2.84-1.16,4.31l-.18,1.11c-.06,.37-.08,.79-.12,1.19l-.05,.6c-.01,.2-.01,.34-.02,.51l-.03,.98c.02,6.32,2.48,11.89,5.78,16.39,3.31,4.53,7.39,8.1,11.64,11.2,4.27,3.09,8.78,5.67,13.37,7.93,4.59,2.27,9.28,4.22,14.01,5.95,9.3,3.41,16.61,5.96,26.01,8,.05-.59,.09-1.19,.15-1.78,.04-2.12,.07-4.23,.11-6.35-10.88-3-19.12-6.58-28.06-10.82C10.92,115.92-.57,83.24,79.35,59.67c36.89-10.88,97.71-8.88,123.88-9.01-5.82-1.5-48.44-8.58-96.85-3.59"/><path fill="#0083aa" d="M349.67,129.76c-3.3,1.09-11.78,4.56-20.09,6.88-10.09,2.81-19.92,4.4-19.92,4.4,3.58,2.58,5.34,6.48,5.34,6.48,.19,0,.39-.03,.64-.1,12.05-3.2,24.39-8.15,34.89-14.85,.96-.61,1.9-1.27,2.88-1.94-1.87-1.58-1.85-1.51-3.74-.88"/></g><g id="standGrouphc" mask="url(#standMaskhc)" style="opacity:0"><path fill="#0083aa" d="M189.44,195.11c-2.2-5.29-6.67-16.81-6.67-16.81-1.85-4.75-3.62-9.8-5.3-15.13-.04-.11-.07-.22-.1-.33-.86,1.24-1.89,2.35-3.05,3.28,3.2,8.33,14.13,31.13,14.68,31.83,.06-.08,.1-.15,.16-.22,.03,.05,.07,.11,.1,.16,0-.1,0-.19,0-.29,.79-1.12,.71-1.23,.19-2.47"/><path fill="#0083aa" d="M207.77,35.93c-1.7-3.31-3.53-6.59-5.54-9.8-2-3.21-4.17-6.35-6.63-9.34-2.47-2.98-5.22-5.83-8.6-8.19-1.71-1.15-3.58-2.19-5.71-2.84-1.06-.33-2.18-.57-3.34-.64-.29-.03-.58-.03-.87-.03-.29,0-.58,0-.92,.02l-.49,.04c-.17,.01-.33,.03-.42,.05l-.8,.13c-2.32,.47-4.45,1.59-6.13,3.01-1.71,1.41-3.02,3.08-4.15,4.79-2.2,3.45-3.63,7.12-4.75,10.8-2.2,7.37-3.2,14.85-3.79,22.23-.56,7.39-.63,14.73-.41,21.95,.22,7.22,.75,14.33,1.5,21.29,1.5,13.93,3.79,27.27,6.66,39.76,.79,3.44,2.69,7.88,3.56,11.19,1.92,.16,3.75,.65,5.44,1.4-.94-3.97-2.91-9.1-3.76-13.26-1.25-6.23-2.41-12.65-3.41-19.24-.99-6.59-1.83-13.35-2.44-20.24-.62-6.89-1.02-13.91-1.12-21.01-.1-7.1,.09-11.08,.76-18.25,.69-7.15,1.8-12.22,3.95-18.99,1.08-3.37,2.46-6.64,4.3-9.42,1.84-2.76,4.23-5.27,6.94-5.36,16.17-.49,35.36,47.2,36.49,50.73h5.19c-1.38-4.32-8.11-24.15-11.51-30.78"/></g>
+  <g id="logohc">
+    <g clip-path="url(#clippathhc)">
+      <g clip-path="url(#clippath-1hc)">
+        
+        
+        <polygon fill="#d87b0b" points="81.02 161.87 81.02 138.44 88.71 138.44 88.71 156.4 99.25 156.4 99.25 161.87 81.02 161.87"/>
+        <path fill="#d87b0b" d="M114.03,161.87l-.33-1.82c-1.92,1.79-3.87,2.31-6.41,2.31-3.22,0-6.09-1.59-6.09-5.14,0-7.75,12.14-4.23,12.14-7.42,0-1.24-1.5-1.4-2.21-1.4-.94,0-2.21,.2-2.38,1.66h-6.51c0-3.61,2.57-5.73,9.31-5.73,8.07,0,8.56,2.99,8.56,7.06v7.98c0,.98,.03,1.46,.91,2.18v.32h-7Zm-.68-7.55c-2.21,1.07-5.14,.55-5.14,2.77,0,.85,.81,1.43,2.15,1.43,2.38,0,3.16-1.86,3-4.2"/>
+        <path fill="#d87b0b" d="M129.37,156.57c0,.68,.26,1.21,.72,1.56,.42,.33,1.01,.52,1.66,.52,1.04,0,2.15-.32,2.15-1.53,0-2.73-10.45-.55-10.45-7.16,0-4.36,4.52-5.63,8.07-5.63s8.07,.85,8.46,5.37h-6.15c-.07-.55-.29-.94-.65-1.24-.36-.29-.85-.42-1.37-.42-1.17,0-1.92,.36-1.92,1.2,0,2.38,10.78,.78,10.78,7.16,0,3.55-2.93,5.96-9.18,5.96-3.91,0-8.2-1.2-8.56-5.79h6.45Z"/>
+        <path fill="#d87b0b" d="M154.42,161.87c-8.89,.49-9.96-.13-9.96-6.02v-7.13h-2.41v-3.91h2.51v-5.31h6.67v5.31h3.26v3.91h-3.26v6.19c0,1.56,.23,2.12,2.12,2.12h1.07v4.85Z"/>
+        <path fill="#d87b0b" d="M163.25,154.87c0,2.02,1.56,3.35,3.35,3.35,1.07,0,2.05-.49,2.54-1.5h6.48c-1.17,4.23-5.47,5.63-9.44,5.63-5.47,0-9.7-3.12-9.7-8.85s4.2-9.18,9.67-9.18c6.31,0,10.12,4.36,10.03,10.55h-12.92Zm6.15-3.45c0-1.56-1.4-2.96-3-2.96-2.02,0-3.16,1.14-3.16,2.96h6.15Z"/>
+        <path fill="#d87b0b" d="M178.71,144.82h6.19v2.67c1.53-2.05,3.19-3.16,5.76-3.16,4.49,0,6.61,2.64,6.61,7.32v10.22h-6.77v-9.02c0-1.69-.46-3.19-2.38-3.19-2.08,0-2.64,1.33-2.64,3.52v8.69h-6.77v-17.06Z"/>
+        <path fill="#d87b0b" d="M206.31,156.57c0,.68,.26,1.21,.72,1.56,.42,.33,1.01,.52,1.66,.52,1.04,0,2.15-.32,2.15-1.53,0-2.73-10.45-.55-10.45-7.16,0-4.36,4.52-5.63,8.07-5.63s8.07,.85,8.46,5.37h-6.15c-.06-.55-.29-.94-.65-1.24-.36-.29-.85-.42-1.37-.42-1.17,0-1.92,.36-1.92,1.2,0,2.38,10.78,.78,10.78,7.16,0,3.55-2.93,5.96-9.18,5.96-3.91,0-8.2-1.2-8.56-5.79h6.45Z"/>
+        <path fill="#d87b0b" d="M231.35,161.87c-8.89,.49-9.96-.13-9.96-6.02v-7.13h-2.41v-3.91h2.51v-5.31h6.67v5.31h3.26v3.91h-3.26v6.19c0,1.56,.23,2.12,2.12,2.12h1.07v4.85Z"/>
+        <path fill="#d87b0b" d="M234.59,144.82h6.15v3.45h.07c.94-2.67,2.6-3.94,5.24-3.94,.29,0,.59,.07,.88,.1v6.77c-.46-.07-.94-.2-1.4-.2-2.77,0-4.17,1.3-4.17,4.98v5.89h-6.77v-17.06Z"/>
+        <path fill="#d87b0b" d="M260.81,161.87l-.33-1.82c-1.92,1.79-3.87,2.31-6.41,2.31-3.22,0-6.09-1.59-6.09-5.14,0-7.75,12.14-4.23,12.14-7.42,0-1.24-1.5-1.4-2.21-1.4-.94,0-2.21,.2-2.38,1.66h-6.51c0-3.61,2.57-5.73,9.31-5.73,8.07,0,8.56,2.99,8.56,7.06v7.98c0,.98,.03,1.46,.91,2.18v.32h-7Zm-.68-7.55c-2.21,1.07-5.14,.55-5.14,2.77,0,.85,.81,1.43,2.15,1.43,2.38,0,3.16-1.86,3-4.2"/>
+        <path fill="#d87b0b" d="M279.08,147.16c1.63,.03,2.57-.68,2.57-2.34,0-1.37-.68-2.44-2.21-2.44-2.18,0-2.15,1.63-2.15,3.35v16.15h-6.77v-15.92c0-5.89,3.45-8.14,8.98-8.14,4.88,0,8.5,2.08,8.5,6.09,0,2.18-.94,3.71-2.9,4.62,3.09,1.17,4.26,3.03,4.26,6.31,0,4.92-3.52,7.52-7.55,7.52-.94,0-1.86-.1-2.8-.29v-4.2c2.73,.46,3.58-.85,3.58-3.35s-.91-3.71-3.52-3.65v-3.71Z"/>
+        <path fill="#d87b0b" d="M298.28,154.87c0,2.02,1.56,3.35,3.35,3.35,1.07,0,2.05-.49,2.54-1.5h6.48c-1.17,4.23-5.47,5.63-9.44,5.63-5.47,0-9.7-3.12-9.7-8.85s4.2-9.18,9.67-9.18c6.31,0,10.12,4.36,10.03,10.55h-12.92Zm6.15-3.45c0-1.56-1.4-2.96-3-2.96-2.02,0-3.16,1.14-3.16,2.96h6.15Z"/>
+        
+        
+        <path fill="#d87b0b" d="M310.91,133.97V68.02h-13.81c-.64,5.11-2.89,8.88-6.99,11.47-4,2.52-8.55,3.13-13.18,3.41v11.75h16.01v39.32h17.98Z"/>
+        <path fill="#222" d="M233.23,68.82v48.96h29.13v14.85h-47.22v-63.81h18.09Zm-92.66,0v63.72h-18.13v-26.04h-21.1v25.96h-18.2v-63.62h18.15v22.7h21.09v-22.72h18.19m64.83,0v14.66h-18.36v49.11h-18.3v-48.99h-18.42v-14.78h55.07m29.97-2.15h-22.36v68.08h51.49v-19.12h-29.13v-48.96Zm-92.66,0h-22.46v22.72h-16.82v-22.7h-22.42v67.89h22.47v-25.96h16.82v26.04h22.4V66.69Zm64.83,0h-59.35v19.05h18.42v48.99h22.57v-49.11h18.36v-18.93Z"/>
+        <circle cx="373.8" cy="79.24" r="51.4" style="fill:none;stroke:#0083aa;stroke-width:2.5"/><g id="globeGridhc" clip-path="url(#globeCliphc)"></g>
+        <path fill="#16223e" d="M205.4,68.83h-55.07v14.78h18.42v48.99h18.3v-49.11h18.36v-14.66Zm27.83,48.95v-48.96h-18.09v63.81h47.22v-14.85h-29.13Zm-92.66,14.77v-63.72h-18.19v22.72h-21.09v-22.7h-18.15v63.62h18.2v-25.96h21.1v26.04h18.13Z"/>
+      </g>
+    </g>
+  </g>
+</svg></span>
+    <div class="title-stack">
+      <h1>Klassenkonferenz-Planung</h1>
+      <p class="sub"><b>Master</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit</p>
+    </div>
+    <button class="topbar-btn" id="openBeamerBtn" type="button">🖥 Beamer-Ansicht</button>
+    <div class="clock">
+      <div class="time"><span class="off">88:88:88</span><span class="lit" id="clockTime">00:00:00</span></div>
+      <div class="meta"><span class="date" id="clockDate">—</span><span class="sep">·</span><span class="lbl">Live</span></div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel controls">
+      <h2>Steuerung <span class="pill" id="rolePill">Master</span></h2>
+
+      <div class="row">
+        <label for="teacherInput">Kürzel oder Nachname (eigene Klassen hervorheben)</label>
+        <input id="teacherInput" placeholder="z. B. KRA oder Kranz" maxlength="40">
+      </div>
+
+      <div class="row two">
+        <div><label for="startTime">Startzeit</label><input id="startTime" type="time" value="07:45"></div>
+        <div><label for="slotMinutes">Dauer/Konferenz (Min.)</label><input id="slotMinutes" type="number" min="5" max="180" value="15"></div>
+      </div>
+
+      <div class="dept-head">Abteilungen · Farbe + Startnummer (1–4)</div>
+      <div id="deptConfig"></div>
+
+      <div class="button-row">
+        <label class="file-btn" for="excelInput">📄 Excel/CSV laden</label>
+        <input id="excelInput" type="file" accept=".xlsx,.xls,.csv">
+        <button id="loadDemoBtn" class="ghost" type="button">Demo-Daten</button>
+        <button id="rebuildBtn" type="button">Plan aufbauen</button>
+      </div>
+
+      <div class="button-row">
+        <button id="exportBtn" class="ghost small" type="button" title="Aktuellen Stand als Datei sichern">💾 Stand sichern</button>
+        <label class="file-btn small" for="importInput" title="Gesicherten Stand laden">↺ Stand laden</label>
+        <input id="importInput" type="file" accept=".json">
+      </div>
+
+      <label class="inline"><input type="checkbox" id="hideDone"> Fertige Konferenzen ausblenden</label>
+      <p class="hint" id="syncHint">—</p>
+    </section>
+
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <section class="panel live">
+        <h2>Live-Status</h2>
+        <div id="liveNow" class="live-card current"><span class="live-tag">Aktuell</span><strong>Noch keine Konferenz aktiv</strong><small>—</small></div>
+        <div id="liveNext" class="live-card"><span class="live-tag">Als Nächstes</span><strong>Keine offene Konferenz</strong><small>—</small></div>
+        <div class="quick-actions">
+          <button id="finishCurrentBtn" type="button">✓ Aktuelle fertig</button>
+          <button id="startNextBtn" class="ghost" type="button">▶ Nächste starten</button>
+        </div>
+      </section>
+
+      <section class="panel full">
+        <h2>Konferenzliste <span class="pill" id="countPill">0</span></h2>
+        <div class="add-form" id="addForm">
+          <div><label>Abteilung</label><select id="addDept"></select></div>
+          <div><label>Klasse</label><input id="addClass" placeholder="z. B. 1AHET"></div>
+          <div><label>KV (Kürzel)</label><input id="addKv" placeholder="KRA" maxlength="12"></div>
+          <div><label>Lehrer (mit , trennen)</label><input id="addTeachers" placeholder="KRA, WAL"></div>
+          <button id="addBtn" type="button" title="Klasse hinzufügen">+ Hinzufügen</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>#</th><th>Abteilung</th><th>Klasse</th><th>KV</th><th>Lehrer</th><th>Plan</th><th>Live</th><th>Status</th><th>Aktionen</th>
+            </tr></thead>
+            <tbody id="conferenceBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+/* HTL1-Animationslogo (inline, selbstständig) */
+function runOrbitReveal(sfx){
+  sfx=sfx||'';
+  var wedge=document.getElementById('orbitWedge'+sfx);
+  var stand=document.getElementById('standStroke'+sfx);
+  if(!wedge)return;
+  function easeIO(k){return k<0.5?2*k*k:1-Math.pow(-2*k+2,2)/2;}
+  function pieFn(cx,cy,r,a0,a1){var p="M"+cx+","+cy+" ";var steps=72;for(var s=0;s<=steps;s++){var a=(a0+(a1-a0)*s/steps)*Math.PI/180;p+="L"+(cx+r*Math.cos(a)).toFixed(1)+","+(cy+r*Math.sin(a)).toFixed(1)+" ";}return p+"Z";}
+  var P1={cx:150,cy:95,R:300,a0:-35,sweep:375,dur:2800};
+  var GAP=250, P2dur=1500;
+  var sg=document.getElementById('standGroup'+sfx);
+  wedge.setAttribute("d",pieFn(P1.cx,P1.cy,P1.R,P1.a0,P1.a0+0.1));
+  if(stand)stand.setAttribute("stroke-dasharray","0 2000");
+  if(sg)sg.style.opacity="0";
+  var t0=performance.now();
+  function frame(t){
+    var el=t-t0;
+    var k1=Math.min(1,el/P1.dur);
+    wedge.setAttribute("d",pieFn(P1.cx,P1.cy,P1.R,P1.a0,P1.a0+P1.sweep*easeIO(k1)));
+    var el2=el-(P1.dur+GAP);
+    if(el2>0 && stand){if(sg)sg.style.opacity="1";var k2=Math.min(1,el2/P2dur);stand.setAttribute("stroke-dasharray",(1000*easeIO(k2)).toFixed(1)+" 2000");}
+    if(el < P1.dur+GAP+P2dur) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+function startGlobe(sfx){
+  sfx=sfx||'';
+  var grid=document.getElementById('globeGrid'+sfx);
+  if(!grid)return;
+  var cx=373.8,cy=79.24,r=49.0;
+  var TILT=26*Math.PI/180, ANG=-22*Math.PI/180;
+  var N_LON=12,N_LAT=8,SEG=44,DUR=20000;
+  function proj(lat,lon){
+    var la=lat*Math.PI/180, lo=lon*Math.PI/180;
+    var x=Math.cos(la)*Math.sin(lo), y=Math.sin(la), z=Math.cos(la)*Math.cos(lo);
+    var y2=y*Math.cos(TILT)-z*Math.sin(TILT), z2=y*Math.sin(TILT)+z*Math.cos(TILT), x2=x;
+    var x3=x2*Math.cos(ANG)-y2*Math.sin(ANG), y3=x2*Math.sin(ANG)+y2*Math.cos(ANG);
+    return [cx+r*x3, cy-r*y3, z2];
+  }
+  function build(rot){
+    var lines=[],i,j,s;
+    for(i=0;i<N_LON;i++){var lon0=i*360/N_LON+rot,p=[];for(s=0;s<=SEG;s++)p.push(proj(-90+180*s/SEG,lon0));lines.push([1.0,p]);}
+    for(j=1;j<=N_LAT;j++){var lat0=-90+180*j/(N_LAT+1),q=[];for(s=0;s<=SEG;s++)q.push(proj(lat0,360*s/SEG+rot));lines.push([0.95,q]);}
+    var d="";
+    for(var k=0;k<lines.length;k++){
+      var sw=lines[k][0],pts=lines[k][1],seg=[];
+      var flush=function(){if(seg.length>1){d+='<path d="M'+seg.map(function(p){return p[0].toFixed(1)+","+p[1].toFixed(1);}).join(" L")+'" style="fill:none;stroke:#0083aa;stroke-width:'+sw+';stroke-linecap:round"/>';}seg=[];};
+      for(var n=0;n<pts.length;n++){if(pts[n][2]>=-0.03)seg.push(pts[n]);else flush();}
+      flush();
+    }
+    return d;
+  }
+  var t0=performance.now();
+  function frame(t){var rot=((t-t0)/DUR)*360%360;grid.innerHTML=build(rot);requestAnimationFrame(frame);}
+  requestAnimationFrame(frame);
+}
+(function(){var go=function(){['ha','hb','hc'].forEach(function(s){try{startGlobe(s)}catch(e){}try{runOrbitReveal(s)}catch(e){}});};if(document.readyState!=='loading')go();else document.addEventListener('DOMContentLoaded',go);})();
+</script>
+
+<script>
+/* ============================================================================
+   Klassenkonferenz-Planungstool – Kernlogik (rein lokal lauffähig)
+   ============================================================================ */
+const STORAGE_KEY = "konferenztool_state_v3";
+const CHANNEL_NAME = "konferenztool_live_channel";
+
+const DEPARTMENT_DEFAULTS = [
+  { key:"elektrotechnik", label:"Elektrotechnik", color:"#d33c3c", order:1 },
+  { key:"maschinenbau",   label:"Maschinenbau",   color:"#2f6fd9", order:2 },
+  { key:"mechatronik",    label:"Mechatronik",    color:"#2e9f60", order:3 },
+  { key:"abendschule",    label:"Abendschule",    color:"#1f3b8f", order:4 }
+];
+
+const state = {
+  startTime:"07:45", slotMinutes:15, hideDone:false, teacherCode:"",
+  departments: structuredClone(DEPARTMENT_DEFAULTS),
+  conferences: [], revision:0
+};
+
+let ROLE = "master"; // "master" | "anzeige" | "locked" – wird vom Sync-Modul gesetzt
+const channel = "BroadcastChannel" in window ? new BroadcastChannel(CHANNEL_NAME) : null;
+const $ = id => document.getElementById(id);
+const dom = {};
+["teacherInput","startTime","slotMinutes","deptConfig","excelInput","loadDemoBtn","rebuildBtn","hideDone",
+ "conferenceBody","liveNow","liveNext","finishCurrentBtn","startNextBtn","clockTime","clockDate","syncHint",
+ "addDept","addClass","addKv","addTeachers","addBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput",
+ "beamerView","bClose","bCurrent","bNext","bList","bDate","bClockTime","ruheView","bTeacher","bTeacherInput"].forEach(k=>dom[k]=$(k));
+
+let clockTimer=null;
+
+init();
+
+function init(){
+  loadState();
+  bindEvents();
+  renderDepartmentConfig();
+  renderAddDeptOptions();
+  renderAll();
+  startClock();
+  if(channel){
+    channel.onmessage = ev=>{
+      const p=ev.data; if(!p||p.type!=="state") return;
+      if(ROLE==="master") return;                 // Master hört nicht auf lokale Spiegel
+      if((p.state.revision||0) <= (state.revision||0)) return;
+      hydrateFromRemote(p.state);
+    };
+  }
+}
+
+/* ---------------- Events ---------------- */
+function bindEvents(){
+  dom.teacherInput.addEventListener("input",()=>{ state.teacherCode=dom.teacherInput.value.trim(); if(dom.bTeacherInput) dom.bTeacherInput.value=state.teacherCode; renderConferenceTable(); persistLocal(); });
+  dom.bTeacherInput.addEventListener("input",()=>{ state.teacherCode=dom.bTeacherInput.value.trim(); renderBeamer(); });
+  dom.startTime.addEventListener("change",()=>{ state.startTime=dom.startTime.value||"07:45"; rebuildSchedule(); });
+  dom.slotMinutes.addEventListener("change",()=>{ const n=Number(dom.slotMinutes.value); state.slotMinutes=Number.isFinite(n)?Math.max(5,Math.min(180,n)):15; dom.slotMinutes.value=String(state.slotMinutes); rebuildSchedule(); });
+  dom.excelInput.addEventListener("change",async()=>{
+    const f=dom.excelInput.files?.[0]; if(!f) return;
+    const imported=await parseExcel(f);
+    if(!imported.length){ alert("Keine gültigen Konferenzdaten gefunden."); return; }
+    state.conferences=imported; rebuildSchedule(); dom.excelInput.value="";
+  });
+  dom.loadDemoBtn.addEventListener("click",()=>{ state.conferences=createDemoData(); rebuildSchedule(); });
+  dom.rebuildBtn.addEventListener("click",rebuildSchedule);
+  dom.hideDone.addEventListener("change",()=>{ state.hideDone=dom.hideDone.checked; renderConferenceTable(); persistLocal(); });
+  dom.finishCurrentBtn.addEventListener("click",()=>{ if(!isMaster())return; const r=getRunning(); if(r) finishConference(r.id); });
+  dom.startNextBtn.addEventListener("click",()=>{ if(!isMaster())return; const n=getNextWaiting(); if(n) startConference(n.id); });
+  dom.addBtn.addEventListener("click",addClassFromForm);
+  ["addClass","addTeachers","addKv"].forEach(k=>dom[k].addEventListener("keydown",e=>{ if(e.key==="Enter") addClassFromForm(); }));
+
+  dom.conferenceBody.addEventListener("click",e=>{
+    const btn=e.target.closest("button"); if(!btn||!isMaster()) return;
+    const tr=btn.closest("tr"); const id=tr?.dataset.id; if(!id) return;
+    const a=btn.dataset.action;
+    if(a==="start") startConference(id);
+    else if(a==="finish") finishConference(id);
+    else if(a==="forward") bringForward(id);
+    else if(a==="remove") removeConference(id);
+  });
+  // KV inline ändern (Master): Kürzel direkt in der Tabelle editieren
+  dom.conferenceBody.addEventListener("change",e=>{
+    const inp=e.target.closest("input[data-kv]"); if(!inp||!isMaster()) return;
+    const id=inp.closest("tr")?.dataset.id; const c=byId(id); if(!c) return;
+    const t=parseTeacher(inp.value); c.kv=t.k; if(t.n) c.kvName=t.n; else if(!inp.value.trim()) c.kvName="";
+    bumpRevision(); renderLiveCards(); if(dom.beamerView.classList.contains("on")) renderBeamer(); persistAndPublish();
+  });
+
+  dom.exportBtn.addEventListener("click",exportState);
+  dom.importInput.addEventListener("change",async()=>{ const f=dom.importInput.files?.[0]; if(f) await importStateFile(f); dom.importInput.value=""; });
+
+  dom.openBeamerBtn.addEventListener("click",()=>openBeamer(true));
+  dom.bClose.addEventListener("click",()=>openBeamer(false));
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape" && dom.beamerView.classList.contains("on") && ROLE==="master") openBeamer(false); });
+}
+
+/* ---------------- Abteilungs-Konfig ---------------- */
+function renderDepartmentConfig(){
+  dom.deptConfig.innerHTML="";
+  state.departments.forEach(dept=>{
+    const row=document.createElement("div"); row.className="dept-row";
+    row.innerHTML=`<div class="dname"><span class="swatch" style="background:${dept.color}"></span>${escapeHtml(dept.label)}</div>`;
+    const color=document.createElement("input"); color.type="color"; color.value=dept.color;
+    color.addEventListener("input",()=>{ dept.color=color.value; row.querySelector(".swatch").style.background=color.value; bumpRevision(); renderAll(); persistAndPublish(); });
+    const ordWrap=document.createElement("div"); ordWrap.style.textAlign="center";
+    const ord=document.createElement("input"); ord.type="number"; ord.min="1"; ord.max="9"; ord.value=String(dept.order);
+    ord.addEventListener("change",()=>{ const n=Number(ord.value); dept.order=Number.isFinite(n)?Math.max(1,n):dept.order; rebuildSchedule(); });
+    ordWrap.innerHTML='<div class="ord-lbl">Nr.</div>'; ordWrap.appendChild(ord);
+    row.append(color,ordWrap);
+    dom.deptConfig.appendChild(row);
+  });
+}
+function renderAddDeptOptions(){
+  dom.addDept.innerHTML="";
+  state.departments.forEach(d=>{ const o=document.createElement("option"); o.value=d.key; o.textContent=d.label; dom.addDept.appendChild(o); });
+}
+
+/* ---------------- Rendering ---------------- */
+function renderAll(){
+  dom.teacherInput.value=state.teacherCode;
+  dom.bTeacherInput.value=state.teacherCode;
+  dom.startTime.value=state.startTime;
+  dom.slotMinutes.value=String(state.slotMinutes);
+  dom.hideDone.checked=state.hideDone;
+  applyRoleUi();
+  renderConferenceTable();
+  renderLiveCards();
+  applyAccent();
+  if(dom.beamerView.classList.contains("on")) renderBeamer();
+}
+
+function applyRoleUi(){
+  const master=isMaster();
+  dom.rolePill.textContent = master?"Master":(ROLE==="locked"?"Gesperrt":"Anzeige");
+  [dom.finishCurrentBtn,dom.startNextBtn,dom.addBtn,dom.loadDemoBtn,dom.rebuildBtn].forEach(b=>b.disabled=!master);
+  [dom.startTime,dom.slotMinutes,dom.addClass,dom.addKv,dom.addTeachers,dom.addDept,dom.excelInput,dom.importInput].forEach(i=>i.disabled=!master);
+  // Teacher-Filter bleibt für ALLE nutzbar (Lehrer/Schüler an Anzeige-Geräten); Export ebenso.
+  dom.teacherInput.disabled=false;
+  dom.syncHint.textContent = master
+    ? "Master aktiv: Änderungen werden live an alle Clients gesendet."
+    : "Client/Anzeige: nur Live-Anzeige, keine Steuerung.";
+}
+
+function renderConferenceTable(){
+  const rows=getVisible();
+  const running=getRunning(), next=getNextWaiting();
+  const tc=state.teacherCode, master=isMaster();
+  dom.countPill.textContent=String(state.conferences.length);
+  dom.conferenceBody.innerHTML="";
+  rows.forEach((c,i)=>{
+    const tr=document.createElement("tr"); tr.dataset.id=c.id;
+    if(running&&running.id===c.id) tr.classList.add("current");
+    if(next&&next.id===c.id) tr.classList.add("next");
+    if(c.status==="done") tr.classList.add("done");
+    if(matchesQuery(c,tc)) tr.classList.add("mine");
+    const d=getDept(c.departmentKey);
+    const kvCell = master
+      ? `<input class="kv-input" data-kv value="${escapeHtml(c.kv)}" maxlength="12" placeholder="KV" title="${escapeHtml(c.kvName||"Klassenvorstand-Kürzel")}">`
+      : escapeHtml(c.kv||"—");
+    tr.innerHTML=[
+      `<td>${i+1}</td>`,
+      `<td><span class="badge" style="background:${d.color}">${escapeHtml(d.label)}</span></td>`,
+      `<td>${escapeHtml(c.className)}</td>`,
+      `<td>${kvCell}</td>`,
+      `<td>${escapeHtml(teacherKuerzel(c))}</td>`,
+      `<td>${fmt(c.plannedStart)}–${fmt(c.plannedEnd)}</td>`,
+      `<td>${liveText(c)}</td>`,
+      `<td>${statusBadge(c.status)}</td>`,
+      `<td>${actionsHtml(c,master)}</td>`
+    ].join("");
+    dom.conferenceBody.appendChild(tr);
+  });
+}
+function actionsHtml(c,master){
+  if(!master) return "—";
+  const start = c.status==="waiting" ? `<button class="small" data-action="start">Start</button>` : "";
+  const finish= c.status==="running" ? `<button class="small warn" data-action="finish">Fertig</button>` : "";
+  const fwd   = c.status==="waiting" ? `<button class="small ghost" data-action="forward" title="Vorverlegen">▲</button>` : "";
+  const rem   = `<button class="icon ghost" data-action="remove" title="Klasse entfernen">✕</button>`;
+  return `<div class="actions">${start}${finish}${fwd}${rem}</div>`;
+}
+
+function renderLiveCards(){
+  const r=getRunning(), n=getNextWaiting();
+  dom.liveNow.innerHTML = r
+    ? `<span class="live-tag">Aktuell</span><strong>${escapeHtml(r.className)} · ${escapeHtml(getDept(r.departmentKey).label)}</strong><small>KV ${escapeHtml(r.kv||"—")} · seit ${fmt(r.actualStart)}</small>`
+    : `<span class="live-tag">Aktuell</span><strong>Noch keine Konferenz aktiv</strong><small>—</small>`;
+  dom.liveNext.innerHTML = n
+    ? `<span class="live-tag">Als Nächstes</span><strong>${escapeHtml(n.className)} · ${escapeHtml(getDept(n.departmentKey).label)}</strong><small>Plan ${fmt(n.plannedStart)} · KV ${escapeHtml(n.kv||"—")}</small>`
+    : `<span class="live-tag">Als Nächstes</span><strong>Keine offene Konferenz</strong><small>—</small>`;
+}
+
+function statusBadge(s){ return s==="running"?'<span class="badge running">Laufend</span>':s==="done"?'<span class="badge done">Fertig</span>':'<span class="badge waiting">Wartet</span>'; }
+function liveText(c){
+  if(c.status==="running"&&c.actualStart) return `${fmt(c.actualStart)} – offen`;
+  if(c.status==="done") return `${fmt(c.actualStart)} – ${fmt(c.actualEnd)}`;
+  return "—";
+}
+
+/* ---------------- Beamer / Anzeige Vollbild ---------------- */
+function openBeamer(on){
+  dom.beamerView.classList.toggle("on",on);
+  if(ROLE==="master"){ dom.bClose.style.display=on?"block":"none"; }
+  if(on){ dom.bDate.textContent=dateLong(); renderBeamer(); }
+}
+function renderBeamer(){
+  const r=getRunning(), n=getNextWaiting(), tc=state.teacherCode;
+  paintBCard(dom.bCurrent,r,"Jetzt in Konferenz");
+  paintBCard(dom.bNext,n,"Als Nächstes");
+  const rows=state.conferences.filter(c=>!(state.hideDone&&c.status==="done"));
+  dom.bList.innerHTML=rows.map((c,i)=>{
+    const d=getDept(c.departmentKey);
+    const cls=["brow"]; if(r&&r.id===c.id)cls.push("current"); if(c.status==="done")cls.push("done"); if(matchesQuery(c,tc))cls.push("mine");
+    return `<div class="${cls.join(" ")}"><span class="bdot" style="background:${d.color}"></span><span>${fmt(c.plannedStart)}</span><strong>${escapeHtml(c.className)}</strong><span>KV ${escapeHtml(c.kv||"—")}</span><span>${escapeHtml(teacherKuerzel(c))}</span><span>${statusBadge(c.status)}</span></div>`;
+  }).join("") || `<div class="brow" style="opacity:.5">Keine Konferenzen geladen</div>`;
+}
+function paintBCard(el,c,label){
+  if(!c){ el.innerHTML=`<div class="blabel">${label}</div><div class="bname" style="color:#9aa6b6">—</div>`; el.style.borderColor=""; return; }
+  const d=getDept(c.departmentKey);
+  el.innerHTML=`<div class="blabel">${label}</div><div class="bname">${escapeHtml(c.className)}</div>`
+    +`<div class="bsub">KV: ${escapeHtml(c.kv||"—")}${c.kvName?" ("+escapeHtml(c.kvName)+")":""}</div>`
+    +`<span class="bdept" style="background:${d.color}">${escapeHtml(d.label)}</span>`;
+}
+
+/* ---------------- Zeitplan & Sortierung ---------------- */
+function rebuildSchedule(){
+  state.conferences.sort(cmpOrder);
+  let cur=timeToToday(state.startTime).getTime();
+  state.conferences.forEach(c=>{ c.plannedStart=cur; c.plannedEnd=cur+state.slotMinutes*60000; cur=c.plannedEnd; });
+  bumpRevision(); renderAll(); persistAndPublish();
+}
+function cmpOrder(a,b){
+  const da=getDept(a.departmentKey), db=getDept(b.departmentKey);
+  if(da.order!==db.order) return da.order-db.order;
+  return a.className.localeCompare(b.className,"de",{sensitivity:"base"});
+}
+function retimeWaiting(){
+  let cur=Date.now();
+  for(const c of state.conferences){ if(c.status!=="waiting")continue; c.plannedStart=cur; c.plannedEnd=cur+state.slotMinutes*60000; cur=c.plannedEnd; }
+}
+
+/* ---------------- Aktionen ---------------- */
+function startConference(id){
+  if(getRunning()){ alert("Es läuft bereits eine Konferenz. Bitte zuerst auf „Fertig“ klicken."); return; }
+  const c=byId(id); if(!c||c.status!=="waiting") return;
+  c.status="running"; c.actualStart=Date.now();
+  bumpRevision(); renderAll(); persistAndPublish();
+}
+function finishConference(id){
+  const c=byId(id); if(!c||c.status!=="running") return;
+  c.status="done"; c.actualEnd=Date.now();
+  retimeWaiting(); bumpRevision(); renderAll(); persistAndPublish();
+}
+function bringForward(id){
+  const i=state.conferences.findIndex(x=>x.id===id); if(i<=0) return;
+  if(state.conferences[i].status!=="waiting") return;
+  let j=i-1; while(j>=0 && state.conferences[j].status!=="waiting") j--;
+  if(j<0) return;
+  [state.conferences[i],state.conferences[j]]=[state.conferences[j],state.conferences[i]];
+  // Vorverlegen hebt die Auto-Sortierung lokal auf → nur neu takten, nicht neu sortieren
+  retimeAll(); bumpRevision(); renderAll(); persistAndPublish();
+}
+function retimeAll(){
+  let cur=timeToToday(state.startTime).getTime();
+  state.conferences.forEach(c=>{ if(c.status==="done"){return;} c.plannedStart=cur; c.plannedEnd=cur+state.slotMinutes*60000; cur=c.plannedEnd; });
+}
+function addClassFromForm(){
+  if(!isMaster()) return;
+  const name=dom.addClass.value.trim();
+  if(!name){ dom.addClass.focus(); return; }
+  const dept=dom.addDept.value||state.departments[0].key;
+  const teachers=splitTeachers(dom.addTeachers.value);
+  const kvT=parseTeacher(dom.addKv.value);
+  state.conferences.push(createConference(dept,name,teachers,{kv:kvT.k,kvName:kvT.n}));
+  dom.addClass.value=""; dom.addTeachers.value=""; dom.addKv.value=""; dom.addClass.focus();
+  rebuildSchedule();
+}
+function removeConference(id){
+  const c=byId(id); if(!c) return;
+  if(!confirm(`Klasse „${c.className}“ wirklich entfernen?`)) return;
+  state.conferences=state.conferences.filter(x=>x.id!==id);
+  rebuildSchedule();
+}
+
+/* ---------------- Daten / Helfer ---------------- */
+function getVisible(){ return state.hideDone ? state.conferences.filter(c=>c.status!=="done") : state.conferences; }
+function getRunning(){ return state.conferences.find(c=>c.status==="running")||null; }
+function getNextWaiting(){ return state.conferences.find(c=>c.status==="waiting")||null; }
+function getDept(k){ return state.departments.find(d=>d.key===k)||state.departments[0]; }
+function byId(id){ return state.conferences.find(c=>c.id===id); }
+function bumpRevision(){ state.revision=(state.revision||0)+1; }
+function isMaster(){ return ROLE==="master"; }
+
+/* Lehrer-Modell: {k:"KRA", n:"Kranz"}  (Kürzel + Nachname) */
+function parseTeacher(s){
+  s=String(s).trim();
+  const m=s.match(/^([^(]+?)\s*\(([^)]*)\)\s*$/);   // "KRA (Kranz)"
+  if(m) return { k:m[1].trim().toUpperCase(), n:m[2].trim() };
+  return { k:s.toUpperCase(), n:"" };
+}
+function normalizeTeachers(arr){
+  return (arr||[]).map(t=> typeof t==="string" ? parseTeacher(t) : { k:String(t.k||"").toUpperCase(), n:t.n||"" })
+                  .filter(t=>t.k||t.n);
+}
+function splitTeachers(v){ return String(v).split(/[;,/|]+/).map(s=>s.trim()).filter(Boolean).map(parseTeacher); }
+function teacherKuerzel(c){ return c.teachers.map(t=>t.k).join(", "); }
+
+/* Hervorheben: Kürzel ODER Nachname, case-insensitive (Lehrer + KV + StellvKV) */
+function matchesQuery(c,q){
+  q=String(q||"").trim().toLowerCase(); if(!q) return false;
+  const hitK = k => k && k.toLowerCase()===q;
+  const hitN = n => n && (n.toLowerCase()===q || (q.length>=3 && n.toLowerCase().includes(q)));
+  if(hitK(c.kv) || hitN(c.kvName)) return true;
+  if(hitK(c.stellvKv) || hitN(c.stellvKvName)) return true;
+  return c.teachers.some(t=>hitK(t.k)||hitN(t.n));
+}
+
+function createConference(departmentKey,className,teachers,opts){
+  opts=opts||{};
+  return { id:(crypto.randomUUID?crypto.randomUUID():"c"+Math.random().toString(36).slice(2)),
+    departmentKey, className,
+    langname:opts.langname||"",
+    kv:String(opts.kv||"").toUpperCase(), kvName:opts.kvName||"",
+    stellvKv:String(opts.stellvKv||"").toUpperCase(), stellvKvName:opts.stellvKvName||"",
+    teachers:normalizeTeachers(teachers), status:"waiting",
+    plannedStart:0, plannedEnd:0, actualStart:null, actualEnd:null };
+}
+function createDemoData(){
+  return [
+    createConference("elektrotechnik","1AHET",["KRA (Kranz)","WAL (Walter)"],{kv:"KRA",kvName:"Kranz"}),
+    createConference("elektrotechnik","1BHET",["KRA (Kranz)","MAY (Mayer)"],{kv:"MAY",kvName:"Mayer"}),
+    createConference("maschinenbau","2AHMBT",["BOD (Bodner)","KRA (Kranz)"],{kv:"BOD",kvName:"Bodner"}),
+    createConference("maschinenbau","3BHMBT",["BOD (Bodner)","REI (Reiter)"],{kv:"REI",kvName:"Reiter"}),
+    createConference("mechatronik","2CHMET",["WEI (Weiß)","REI (Reiter)"],{kv:"WEI",kvName:"Weiß"}),
+    createConference("abendschule","1ABS",["NIG (Niggas)","KRA (Kranz)"],{kv:"NIG",kvName:"Niggas"})
+  ];
+}
+
+/* ---------------- Excel-/CSV-Import (WebUntis-Export v6) --------------------
+   Erkannte Spalten:  Abteilung · Klasse · Langname · Klassenvorstand · StellvKV · Lehrer
+   (ältere Exporte mit Schultyp werden weiterhin verstanden.)
+   - SheetJS liest .xlsx/.xls/.csv (Semikolon- und Komma-getrennt).
+   - Mehrere Zeilen pro Klasse (1 Zeile = 1 Lehrer) werden zusammengeführt.
+   - Lehrer/KV im Format "KRA (Kranz)" → {Kürzel:"KRA", Nachname:"Kranz"}.
+   - Abteilung wird notfalls aus dem Klassennamen abgeleitet (ET/ME/MB/Abend).
+   - Nur Klassen MIT Klassenvorstand werden übernommen (Rest wird gemeldet).
+----------------------------------------------------------------------------- */
+async function parseExcel(file){
+  const bytes=await file.arrayBuffer();
+  const wb=XLSX.read(bytes,{type:"array",raw:false});
+  const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""});
+  const map=new Map(); // Klasse -> {departmentKey, langname, kv,kvName, stellvKv,stellvKvName, teachers:Map(k->{k,n})}
+  for(const row of rows){
+    const keys=Object.keys(row); if(!keys.length) continue;
+    const cls=String(pick(row,["Klasse","klasse","Class","class"])).trim(); if(!cls) continue;
+    const deptRaw=String(pick(row,["Abteilung","abteilung","Department","department"]));
+    const schultyp=String(pick(row,["Schultyp","schultyp","Schulform"]));
+    const langname=String(pick(row,["Langname","langname","Langbez"]));
+    const kvRaw=String(pick(row,["Klassenvorstand","klassenvorstand","KV","kv"]));
+    const stellvRaw=String(pick(row,["StellvKV","stellvkv","Stellv. KV","StellvertreterKV"]));
+    let tRaw=pick(row,["Lehrer","Lehrerkuerzel","LehrerKürzel","Teacher","teachers"]);
+    if(!tRaw){
+      const cols=keys.filter(k=>!/abteilung|department|klasse|class|schultyp|schulform|langname|langbez|klassenvorstand|stellv|^kv$/i.test(k));
+      tRaw=cols.map(c=>String(row[c]).trim()).filter(Boolean).join(",");
+    }
+    if(!map.has(cls)) map.set(cls,{departmentKey:normalizeDept(deptRaw,schultyp,cls),langname:"",kv:"",kvName:"",stellvKv:"",stellvKvName:"",teachers:new Map()});
+    const e=map.get(cls);
+    e.departmentKey=normalizeDept(deptRaw,schultyp,cls);
+    if(langname && !e.langname) e.langname=langname;
+    if(kvRaw && !e.kv){ const t=parseTeacher(kvRaw); e.kv=t.k; e.kvName=t.n; }
+    if(stellvRaw && !e.stellvKv){ const t=parseTeacher(stellvRaw); e.stellvKv=t.k; e.stellvKvName=t.n; }
+    splitTeachers(tRaw).forEach(t=>{ if(t.k && !e.teachers.has(t.k)) e.teachers.set(t.k,t); });
+  }
+  const all=[...map.entries()];
+  const withKv=all.filter(([,e])=>e.kv);
+  const skipped=all.length-withKv.length;
+  if(skipped>0) alert(`${withKv.length} Klassen mit Klassenvorstand importiert.\n${skipped} Klasse(n) ohne KV wurden übersprungen.`);
+  return withKv.map(([cls,e])=>createConference(e.departmentKey,cls,[...e.teachers.values()],
+    {langname:e.langname,kv:e.kv,kvName:e.kvName,stellvKv:e.stellvKv,stellvKvName:e.stellvKvName}));
+}
+function normalizeDept(v,schultyp,className){
+  v=String(v).toLowerCase(); schultyp=String(schultyp||"").toLowerCase();
+  const cn=String(className||"").toUpperCase();
+  if(schultyp.includes("abend")||v.includes("abend")) return "abendschule";
+  if(v.includes("elekt")) return "elektrotechnik";
+  if(v.includes("maschin")) return "maschinenbau";
+  if(v.includes("mecha")) return "mechatronik";
+  // Fallback aus Klassenname (z. B. "Abt-ID undefined")
+  if(/ME/.test(cn)) return "mechatronik";
+  if(/MB/.test(cn)) return "maschinenbau";
+  if(/ET/.test(cn)) return "elektrotechnik";
+  return "elektrotechnik";
+}
+function pick(row,keys){ for(const k of keys){ if(k in row && String(row[k]).trim()) return row[k]; } return ""; }
+
+/* ---------------- Akzentfarbe (Uhr + Logo nach Abteilung) ---------------- */
+function applyAccent(){
+  const base=getRunning()||getNextWaiting();
+  const color=base?getDept(base.departmentKey).color:DEPARTMENT_DEFAULTS[0].color;
+  document.documentElement.style.setProperty("--accent",color);
+  document.documentElement.style.setProperty("--accent-soft",color+"22");
+}
+
+/* ---------------- Uhr ---------------- */
+function startClock(){
+  if(clockTimer) clearInterval(clockTimer);
+  const tick=()=>{
+    const n=new Date(), p=x=>String(x).padStart(2,"0");
+    const t=`${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+    if(dom.clockTime) dom.clockTime.textContent=t;
+    if(dom.bClockTime) dom.bClockTime.textContent=t;
+    if(dom.clockDate) dom.clockDate.textContent=n.toLocaleDateString("de-AT",{weekday:"short",day:"2-digit",month:"2-digit",year:"numeric"});
+  };
+  tick(); clockTimer=setInterval(tick,1000);
+}
+function dateLong(){ return new Date().toLocaleDateString("de-AT",{weekday:"long",day:"2-digit",month:"long",year:"numeric"}); }
+function timeToToday(hhmm){ const [h,m]=String(hhmm).split(":").map(Number); const d=new Date(); d.setHours(Number.isFinite(h)?h:7,Number.isFinite(m)?m:45,0,0); return d; }
+function fmt(ts){ if(!ts) return "--:--"; return new Date(ts).toLocaleTimeString("de-AT",{hour:"2-digit",minute:"2-digit",hour12:false}); }
+function escapeHtml(t){ return String(t).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+
+/* ---------------- Persistenz + lokale Spiegelung ---------------- */
+function persistAndPublish(){ persistLocal(); if(isMaster()){ broadcastLocal(); if(window.__kfPush) window.__kfPush(); } }
+function persistLocal(){ try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){} }
+function broadcastLocal(){ if(channel) channel.postMessage({type:"state",state}); }
+
+function loadState(){
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw){ state.conferences=createDemoData(); rebuildSchedule(); return; }
+  try{ hydrateFromRemote(JSON.parse(raw),false); }
+  catch(e){ state.conferences=createDemoData(); rebuildSchedule(); }
+}
+function hydrateFromRemote(r,render=true){
+  state.startTime=r.startTime||state.startTime;
+  state.slotMinutes=Number(r.slotMinutes)||state.slotMinutes;
+  state.hideDone=!!r.hideDone;
+  state.departments=Array.isArray(r.departments)&&r.departments.length?r.departments:structuredClone(DEPARTMENT_DEFAULTS);
+  state.conferences=(Array.isArray(r.conferences)?r.conferences:[]).map(c=>({...c, teachers:normalizeTeachers(c.teachers), kv:String(c.kv||"").toUpperCase(), kvName:c.kvName||"", stellvKv:String(c.stellvKv||"").toUpperCase(), stellvKvName:c.stellvKvName||""}));
+  state.revision=Number(r.revision)||0;
+  if(typeof r.teacherCode==="string" && ROLE==="master") state.teacherCode=r.teacherCode;
+  renderDepartmentConfig(); renderAddDeptOptions();
+  if(render) renderAll();
+  persistLocal();
+}
+
+/* Daten für die geräteübergreifende Spiegelung */
+window.__kfSnapshot = ()=>({
+  v:2, startTime:state.startTime, slotMinutes:state.slotMinutes, hideDone:state.hideDone,
+  departments:state.departments, conferences:state.conferences, revision:state.revision
+});
+window.__kfApplyRemote = pl=>{
+  if(!pl) return;
+  if((pl.revision||0) <= (state.revision||0)) return;
+  hydrateFromRemote(pl);
+};
+/* Erzwungene Wiederherstellung (Cloud-Recovery / Datei-Import) – ohne Revisions-Sperre */
+window.__kfRestoreSnapshot = pl=>{ if(pl) hydrateFromRemote(pl); };
+window.__kfCurrentRevision = ()=>state.revision||0;
+
+/* ---------------- Manuelle Sicherung (JSON) ---------------- */
+function exportState(){
+  const data=JSON.stringify(window.__kfSnapshot(),null,2);
+  const stamp=new Date().toISOString().slice(0,16).replace(/[:T]/g,"-");
+  const blob=new Blob([data],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download=`konferenz-stand_${stamp}.json`; a.click();
+}
+async function importStateFile(file){
+  try{
+    const pl=JSON.parse(await file.text());
+    if(!pl||!Array.isArray(pl.conferences)) throw new Error("kein gültiger Stand");
+    if(!confirm("Gesicherten Stand laden? Der aktuelle Stand wird überschrieben.")) return;
+    hydrateFromRemote(pl); persistAndPublish();
+  }catch(e){ alert("Datei konnte nicht gelesen werden: "+e.message); }
+}
+window.__kfSetRole = role=>{
+  ROLE=role;
+  if(role!=="master") document.body.classList.add("anzeige");
+  applyRoleUi();
+};
+window.__kfShowBeamer = on=>openBeamer(on);
+window.__kfRuhe = on=>{ dom.ruheView.classList.toggle("on",!!on); };
+window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
+</script>
+
+<script>
+/* ============================================================================
+   LIVE-SPIEGELUNG (Supabase Realtime) – rein additiv.
+   Rollen über URL:  ?mode=master&key=…  (Steuerung) · ?mode=anzeige / ohne Parameter (nur sehen)
+   Ohne Supabase-Konfiguration ist dieses Modul ein No-Op → App bleibt exakt lokal.
+   ============================================================================ */
+(function(){
+  const SUPABASE_URL      = "https://excopftemuwsxmqwyxrn.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_sVjO2A8cq8Rr6SgpHl9_7A_sqtQFBZB";
+  const LIVE_KEY          = "HTL1-Lastenstrasse-KONF2026";   // muss zu set_konferenz_state in der DB passen
+  const RPC_NAME          = "set_konferenz_state";
+  const ROW_ID            = "konferenz";
+  const TZ                = "Europe/Vienna";
+
+  const q=new URLSearchParams(location.search);
+  const mode=(q.get("mode")||"").toLowerCase();
+  const role = mode==="master" ? (q.get("key")===LIVE_KEY ? "master" : "locked") : (mode==="anzeige"?"anzeige":"master");
+  // Ohne ?mode bleibt es lokaler Master (Einzelgerät). Anzeige nur explizit per ?mode=anzeige.
+  window.__kfSetRole(role==="locked"?"locked":role);
+
+  const haveSB = !!(window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY);
+  const SB = haveSB ? window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY) : null;
+  const $id=id=>document.getElementById(id);
+  const viennaDate=()=>new Date().toLocaleDateString("en-CA",{timeZone:TZ});
+
+  // Live-Statuspunkt
+  const status=document.createElement("div"); status.id="liveStatus";
+  status.innerHTML='<span class="dot"></span><span class="txt">verbinde…</span>';
+  document.body.appendChild(status);
+  function setStatus(live){
+    if(role!=="master"){ status.classList.add("show"); status.classList.toggle("live",!!live); status.querySelector(".txt").textContent=live?"live":"getrennt"; }
+    const p=$id("livePanel"); if(p) p.classList.toggle("live",!!live);
+  }
+
+  // ====================== ANZEIGE / LOCKED ======================
+  if(role!=="master"){
+    if(role==="locked"){
+      const lb=document.createElement("div"); lb.id="lockBanner";
+      lb.textContent="⚠ Kein Steuerzugriff – ungültiger oder fehlender Schlüssel. Nur-Anzeige.";
+      document.body.appendChild(lb);
+    }
+    window.__kfEnableTeacherInput();
+    let last=null;
+    function applyPayload(pl){
+      last=pl||null;
+      const active = pl && pl.sessionActive && pl.sessionDate===viennaDate() && pl.snapshot && pl.snapshot.conferences && pl.snapshot.conferences.length;
+      if(active){
+        window.__kfRuhe(false);
+        window.__kfApplyRemote(pl.snapshot);
+        window.__kfShowBeamer(true);
+      }else{
+        window.__kfShowBeamer(false);
+        window.__kfRuhe(true);
+      }
+    }
+    if(!haveSB){ window.__kfRuhe(true); return; }
+    (async function(){
+      try{ const {data}=await SB.from("live_state").select("payload").eq("id",ROW_ID).maybeSingle();
+        applyPayload(data&&data.payload&&Object.keys(data.payload).length?data.payload:null);
+      }catch(e){ applyPayload(null); }
+      SB.channel("live_"+ROW_ID)
+        .on("postgres_changes",{event:"*",schema:"public",table:"live_state",filter:"id=eq."+ROW_ID},
+            p=>{ setStatus(true); applyPayload(p.new&&p.new.payload); })
+        .subscribe(s=>setStatus(s==="SUBSCRIBED"));
+      setInterval(()=>{ if(last) applyPayload(last); }, 30000); // Mitternacht / Datum neu prüfen
+    })();
+    return;
+  }
+
+  // ====================== MASTER ======================
+  if(!haveSB){ window.__kfPush=()=>{}; return; }   // lokaler Einzelgerät-Master ohne Cloud
+
+  // --- Crash-Recovery: beim Start prüfen, ob in der Cloud ein NEUERER Stand liegt
+  //     (z. B. wenn der bisherige Master-PC ausgefallen ist und hier ein neues Gerät übernimmt).
+  (async function recover(){
+    try{
+      const {data}=await SB.from("live_state").select("payload").eq("id",ROW_ID).maybeSingle();
+      const pl=data&&data.payload&&data.payload.snapshot;
+      if(pl && (pl.revision||0) > (window.__kfCurrentRevision?window.__kfCurrentRevision():0)){
+        if(confirm("In der Cloud liegt ein neuerer Konferenz-Stand (vermutlich vom vorherigen Master-Gerät).\n\nDiesen Stand übernehmen?")){
+          window.__kfRestoreSnapshot(pl);
+        }
+      }
+    }catch(e){}
+  })();
+
+  let sessionActive=false, sessionDate=null, lastSent="";
+  const panel=document.createElement("div"); panel.id="livePanel"; panel.classList.add("show");
+  panel.innerHTML='<h4 title="Zum Verschieben ziehen"><span class="lp-grip">⠿</span> 🔴 Live-Spiegelung <span class="lp-dot"></span></h4>'
+    +'<button class="lp-main" id="lpToggle">▶ Konferenztag starten</button>'
+    +'<div class="lp-sub">Anzeige-Link (Beamer / Handys):</div>'
+    +'<div class="lp-link"><input id="lpUrl" readonly><button id="lpCopy">Kopieren</button></div>'
+    +'<div id="lpQR"></div>';
+  document.body.appendChild(panel);
+  setStatus(false);
+
+  const buildAnzeigeUrl=()=>location.origin+location.pathname+"?mode=anzeige";
+  function refreshLink(){
+    const url=buildAnzeigeUrl();
+    const u=$id("lpUrl"); if(u) u.value=url;
+    const qr=$id("lpQR"); if(qr){ qr.innerHTML=""; try{ if(window.QRCode) new QRCode(qr,{text:url,width:150,height:150,correctLevel:QRCode.CorrectLevel.M}); }catch(e){} }
+  }
+  refreshLink();
+  $id("lpCopy").onclick=()=>{ const i=$id("lpUrl"); i.select(); if(navigator.clipboard) navigator.clipboard.writeText(i.value); else{ try{document.execCommand("copy");}catch(e){} } $id("lpCopy").textContent="✓"; setTimeout(()=>$id("lpCopy").textContent="Kopieren",1200); };
+
+  function setActive(a){ sessionActive=a; if(a) sessionDate=viennaDate();
+    try{ localStorage.setItem("kf_live_session",a?viennaDate():""); }catch(e){}
+    panel.classList.toggle("active",a);
+    $id("lpToggle").textContent=a?"■ Konferenztag beenden":"▶ Konferenztag starten";
+    pushNow();
+  }
+  $id("lpToggle").onclick=()=>setActive(!sessionActive);
+  try{ if(localStorage.getItem("kf_live_session")===viennaDate()) setActive(true); }catch(e){}
+
+  // grüner Punkt = minimieren
+  const dot=panel.querySelector(".lp-dot");
+  function setMin(m){ panel.classList.toggle("min",m); try{ localStorage.setItem("kf_livePanelMin",m?"1":"0"); }catch(e){} }
+  if(dot){ dot.title="minimieren"; dot.addEventListener("click",e=>{ e.stopPropagation(); setMin(!panel.classList.contains("min")); }); }
+  try{ if(localStorage.getItem("kf_livePanelMin")==="1") setMin(true); }catch(e){}
+
+  // Panel frei verschiebbar (Maus + Touch)
+  (function dragPanel(){
+    let drag=false,sx=0,sy=0,sl=0,st=0;
+    const pin=()=>{ const r=panel.getBoundingClientRect(); panel.style.left=r.left+"px"; panel.style.top=r.top+"px"; panel.style.right="auto"; panel.style.bottom="auto"; };
+    const down=e=>{ if(e.target.closest("button,input,.lp-dot"))return; drag=true; const p=e.touches?e.touches[0]:e; pin(); const r=panel.getBoundingClientRect(); sl=r.left;st=r.top;sx=p.clientX;sy=p.clientY; panel.classList.add("dragging"); e.preventDefault(); };
+    const move=e=>{ if(!drag)return; const p=e.touches?e.touches[0]:e; let nl=sl+(p.clientX-sx),nt=st+(p.clientY-sy); nl=Math.max(0,Math.min(innerWidth-panel.offsetWidth,nl)); nt=Math.max(0,Math.min(innerHeight-panel.offsetHeight,nt)); panel.style.left=nl+"px"; panel.style.top=nt+"px"; e.preventDefault(); };
+    const up=()=>{ if(!drag)return; drag=false; panel.classList.remove("dragging"); try{ localStorage.setItem("kf_livePanelPos",JSON.stringify({l:panel.style.left,t:panel.style.top})); }catch(e){} };
+    panel.addEventListener("mousedown",down); panel.addEventListener("touchstart",down,{passive:false});
+    addEventListener("mousemove",move); addEventListener("touchmove",move,{passive:false});
+    addEventListener("mouseup",up); addEventListener("touchend",up);
+    try{ const pos=JSON.parse(localStorage.getItem("kf_livePanelPos")||"null"); if(pos&&pos.l){ panel.style.left=pos.l;panel.style.top=pos.t;panel.style.right="auto";panel.style.bottom="auto"; } }catch(e){}
+  })();
+
+  function buildPayload(){
+    return { v:2, sessionActive, sessionDate, snapshot: window.__kfSnapshot() };
+  }
+  async function pushNow(){
+    const pl=buildPayload(); const cmp=JSON.stringify(pl);
+    if(cmp===lastSent) return; lastSent=cmp;
+    try{ await SB.rpc(RPC_NAME,{p_payload:pl,p_key:LIVE_KEY}); setStatus(true); }
+    catch(e){ setStatus(false); }
+  }
+  window.__kfPush=pushNow;
+  setInterval(pushNow,800); // Diff-Push: sendet nur bei echter Änderung
+})();
+</script>
+</body>
+</html>
