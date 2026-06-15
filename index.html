@@ -102,8 +102,10 @@ tbody tr.current{background:var(--accent-soft)}
 tbody tr.current td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 tbody tr.next td{font-weight:500}
 tbody tr.done{opacity:.42}
-tbody tr.mine{outline:2px solid var(--accent);outline-offset:-2px}
-tbody tr.mine td:nth-child(3)::after{content:" ★";color:var(--accent)}
+tbody tr.mine{background:#fff0bf}
+tbody tr.mine:hover{background:#ffe9a3}
+tbody tr.mine td{font-weight:600}
+tbody tr.mine td:nth-child(3)::after{content:" ★";color:#c98a00}
 .badge{display:inline-block;font-size:11px;font-weight:600;border-radius:999px;padding:3px 9px;color:#fff}
 .badge.waiting{background:#8893a5}
 .badge.running{background:var(--good)}
@@ -135,7 +137,8 @@ tbody tr.mine td:nth-child(3)::after{content:" ★";color:var(--accent)}
 .brow.current{background:var(--accent-soft);font-weight:600;border-radius:10px}
 .brow.done{opacity:.4}
 .brow .bdot{width:12px;height:12px;border-radius:4px}
-.brow.mine{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+.brow.mine{background:#fff0bf;border-radius:10px;font-weight:600}
+.brow.mine.current{background:#ffe49a}
 .beamer-foot{text-align:center;color:var(--muted);font-size:13px}
 .beamer-close{position:fixed;top:14px;right:16px;z-index:9100;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:600;color:var(--ink)}
 .beamer-teacher{position:fixed;bottom:14px;left:16px;z-index:9100;display:flex;gap:8px;align-items:center;background:#ffffffcc;border:1px solid var(--line);border-radius:12px;padding:7px 11px}
@@ -175,6 +178,70 @@ body.anzeige .wrap{display:none!important}
 #livePanel .lp-link button{border:none;background:#1e2a3a;color:#cfe3f2;border-radius:8px;padding:0 10px;font-size:12px}
 #livePanel #lpQR{margin-top:10px;display:flex;justify-content:center;background:#fff;padding:8px;border-radius:8px}
 #livePanel #lpQR img,#livePanel #lpQR canvas{display:block}
+
+/* ---- Live-Timer (mitlaufende Dauer der aktuellen Konferenz) ---- */
+.elapsed{font-weight:700;color:var(--accent)}
+.btimer{margin-top:10px;font-size:clamp(16px,2vw,26px);font-weight:600;color:var(--accent)}
+.btimer span{font-family:"DSEG7 Classic",ui-monospace,monospace;letter-spacing:1px}
+
+/* ---- QR in der Beamer-Ansicht ---- */
+.beamer-qr{position:fixed;right:16px;bottom:16px;z-index:9050;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 10px 8px;
+  box-shadow:0 14px 40px -22px rgba(20,30,50,.6);display:flex;flex-direction:column;align-items:center;gap:6px}
+.beamer-qr .bqr-code{width:150px;height:150px;display:flex;align-items:center;justify-content:center}
+.beamer-qr .bqr-code img,.beamer-qr .bqr-code canvas{display:block;width:150px;height:150px}
+.beamer-qr .bqr-label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.3px}
+
+/* ---- Lehrer ausblenden (Standard): Spalte in Tabelle + Beamer weg ---- */
+body.no-teachers table th:nth-child(5),
+body.no-teachers table td:nth-child(5){display:none}
+body.no-teachers .brow .bteach{display:none}
+body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
+
+/* ---- Mobile Steuerleiste (Master am Handy) ---- */
+.mobilebar{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;gap:10px;
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,.9);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
+  border-top:1px solid var(--line);box-shadow:0 -8px 26px -16px rgba(20,30,50,.45)}
+.mobilebar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:var(--accent-soft);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:10px 6px;font-weight:600;font-size:12px}
+.mobilebar button:active{transform:scale(.97)}
+.mobilebar .mb-ico{font-size:20px;line-height:1;color:var(--accent)}
+
+/* ============ MOBIL / HOCHFORMAT ============ */
+@media(max-width:760px){
+  /* Master-Steuerleiste nur am Handy & nur als Master */
+  body:not(.anzeige) .mobilebar{display:flex}
+  body:not(.anzeige) .wrap{padding-bottom:96px}
+
+  /* Beamer/Anzeige: Kopf stapeln, Uhr sichtbar halten */
+  #beamerView{padding:12px 12px 0}
+  .beamer-top{flex-wrap:wrap;gap:10px 14px;padding-right:0}
+  .beamer-top .logo-badge svg{height:46px}
+  .beamer-top .btitle{font-size:19px;flex:1 1 auto;margin-right:0}
+  .beamer-top .btitle small{font-size:11px}
+  .bclock{order:5;flex:1 1 100%;text-align:center}
+  .bclock .time{font-size:38px}
+
+  /* Karten untereinander */
+  .beamer-now{grid-template-columns:1fr;gap:10px}
+  .bcard{min-height:auto;padding:14px 16px}
+  .bname{font-size:34px}
+  .bsub{font-size:15px}
+  .btimer{margin-top:6px;font-size:20px}
+
+  /* Liste: kompakte Zeilen, scrollbar, Platz für Eingabe/Leiste unten */
+  .beamer-list{padding-bottom:96px}
+  .brow{grid-template-columns:54px 1fr auto auto;gap:10px;font-size:15px;padding:9px 2px}
+  .brow .bdot{display:none}
+  .brow .bteach{display:none}
+  body.no-teachers .brow{grid-template-columns:54px 1fr auto auto}
+
+  /* QR am Handy ausblenden (für Projektor gedacht), Schließen kleiner */
+  .beamer-qr{display:none}
+  .beamer-close{top:10px;right:10px;padding:7px 10px;font-size:13px}
+  .beamer-teacher{left:10px;right:10px;bottom:10px;justify-content:center}
+  .beamer-teacher input{flex:1;max-width:200px}
+}
 </style>
 </head>
 <body>
@@ -229,9 +296,10 @@ body.anzeige .wrap{display:none!important}
   </div>
   <div class="beamer-list" id="bList"></div>
   <div class="beamer-foot">Live-Ansicht · aktualisiert automatisch</div>
+  <div class="beamer-qr" id="bQRWrap"><div class="bqr-code" id="bQR"></div><div class="bqr-label">📱 Live mitschauen</div></div>
 </div>
 <button class="beamer-close" id="bClose" style="display:none">✕ Schließen</button>
-<div class="beamer-teacher" id="bTeacher" style="display:none"><span>Mein Kürzel:</span><input id="bTeacherInput" placeholder="z. B. KRA" maxlength="20"></div>
+<div class="beamer-teacher" id="bTeacher" style="display:none"><span>Mein Kürzel:</span><input id="bTeacherInput" placeholder="z. B. KRA oder Name" maxlength="40"></div>
 
 <!-- Ruhe-Bildschirm -->
 <div id="ruheView"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 432.46 202.88" class="htl-logo-anim" role="img" aria-label="HTL1 Klagenfurt">
@@ -353,6 +421,7 @@ body.anzeige .wrap{display:none!important}
       </div>
 
       <label class="inline"><input type="checkbox" id="hideDone"> Fertige Konferenzen ausblenden</label>
+      <label class="inline"><input type="checkbox" id="showTeachers"> Lehrer anzeigen &amp; in Filter einbeziehen</label>
       <p class="hint" id="syncHint">—</p>
     </section>
 
@@ -388,6 +457,13 @@ body.anzeige .wrap{display:none!important}
     </div>
   </main>
 </div>
+
+<!-- Mobile Steuerleiste (nur am Handy & nur als Master sichtbar) -->
+<nav class="mobilebar" id="mobileBar">
+  <button id="mFinish" type="button"><span class="mb-ico">✓</span><span class="mb-txt">Fertig</span></button>
+  <button id="mNext" type="button"><span class="mb-ico">▶</span><span class="mb-txt">Nächste</span></button>
+  <button id="mBeamer" type="button"><span class="mb-ico">🖥</span><span class="mb-txt">Beamer</span></button>
+</nav>
 
 <script>
 /* HTL1-Animationslogo (inline, selbstständig) */
@@ -464,7 +540,7 @@ const DEPARTMENT_DEFAULTS = [
 ];
 
 const state = {
-  startTime:"07:45", slotMinutes:15, hideDone:false, teacherCode:"",
+  startTime:"07:45", slotMinutes:15, hideDone:false, showTeachers:false, teacherCode:"",
   departments: structuredClone(DEPARTMENT_DEFAULTS),
   conferences: [], revision:0
 };
@@ -475,7 +551,7 @@ const $ = id => document.getElementById(id);
 const dom = {};
 ["teacherInput","startTime","slotMinutes","deptConfig","excelInput","loadDemoBtn","rebuildBtn","hideDone",
  "conferenceBody","liveNow","liveNext","finishCurrentBtn","startNextBtn","clockTime","clockDate","syncHint",
- "addDept","addClass","addKv","addTeachers","addBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput",
+ "addDept","addClass","addKv","addTeachers","addBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","showTeachers","bQRWrap","bQR",
  "beamerView","bClose","bCurrent","bNext","bList","bDate","bClockTime","ruheView","bTeacher","bTeacherInput"].forEach(k=>dom[k]=$(k));
 
 let clockTimer=null;
@@ -513,7 +589,8 @@ function bindEvents(){
   });
   dom.loadDemoBtn.addEventListener("click",()=>{ state.conferences=createDemoData(); rebuildSchedule(); });
   dom.rebuildBtn.addEventListener("click",rebuildSchedule);
-  dom.hideDone.addEventListener("change",()=>{ state.hideDone=dom.hideDone.checked; renderConferenceTable(); persistLocal(); });
+  dom.hideDone.addEventListener("change",()=>{ state.hideDone=dom.hideDone.checked; bumpRevision(); renderAll(); persistAndPublish(); });
+  dom.showTeachers.addEventListener("change",()=>{ state.showTeachers=dom.showTeachers.checked; bumpRevision(); renderAll(); persistAndPublish(); });
   dom.finishCurrentBtn.addEventListener("click",()=>{ if(!isMaster())return; const r=getRunning(); if(r) finishConference(r.id); });
   dom.startNextBtn.addEventListener("click",()=>{ if(!isMaster())return; const n=getNextWaiting(); if(n) startConference(n.id); });
   dom.addBtn.addEventListener("click",addClassFromForm);
@@ -542,6 +619,11 @@ function bindEvents(){
   dom.openBeamerBtn.addEventListener("click",()=>openBeamer(true));
   dom.bClose.addEventListener("click",()=>openBeamer(false));
   document.addEventListener("keydown",e=>{ if(e.key==="Escape" && dom.beamerView.classList.contains("on") && ROLE==="master") openBeamer(false); });
+
+  // Mobile Steuerleiste (gespiegelt auf die Hauptaktionen)
+  $("mFinish").addEventListener("click",()=>{ if(!isMaster())return; const r=getRunning(); if(r) finishConference(r.id); });
+  $("mNext").addEventListener("click",()=>{ if(!isMaster())return; const n=getNextWaiting(); if(n) startConference(n.id); });
+  $("mBeamer").addEventListener("click",()=>openBeamer(true));
 }
 
 /* ---------------- Abteilungs-Konfig ---------------- */
@@ -572,6 +654,8 @@ function renderAll(){
   dom.startTime.value=state.startTime;
   dom.slotMinutes.value=String(state.slotMinutes);
   dom.hideDone.checked=state.hideDone;
+  dom.showTeachers.checked=state.showTeachers;
+  document.body.classList.toggle("no-teachers",!state.showTeachers);
   applyRoleUi();
   renderConferenceTable();
   renderLiveCards();
@@ -583,7 +667,7 @@ function applyRoleUi(){
   const master=isMaster();
   dom.rolePill.textContent = master?"Master":(ROLE==="locked"?"Gesperrt":"Anzeige");
   [dom.finishCurrentBtn,dom.startNextBtn,dom.addBtn,dom.loadDemoBtn,dom.rebuildBtn].forEach(b=>b.disabled=!master);
-  [dom.startTime,dom.slotMinutes,dom.addClass,dom.addKv,dom.addTeachers,dom.addDept,dom.excelInput,dom.importInput].forEach(i=>i.disabled=!master);
+  [dom.startTime,dom.slotMinutes,dom.addClass,dom.addKv,dom.addTeachers,dom.addDept,dom.excelInput,dom.importInput,dom.hideDone,dom.showTeachers].forEach(i=>i.disabled=!master);
   // Teacher-Filter bleibt für ALLE nutzbar (Lehrer/Schüler an Anzeige-Geräten); Export ebenso.
   dom.teacherInput.disabled=false;
   dom.syncHint.textContent = master
@@ -605,7 +689,7 @@ function renderConferenceTable(){
     if(matchesQuery(c,tc)) tr.classList.add("mine");
     const d=getDept(c.departmentKey);
     const kvCell = master
-      ? `<input class="kv-input" data-kv value="${escapeHtml(c.kv)}" maxlength="12" placeholder="KV" title="${escapeHtml(c.kvName||"Klassenvorstand-Kürzel")}">`
+      ? `<input class="kv-input" data-kv value="${escapeHtml(c.kv)}" maxlength="12" placeholder="Kürzel" title="${escapeHtml(c.kvName||"Klassenvorstand-Kürzel")}">`
       : escapeHtml(c.kv||"—");
     tr.innerHTML=[
       `<td>${i+1}</td>`,
@@ -633,11 +717,12 @@ function actionsHtml(c,master){
 function renderLiveCards(){
   const r=getRunning(), n=getNextWaiting();
   dom.liveNow.innerHTML = r
-    ? `<span class="live-tag">Aktuell</span><strong>${escapeHtml(r.className)} · ${escapeHtml(getDept(r.departmentKey).label)}</strong><small>KV ${escapeHtml(r.kv||"—")} · seit ${fmt(r.actualStart)}</small>`
+    ? `<span class="live-tag">Aktuell</span><strong>${escapeHtml(r.className)} · ${escapeHtml(getDept(r.departmentKey).label)}</strong><small>${escapeHtml(r.kv||"—")} · seit ${fmt(r.actualStart)} · <span id="nowElapsed" class="elapsed"></span></small>`
     : `<span class="live-tag">Aktuell</span><strong>Noch keine Konferenz aktiv</strong><small>—</small>`;
   dom.liveNext.innerHTML = n
-    ? `<span class="live-tag">Als Nächstes</span><strong>${escapeHtml(n.className)} · ${escapeHtml(getDept(n.departmentKey).label)}</strong><small>Plan ${fmt(n.plannedStart)} · KV ${escapeHtml(n.kv||"—")}</small>`
+    ? `<span class="live-tag">Als Nächstes</span><strong>${escapeHtml(n.className)} · ${escapeHtml(getDept(n.departmentKey).label)}</strong><small>Plan ${fmt(n.plannedStart)} · ${escapeHtml(n.kv||"—")}</small>`
     : `<span class="live-tag">Als Nächstes</span><strong>Keine offene Konferenz</strong><small>—</small>`;
+  tickTimers();
 }
 
 function statusBadge(s){ return s==="running"?'<span class="badge running">Laufend</span>':s==="done"?'<span class="badge done">Fertig</span>':'<span class="badge waiting">Wartet</span>'; }
@@ -651,7 +736,12 @@ function liveText(c){
 function openBeamer(on){
   dom.beamerView.classList.toggle("on",on);
   if(ROLE==="master"){ dom.bClose.style.display=on?"block":"none"; }
-  if(on){ dom.bDate.textContent=dateLong(); renderBeamer(); }
+  if(on){ dom.bDate.textContent=dateLong(); ensureBeamerQR(); renderBeamer(); }
+}
+function ensureBeamerQR(){
+  if(!dom.bQR || dom.bQR.dataset.done==="1") return;
+  const url=location.origin+location.pathname+"?mode=anzeige";
+  try{ if(window.QRCode){ new QRCode(dom.bQR,{text:url,width:150,height:150,correctLevel:QRCode.CorrectLevel.M}); dom.bQR.dataset.done="1"; } }catch(e){}
 }
 function renderBeamer(){
   const r=getRunning(), n=getNextWaiting(), tc=state.teacherCode;
@@ -661,15 +751,18 @@ function renderBeamer(){
   dom.bList.innerHTML=rows.map((c,i)=>{
     const d=getDept(c.departmentKey);
     const cls=["brow"]; if(r&&r.id===c.id)cls.push("current"); if(c.status==="done")cls.push("done"); if(matchesQuery(c,tc))cls.push("mine");
-    return `<div class="${cls.join(" ")}"><span class="bdot" style="background:${d.color}"></span><span>${fmt(c.plannedStart)}</span><strong>${escapeHtml(c.className)}</strong><span>KV ${escapeHtml(c.kv||"—")}</span><span>${escapeHtml(teacherKuerzel(c))}</span><span>${statusBadge(c.status)}</span></div>`;
+    return `<div class="${cls.join(" ")}"><span class="bdot" style="background:${d.color}"></span><span class="btime">${fmt(c.plannedStart)}</span><strong class="bclass">${escapeHtml(c.className)}</strong><span class="bkv">${escapeHtml(c.kv||"—")}</span><span class="bteach">${escapeHtml(teacherKuerzel(c))}</span><span class="bstat">${statusBadge(c.status)}</span></div>`;
   }).join("") || `<div class="brow" style="opacity:.5">Keine Konferenzen geladen</div>`;
+  tickTimers();
 }
 function paintBCard(el,c,label){
   if(!c){ el.innerHTML=`<div class="blabel">${label}</div><div class="bname" style="color:#9aa6b6">—</div>`; el.style.borderColor=""; return; }
   const d=getDept(c.departmentKey);
+  const timer = (c.status==="running"&&c.actualStart) ? `<div class="btimer">läuft <span id="bElapsed">00:00</span></div>` : "";
   el.innerHTML=`<div class="blabel">${label}</div><div class="bname">${escapeHtml(c.className)}</div>`
-    +`<div class="bsub">KV: ${escapeHtml(c.kv||"—")}${c.kvName?" ("+escapeHtml(c.kvName)+")":""}</div>`
-    +`<span class="bdept" style="background:${d.color}">${escapeHtml(d.label)}</span>`;
+    +`<div class="bsub">${escapeHtml(c.kv||"—")}${c.kvName?" ("+escapeHtml(c.kvName)+")":""}</div>`
+    +`<span class="bdept" style="background:${d.color}">${escapeHtml(d.label)}</span>`
+    +timer;
 }
 
 /* ---------------- Zeitplan & Sortierung ---------------- */
@@ -755,13 +848,14 @@ function normalizeTeachers(arr){
 function splitTeachers(v){ return String(v).split(/[;,/|]+/).map(s=>s.trim()).filter(Boolean).map(parseTeacher); }
 function teacherKuerzel(c){ return c.teachers.map(t=>t.k).join(", "); }
 
-/* Hervorheben: Kürzel ODER Nachname, case-insensitive (Lehrer + KV + StellvKV) */
+/* Hervorheben: "die Klassen, die mein Kürzel betreffen".
+   Matcht IMMER gegen KV + StellvKV + alle Lehrer der Klasse (unabhängig davon,
+   ob die Lehrerliste gerade angezeigt wird). Kürzel exakt, Nachname exakt/am Anfang. */
 function matchesQuery(c,q){
   q=String(q||"").trim().toLowerCase(); if(!q) return false;
-  const hitK = k => k && k.toLowerCase()===q;
-  const hitN = n => n && (n.toLowerCase()===q || (q.length>=3 && n.toLowerCase().includes(q)));
-  if(hitK(c.kv) || hitN(c.kvName)) return true;
-  if(hitK(c.stellvKv) || hitN(c.stellvKvName)) return true;
+  const hitK = k => !!k && k.toLowerCase()===q;                         // Kürzel exakt
+  const hitN = n => { n=(n||"").toLowerCase(); return !!n && (n===q || (q.length>=3 && n.startsWith(q))); }; // Nachname exakt/Anfang
+  if(hitK(c.kv)||hitN(c.kvName)||hitK(c.stellvKv)||hitN(c.stellvKvName)) return true;
   return c.teachers.some(t=>hitK(t.k)||hitN(t.n));
 }
 
@@ -860,8 +954,17 @@ function startClock(){
     if(dom.clockTime) dom.clockTime.textContent=t;
     if(dom.bClockTime) dom.bClockTime.textContent=t;
     if(dom.clockDate) dom.clockDate.textContent=n.toLocaleDateString("de-AT",{weekday:"short",day:"2-digit",month:"2-digit",year:"numeric"});
+    tickTimers();
   };
   tick(); clockTimer=setInterval(tick,1000);
+}
+/* Mitlaufende Dauer der aktuell laufenden Konferenz (Master-Karte + Beamer) */
+function fmtDur(ms){ if(ms<0)ms=0; const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60,p=x=>String(x).padStart(2,"0"); return h>0?`${h}:${p(m)}:${p(ss)}`:`${p(m)}:${p(ss)}`; }
+function tickTimers(){
+  const r=getRunning();
+  const txt = (r&&r.actualStart) ? fmtDur(Date.now()-r.actualStart) : "";
+  const a=$("nowElapsed"); if(a) a.textContent=txt;
+  const b=$("bElapsed");   if(b) b.textContent=txt;
 }
 function dateLong(){ return new Date().toLocaleDateString("de-AT",{weekday:"long",day:"2-digit",month:"long",year:"numeric"}); }
 function timeToToday(hhmm){ const [h,m]=String(hhmm).split(":").map(Number); const d=new Date(); d.setHours(Number.isFinite(h)?h:7,Number.isFinite(m)?m:45,0,0); return d; }
@@ -883,6 +986,7 @@ function hydrateFromRemote(r,render=true){
   state.startTime=r.startTime||state.startTime;
   state.slotMinutes=Number(r.slotMinutes)||state.slotMinutes;
   state.hideDone=!!r.hideDone;
+  state.showTeachers=!!r.showTeachers;
   state.departments=Array.isArray(r.departments)&&r.departments.length?r.departments:structuredClone(DEPARTMENT_DEFAULTS);
   state.conferences=(Array.isArray(r.conferences)?r.conferences:[]).map(c=>({...c, teachers:normalizeTeachers(c.teachers), kv:String(c.kv||"").toUpperCase(), kvName:c.kvName||"", stellvKv:String(c.stellvKv||"").toUpperCase(), stellvKvName:c.stellvKvName||""}));
   state.revision=Number(r.revision)||0;
@@ -894,7 +998,7 @@ function hydrateFromRemote(r,render=true){
 
 /* Daten für die geräteübergreifende Spiegelung */
 window.__kfSnapshot = ()=>({
-  v:2, startTime:state.startTime, slotMinutes:state.slotMinutes, hideDone:state.hideDone,
+  v:2, startTime:state.startTime, slotMinutes:state.slotMinutes, hideDone:state.hideDone, showTeachers:state.showTeachers,
   departments:state.departments, conferences:state.conferences, revision:state.revision
 });
 window.__kfApplyRemote = pl=>{
