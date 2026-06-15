@@ -154,7 +154,7 @@ body.anzeige .wrap{display:none!important}
 #ruheView .rt{font-size:clamp(18px,3vw,28px);font-weight:300;letter-spacing:.5px}
 
 /* Live-Statuspunkt + Master-Panel */
-#liveStatus{position:fixed;top:14px;left:16px;z-index:9200;font-size:13px;font-weight:600;color:#9fb3cc;background:#111927cc;border:1px solid #1e2a3a;border-radius:12px;padding:6px 12px;display:none}
+#liveStatus{position:fixed;top:12px;right:14px;z-index:9200;font-size:12px;font-weight:600;color:#9fb3cc;background:#111927cc;border:1px solid #1e2a3a;border-radius:12px;padding:5px 11px;display:none}
 #liveStatus.show{display:inline-flex;align-items:center;gap:7px}
 #liveStatus .dot{width:9px;height:9px;border-radius:50%;background:#ff5a5a}
 #liveStatus.live .dot{background:#4fd6bf}
@@ -409,7 +409,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 
       <div class="button-row">
         <label class="file-btn" for="excelInput">📄 Excel/CSV laden</label>
-        <input id="excelInput" type="file" accept=".xlsx,.xls,.csv">
+        <input id="excelInput" type="file" accept=".csv,.xlsx,.xls,text/csv,text/comma-separated-values,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream">
         <button id="loadDemoBtn" class="ghost" type="button">Demo-Daten</button>
         <button id="rebuildBtn" type="button">Plan aufbauen</button>
       </div>
@@ -1092,15 +1092,28 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
       }
     }
     if(!haveSB){ window.__kfRuhe(true); return; }
-    (async function(){
+    // Holt den aktuellen Stand frisch aus der DB (Selbstheilung, falls Realtime abreißt)
+    async function refetch(){
       try{ const {data}=await SB.from("live_state").select("payload").eq("id",ROW_ID).maybeSingle();
+        setStatus(true);
         applyPayload(data&&data.payload&&Object.keys(data.payload).length?data.payload:null);
-      }catch(e){ applyPayload(null); }
-      SB.channel("live_"+ROW_ID)
+      }catch(e){ setStatus(false); }
+    }
+    function subscribe(){
+      return SB.channel("live_"+ROW_ID)
         .on("postgres_changes",{event:"*",schema:"public",table:"live_state",filter:"id=eq."+ROW_ID},
             p=>{ setStatus(true); applyPayload(p.new&&p.new.payload); })
-        .subscribe(s=>setStatus(s==="SUBSCRIBED"));
-      setInterval(()=>{ if(last) applyPayload(last); }, 30000); // Mitternacht / Datum neu prüfen
+        .subscribe(s=>{ setStatus(s==="SUBSCRIBED"); });
+    }
+    (async function(){
+      await refetch();
+      subscribe();
+      // Robustheit: regelmäßig frisch nachladen (heilt abgerissene Realtime-Verbindung am Handy)
+      setInterval(refetch, 15000);
+      // Sofort nachladen, sobald das Gerät wieder aktiv ist (Handy entsperrt / Tab im Vordergrund)
+      document.addEventListener("visibilitychange",()=>{ if(!document.hidden) refetch(); });
+      window.addEventListener("online", refetch);
+      window.addEventListener("focus", refetch);
     })();
     return;
   }
