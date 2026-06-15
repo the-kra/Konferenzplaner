@@ -125,10 +125,10 @@ tbody tr.current{background:var(--accent-soft)}
 tbody tr.current td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 tbody tr.next td{font-weight:500}
 tbody tr.done{opacity:.42}
-tbody tr.mine{background:#fff0bf}
-tbody tr.mine:hover{background:#ffe9a3}
+tbody tr.mine{background:linear-gradient(90deg,rgba(245,158,11,.15),rgba(245,158,11,.03))}
 tbody tr.mine td{font-weight:600}
-tbody tr.mine td:nth-child(3)::after{content:" ★";color:#c98a00}
+tbody tr.mine td:first-child{box-shadow:inset 4px 0 0 #f59e0b}
+tbody tr.mine td:nth-child(3)::after{content:" ★";color:#f59e0b}
 .badge{display:inline-block;font-size:11px;font-weight:600;border-radius:999px;padding:3px 9px;color:#fff}
 .badge.waiting{background:#8893a5}
 .badge.running{background:var(--good)}
@@ -160,8 +160,8 @@ tbody tr.mine td:nth-child(3)::after{content:" ★";color:#c98a00}
 .brow.current{background:var(--accent-soft);font-weight:600;border-radius:10px}
 .brow.done{opacity:.4}
 .brow .bdot{width:12px;height:12px;border-radius:4px}
-.brow.mine{background:#fff0bf;border-radius:10px;font-weight:600}
-.brow.mine.current{background:#ffe49a}
+.brow.mine{background:linear-gradient(90deg,rgba(245,158,11,.20),rgba(245,158,11,.05));border-radius:12px;font-weight:600;box-shadow:inset 5px 0 0 #f59e0b}
+.brow.mine.current{background:linear-gradient(90deg,rgba(245,158,11,.30),rgba(245,158,11,.08))}
 .beamer-foot{text-align:center;color:var(--muted);font-size:13px}
 .beamer-close{position:fixed;top:14px;right:16px;z-index:9100;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:600;color:var(--ink)}
 .beamer-teacher{position:fixed;bottom:14px;left:16px;z-index:9100;display:flex;gap:8px;align-items:center;background:#ffffffcc;border:1px solid var(--line);border-radius:12px;padding:7px 11px}
@@ -455,6 +455,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
         <label class="file-btn" for="excelInput">📄 Excel/CSV laden</label>
         <input id="excelInput" type="file" accept=".csv,.xlsx,.xls,text/csv,text/comma-separated-values,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream">
         <button id="loadDemoBtn" class="ghost" type="button">Demo-Daten</button>
+        <button id="clearBtn" class="ghost" type="button" title="Alle Konferenzen entfernen (leere Liste)">🗑 Leeren</button>
         <button id="rebuildBtn" type="button">Plan aufbauen</button>
       </div>
 
@@ -596,7 +597,7 @@ const $ = id => document.getElementById(id);
 const dom = {};
 ["teacherInput","startTime","slotMinutes","deptConfig","excelInput","loadDemoBtn","rebuildBtn","hideDone",
  "conferenceBody","liveNow","liveNext","finishCurrentBtn","startNextBtn","clockTime","clockDate","syncHint",
- "addDept","addClass","addKv","addTeachers","addBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","cloudLoadBtn","showTeachers","bQRWrap","bQR",
+ "addDept","addClass","addKv","addTeachers","addBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","cloudLoadBtn","clearBtn","showTeachers","bQRWrap","bQR",
  "beamerView","bClose","bCurrent","bNext","bList","bDate","bClockTime","ruheView","bTeacher","bTeacherInput"].forEach(k=>dom[k]=$(k));
 
 let clockTimer=null;
@@ -633,6 +634,7 @@ function bindEvents(){
     state.conferences=imported; rebuildSchedule(); dom.excelInput.value="";
   });
   dom.loadDemoBtn.addEventListener("click",()=>{ state.conferences=createDemoData(); rebuildSchedule(); });
+  dom.clearBtn.addEventListener("click",clearAll);
   dom.rebuildBtn.addEventListener("click",rebuildSchedule);
   dom.hideDone.addEventListener("change",()=>{ state.hideDone=dom.hideDone.checked; bumpRevision(); renderAll(); persistAndPublish(); });
   dom.showTeachers.addEventListener("change",()=>{ state.showTeachers=dom.showTeachers.checked; bumpRevision(); renderAll(); persistAndPublish(); });
@@ -648,6 +650,7 @@ function bindEvents(){
     if(a==="start") startConference(id);
     else if(a==="finish") finishConference(id);
     else if(a==="forward") bringForward(id);
+    else if(a==="close") closeConference(id);
     else if(a==="remove") removeConference(id);
   });
   // KV inline ändern (Master): Kürzel direkt in der Tabelle editieren
@@ -712,7 +715,7 @@ function renderAll(){
 function applyRoleUi(){
   const master=isMaster();
   dom.rolePill.textContent = master?"Master":(ROLE==="locked"?"Gesperrt":"Anzeige");
-  [dom.finishCurrentBtn,dom.startNextBtn,dom.addBtn,dom.loadDemoBtn,dom.rebuildBtn,dom.cloudLoadBtn].forEach(b=>b.disabled=!master);
+  [dom.finishCurrentBtn,dom.startNextBtn,dom.addBtn,dom.loadDemoBtn,dom.rebuildBtn,dom.cloudLoadBtn,dom.clearBtn].forEach(b=>b.disabled=!master);
   [dom.startTime,dom.slotMinutes,dom.addClass,dom.addKv,dom.addTeachers,dom.addDept,dom.excelInput,dom.importInput,dom.hideDone,dom.showTeachers].forEach(i=>i.disabled=!master);
   // Teacher-Filter bleibt für ALLE nutzbar (Lehrer/Schüler an Anzeige-Geräten); Export ebenso.
   dom.teacherInput.disabled=false;
@@ -756,8 +759,9 @@ function actionsHtml(c,master){
   const start = c.status==="waiting" ? `<button class="small" data-action="start">Start</button>` : "";
   const finish= c.status==="running" ? `<button class="small warn" data-action="finish">Fertig</button>` : "";
   const fwd   = c.status==="waiting" ? `<button class="small ghost" data-action="forward" title="Vorverlegen">▲</button>` : "";
-  const rem   = `<button class="icon ghost" data-action="remove" title="Klasse entfernen">✕</button>`;
-  return `<div class="actions">${start}${finish}${fwd}${rem}</div>`;
+  const close = c.status==="done"    ? `<button class="small ghost" data-action="close" title="Aus der Liste nehmen (nicht löschen)">Schließen</button>` : "";
+  const rem   = `<button class="icon ghost" data-action="remove" title="Klasse löschen">✕</button>`;
+  return `<div class="actions">${start}${finish}${fwd}${close}${rem}</div>`;
 }
 
 function renderLiveCards(){
@@ -804,7 +808,7 @@ function renderBeamer(){
   const r=getRunning(), n=getNextWaiting(), tc=state.teacherCode;
   paintBCard(dom.bCurrent,r,"Jetzt in Konferenz");
   paintBCard(dom.bNext,n,"Als Nächstes");
-  const rows=state.conferences.filter(c=>!(state.hideDone&&c.status==="done"));
+  const rows=state.conferences.filter(c=>!c.hidden && !(state.hideDone&&c.status==="done"));
   dom.bList.innerHTML=rows.map((c,i)=>{
     const d=getDept(c.departmentKey);
     const cls=["brow"]; if(r&&r.id===c.id)cls.push("current"); if(c.status==="done")cls.push("done"); if(matchesQuery(c,tc))cls.push("mine");
@@ -877,13 +881,27 @@ function addClassFromForm(){
 }
 function removeConference(id){
   const c=byId(id); if(!c) return;
-  if(!confirm(`Klasse „${c.className}“ wirklich entfernen?`)) return;
+  if(!confirm(`Klasse „${c.className}“ wirklich löschen?`)) return;
   state.conferences=state.conferences.filter(x=>x.id!==id);
+  rebuildSchedule();
+}
+/* „Schließen": fertige Konferenz aus der Liste nehmen (Daten bleiben, nur ausgeblendet) */
+function closeConference(id){
+  const c=byId(id); if(!c) return;
+  c.hidden=true;
+  bumpRevision(); renderAll(); persistAndPublish();
+}
+/* „Alles leeren": komplette Konferenzliste entfernen (wie Demo, nur leer) */
+function clearAll(){
+  if(!isMaster()) return;
+  if(!state.conferences.length){ return; }
+  if(!confirm("Alle Konferenzen entfernen? Die Liste wird komplett geleert.")) return;
+  state.conferences=[];
   rebuildSchedule();
 }
 
 /* ---------------- Daten / Helfer ---------------- */
-function getVisible(){ return state.hideDone ? state.conferences.filter(c=>c.status!=="done") : state.conferences; }
+function getVisible(){ return state.conferences.filter(c=>!c.hidden && !(state.hideDone && c.status==="done")); }
 function getRunning(){ return state.conferences.find(c=>c.status==="running")||null; }
 function getNextWaiting(){ return state.conferences.find(c=>c.status==="waiting")||null; }
 function getDept(k){ return state.departments.find(d=>d.key===k)||state.departments[0]; }
@@ -923,7 +941,7 @@ function createConference(departmentKey,className,teachers,opts){
     langname:opts.langname||"",
     kv:String(opts.kv||"").toUpperCase(), kvName:opts.kvName||"",
     stellvKv:String(opts.stellvKv||"").toUpperCase(), stellvKvName:opts.stellvKvName||"",
-    teachers:normalizeTeachers(teachers), status:"waiting",
+    teachers:normalizeTeachers(teachers), status:"waiting", hidden:false,
     plannedStart:0, plannedEnd:0, actualStart:null, actualEnd:null };
 }
 function createDemoData(){
@@ -1045,7 +1063,7 @@ function hydrateFromRemote(r,render=true){
   state.hideDone=!!r.hideDone;
   state.showTeachers=!!r.showTeachers;
   state.departments=Array.isArray(r.departments)&&r.departments.length?r.departments:structuredClone(DEPARTMENT_DEFAULTS);
-  state.conferences=(Array.isArray(r.conferences)?r.conferences:[]).map(c=>({...c, teachers:normalizeTeachers(c.teachers), kv:String(c.kv||"").toUpperCase(), kvName:c.kvName||"", stellvKv:String(c.stellvKv||"").toUpperCase(), stellvKvName:c.stellvKvName||""}));
+  state.conferences=(Array.isArray(r.conferences)?r.conferences:[]).map(c=>({...c, teachers:normalizeTeachers(c.teachers), kv:String(c.kv||"").toUpperCase(), kvName:c.kvName||"", stellvKv:String(c.stellvKv||"").toUpperCase(), stellvKvName:c.stellvKvName||"", hidden:!!c.hidden}));
   state.revision=Number(r.revision)||0;
   if(typeof r.teacherCode==="string" && ROLE==="master") state.teacherCode=r.teacherCode;
   renderDepartmentConfig(); renderAddDeptOptions();
