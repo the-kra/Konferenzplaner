@@ -39,6 +39,11 @@ html,body{margin:0;color:var(--ink);font-family:'Lexend',ui-sans-serif,system-ui
 .hi-gear2{bottom:24vh;right:14vw;width:110px;height:110px;animation:spin 60s linear infinite reverse}
 .hi-circuit{bottom:15vh;left:3vw;width:260px;height:84px}
 .hi-chip{top:14vh;left:6vw;width:120px;height:120px}
+.hi-res{top:40vh;left:8vw;width:200px;height:48px}
+.hi-diode{top:62vh;left:5vw;width:170px;height:54px}
+.hi-trans{top:34vh;right:9vw;width:130px;height:130px}
+.hi-arm{bottom:8vh;right:6vw;width:180px;height:180px}
+.hi-cap{top:70vh;right:16vw;width:120px;height:70px}
 @keyframes spin{to{transform:rotate(360deg)}}
 /* Oszilloskop: durchlaufende Sinus-/Strom-Kurve in Abteilungsfarbe */
 .hero-scope{position:fixed;left:0;top:40vh;width:100vw;height:auto;z-index:-1;pointer-events:none;opacity:.45;filter:drop-shadow(0 0 6px var(--accent))}
@@ -157,8 +162,14 @@ tbody tr.mine td:nth-child(3)::after{content:" ★";color:var(--mine)}
 .beamer-scope{position:absolute;left:0;top:46%;width:100vw;height:auto;z-index:0;pointer-events:none;opacity:.4;
   filter:drop-shadow(0 0 9px var(--accent))}
 #beamerView>*{position:relative;z-index:1}
-#beamerView>.beamer-scope{z-index:0}
-@media(prefers-reduced-motion:reduce){.beamer-scope{animation:none}}
+#beamerView>.beamer-scope,#beamerView>.beamer-art{z-index:0}
+/* Technik-Skizzen im Beamer (hinter den Karten) */
+.beamer-art{position:absolute;pointer-events:none;fill:none;stroke:#34507e;stroke-opacity:.13;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ba-gear{top:7%;right:3%;width:130px;height:130px;animation:spin 80s linear infinite}
+.ba-chip{bottom:9%;left:3%;width:100px;height:100px}
+.ba-res{top:5%;left:4%;width:170px;height:42px}
+@media(prefers-reduced-motion:reduce){.beamer-scope{animation:none}.ba-gear{animation:none}}
+@media(max-width:760px){.beamer-art{display:none}}
 #beamerView.on{display:flex}
 .beamer-top{display:flex;align-items:center;gap:24px;padding-right:160px}
 .beamer-top .logo-badge{background:transparent;border:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
@@ -334,6 +345,24 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   <line x1="70" y1="40" x2="82" y2="40"/><line x1="70" y1="50" x2="82" y2="50"/><line x1="70" y1="60" x2="82" y2="60"/>
   <circle cx="50" cy="50" r="6"/>
 </svg>
+<svg class="hero-art hi-res" viewBox="0 0 200 48" aria-hidden="true">
+  <path d="M6,24 H56 l8,-14 l14,28 l14,-28 l14,28 l8,-14 H194"/>
+</svg>
+<svg class="hero-art hi-diode" viewBox="0 0 170 54" aria-hidden="true">
+  <path d="M6,27 H64"/><path d="M64,10 L64,44 L98,27 Z"/><line x1="98" y1="10" x2="98" y2="44"/><path d="M98,27 H164"/>
+</svg>
+<svg class="hero-art hi-trans" viewBox="0 0 100 100" aria-hidden="true">
+  <circle cx="50" cy="50" r="30"/><line x1="20" y1="50" x2="40" y2="50"/><line x1="40" y1="34" x2="40" y2="66"/>
+  <line x1="40" y1="42" x2="70" y2="26"/><line x1="40" y1="58" x2="70" y2="74"/><line x1="70" y1="26" x2="70" y2="14"/><line x1="70" y1="74" x2="70" y2="86"/>
+</svg>
+<svg class="hero-art hi-arm" viewBox="0 0 100 100" aria-hidden="true">
+  <rect x="34" y="84" width="32" height="10" rx="2"/><line x1="50" y1="84" x2="50" y2="58"/><circle cx="50" cy="58" r="5"/>
+  <line x1="50" y1="58" x2="78" y2="40"/><circle cx="78" cy="40" r="5"/><line x1="78" y1="40" x2="70" y2="20"/>
+  <line x1="70" y1="20" x2="62" y2="24"/><line x1="70" y1="20" x2="80" y2="18"/>
+</svg>
+<svg class="hero-art hi-cap" viewBox="0 0 120 70" aria-hidden="true">
+  <line x1="6" y1="35" x2="50" y2="35"/><line x1="50" y1="10" x2="50" y2="60"/><line x1="70" y1="10" x2="70" y2="60"/><line x1="70" y1="35" x2="114" y2="35"/>
+</svg>
 <!-- Oszilloskop-Sinus (durchlaufend) -->
 <svg class="hero-scope" viewBox="0 0 1600 160" aria-hidden="true">
   <path id="scopePathHero" class="scope-wave" d="M0,80 Q25,20 50,80 T100,80 T150,80 T200,80 T250,80 T300,80 T350,80 T400,80 T450,80 T500,80 T550,80 T600,80 T650,80 T700,80 T750,80 T800,80 T850,80 T900,80 T950,80 T1000,80 T1050,80 T1100,80 T1150,80 T1200,80 T1250,80 T1300,80 T1350,80 T1400,80 T1450,80 T1500,80 T1550,80 T1600,80"/>
@@ -345,6 +374,20 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   <svg class="beamer-scope" viewBox="0 0 1600 160" aria-hidden="true">
     <path id="scopePathBeam" class="scope-wave" d="M0,80 Q25,20 50,80 T100,80 T150,80 T200,80 T250,80 T300,80 T350,80 T400,80 T450,80 T500,80 T550,80 T600,80 T650,80 T700,80 T750,80 T800,80 T850,80 T900,80 T950,80 T1000,80 T1050,80 T1100,80 T1150,80 T1200,80 T1250,80 T1300,80 T1350,80 T1400,80 T1450,80 T1500,80 T1550,80 T1600,80"/>
     <circle class="scope-dot" r="9"><animateMotion dur="11s" repeatCount="indefinite"><mpath href="#scopePathBeam"/></animateMotion></circle>
+  </svg>
+  <svg class="beamer-art ba-gear" viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="26"/><circle cx="50" cy="50" r="10"/>
+    <line x1="76" y1="50" x2="84" y2="50"/><line x1="68.4" y1="68.4" x2="74" y2="74"/><line x1="50" y1="76" x2="50" y2="84"/><line x1="31.6" y1="68.4" x2="26" y2="74"/>
+    <line x1="24" y1="50" x2="16" y2="50"/><line x1="31.6" y1="31.6" x2="26" y2="26"/><line x1="50" y1="24" x2="50" y2="16"/><line x1="68.4" y1="31.6" x2="74" y2="26"/>
+  </svg>
+  <svg class="beamer-art ba-chip" viewBox="0 0 100 100" aria-hidden="true">
+    <rect x="30" y="30" width="40" height="40" rx="4"/><circle cx="50" cy="50" r="6"/>
+    <line x1="40" y1="30" x2="40" y2="18"/><line x1="50" y1="30" x2="50" y2="18"/><line x1="60" y1="30" x2="60" y2="18"/>
+    <line x1="40" y1="70" x2="40" y2="82"/><line x1="50" y1="70" x2="50" y2="82"/><line x1="60" y1="70" x2="60" y2="82"/>
+    <line x1="30" y1="40" x2="18" y2="40"/><line x1="30" y1="60" x2="18" y2="60"/><line x1="70" y1="40" x2="82" y2="40"/><line x1="70" y1="60" x2="82" y2="60"/>
+  </svg>
+  <svg class="beamer-art ba-res" viewBox="0 0 200 48" aria-hidden="true">
+    <path d="M6,24 H56 l8,-14 l14,28 l14,-28 l14,28 l8,-14 H194"/>
   </svg>
   <div class="beamer-top">
     <span class="logo-badge" id="bLogo"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 432.46 202.88" class="htl-logo-anim" role="img" aria-label="HTL1 Klagenfurt">
