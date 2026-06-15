@@ -117,8 +117,9 @@ tbody tr.mine td:nth-child(3)::after{content:" ★";color:var(--accent)}
 #beamerView{position:fixed;inset:0;z-index:9000;display:none;flex-direction:column;padding:3vh 4vw;gap:2.4vh;
   background:radial-gradient(circle at 50% 30%,#fbfcfe,#dde4ee);color:var(--ink)}
 #beamerView.on{display:flex}
-.beamer-top{display:flex;align-items:center;gap:20px}
-.beamer-top .logo-badge svg{height:64px}
+.beamer-top{display:flex;align-items:center;gap:24px;padding-right:160px}
+.beamer-top .logo-badge{background:transparent;border:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.beamer-top .logo-badge svg{height:clamp(70px,8vh,104px);padding:0;border-radius:0}
 .beamer-top .btitle{font-size:clamp(20px,2.4vw,34px);font-weight:600;margin-right:auto}
 .beamer-top .btitle small{display:block;font-size:13px;color:var(--muted);font-weight:400}
 .bclock .time{font-size:clamp(40px,5vw,70px)}
