@@ -715,6 +715,7 @@ const state = {
 };
 
 let ROLE = "master"; // "master" | "anzeige" | "locked" – wird vom Sync-Modul gesetzt
+let passiveMaster = false; // Master, der gerade NICHT steuert (anderes Gerät aktiv) – früh deklariert (TDZ!)
 const channel = "BroadcastChannel" in window ? new BroadcastChannel(CHANNEL_NAME) : null;
 const $ = id => document.getElementById(id);
 const dom = {};
@@ -1039,7 +1040,6 @@ function getDept(k){ return state.departments.find(d=>d.key===k)||state.departme
 function byId(id){ return state.conferences.find(c=>c.id===id); }
 function bumpRevision(){ state.revision=(state.revision||0)+1; }
 function isMaster(){ return ROLE==="master"; }
-let passiveMaster=false;                          // Master, der gerade NICHT steuert (anderes Gerät aktiv)
 // Bedienelemente sind für JEDEN Master nutzbar (auch passiv). Die erste Steueraktion
 // übernimmt automatisch die Kontrolle (siehe pushNow). passiveMaster steuert nur Anzeige/Banner.
 function canControl(){ return ROLE==="master"; }
@@ -1189,7 +1189,8 @@ function persistLocal(){ try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(st
 function broadcastLocal(){ if(channel) channel.postMessage({type:"state",state}); }
 
 function loadState(){
-  const raw=localStorage.getItem(STORAGE_KEY);
+  let raw=null;
+  try{ raw=localStorage.getItem(STORAGE_KEY); }catch(e){ raw=null; }   // Privater Modus: localStorage kann werfen
   if(!raw){ state.conferences=createDemoData(); rebuildSchedule(); return; }
   try{ hydrateFromRemote(JSON.parse(raw),false); }
   catch(e){ state.conferences=createDemoData(); rebuildSchedule(); }
