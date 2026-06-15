@@ -255,24 +255,28 @@ body.anzeige .wrap{display:none!important}
 #masterLock button{background:var(--good);color:#06201c;border:none;border-radius:10px;padding:8px 15px;font-weight:700;cursor:pointer}
 #masterLock button:hover{filter:brightness(1.06)}
 #livePanel.passive{opacity:.55;filter:grayscale(.4)}
-#livePanel{position:fixed;right:16px;bottom:16px;z-index:8800;width:300px;background:#0e1622;border:1px solid #24344a;border-radius:14px;padding:14px 16px;color:#dce6f2;box-shadow:0 12px 40px -16px #000;display:none;cursor:move;touch-action:none}
+#livePanel{position:fixed;right:16px;bottom:16px;z-index:8800;width:300px;color:var(--ink);
+  background:linear-gradient(155deg,rgba(255,255,255,.66),rgba(255,255,255,.46));
+  backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);
+  border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:14px 16px;
+  box-shadow:0 28px 60px -34px rgba(20,30,50,.5),0 1px 0 rgba(255,255,255,.6) inset;display:none;cursor:move;touch-action:none}
 #livePanel.show{display:block}
 #livePanel.dragging{opacity:.92}
 #livePanel button,#livePanel input{cursor:auto}#livePanel button{cursor:pointer}
-#livePanel h4{margin:0 0 10px;font-size:14px;color:#9fb3cc;font-weight:600;display:flex;align-items:center;gap:8px;cursor:move;user-select:none}
-#livePanel h4 .lp-grip{color:#46566b;font-size:13px;letter-spacing:1px}
-#livePanel .lp-dot{width:14px;height:14px;border-radius:50%;background:#ff5a5a;margin-left:auto;cursor:pointer}
-#livePanel.live .lp-dot{background:#4fd6bf}
+#livePanel h4{margin:0 0 10px;font-size:14px;color:var(--ink);font-weight:600;display:flex;align-items:center;gap:8px;cursor:move;user-select:none}
+#livePanel h4 .lp-grip{color:var(--muted);font-size:13px;letter-spacing:1px}
+#livePanel .lp-dot{width:14px;height:14px;border-radius:50%;background:var(--bad);margin-left:auto;cursor:pointer}
+#livePanel.live .lp-dot{background:var(--good)}
 #livePanel.min{width:auto;padding:9px 13px}
 #livePanel.min h4{margin:0}
 #livePanel.min .lp-main,#livePanel.min .lp-sub,#livePanel.min .lp-link,#livePanel.min #lpQR{display:none}
-#livePanel button.lp-main{width:100%;padding:11px;border:none;border-radius:10px;font-weight:600;font-size:14px;color:#fff;background:#2bb673}
-#livePanel.active button.lp-main{background:#cc4444}
-#livePanel .lp-sub{font-size:11px;color:#6a83a3;margin:9px 0 3px}
+#livePanel button.lp-main{width:100%;padding:11px;border:none;border-radius:12px;font-weight:600;font-size:14px;color:#fff;background:var(--good)}
+#livePanel.active button.lp-main{background:var(--bad)}
+#livePanel .lp-sub{font-size:11px;color:var(--muted);margin:9px 0 3px;font-weight:500}
 #livePanel .lp-link{display:flex;gap:6px}
-#livePanel .lp-link input{flex:1;font-size:11px;background:#0a121d;border:1px solid #24344a;color:#aebfd4;border-radius:8px;padding:6px 8px;min-width:0}
-#livePanel .lp-link button{border:none;background:#1e2a3a;color:#cfe3f2;border-radius:8px;padding:0 10px;font-size:12px}
-#livePanel #lpQR{margin-top:10px;display:flex;justify-content:center;background:#fff;padding:8px;border-radius:8px}
+#livePanel .lp-link input{flex:1;font-size:11px;background:rgba(255,255,255,.7);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:7px 9px;min-width:0}
+#livePanel .lp-link button{border:1px solid var(--line);background:rgba(255,255,255,.8);color:var(--ink);border-radius:9px;padding:0 12px;font-size:12px;font-weight:600}
+#livePanel #lpQR{margin-top:10px;display:flex;justify-content:center;background:#fff;padding:8px;border-radius:10px}
 #livePanel #lpQR img,#livePanel #lpQR canvas{display:block}
 
 /* ---- Live-Timer (mitlaufende Dauer der aktuellen Konferenz) ---- */
