@@ -24,7 +24,12 @@ Design & Technik sind bewusst an das Schwesterprojekt
 - **Excel-/CSV-Import** – inklusive direktem WebUntis-Export
   (`Abteilung;Klasse;Langname;Klassenvorstand;StellvKV;Lehrer`, mehrere Zeilen pro Klasse werden zusammengeführt).
 - **Lehrer-Filter (Zuseher)** – **Kürzel _oder_ Nachname** eingeben (case-insensitive) →
-  alle betroffenen Klassen werden hervorgehoben (★).
+  alle betroffenen Klassen werden hervorgehoben (ganze Zeile farbig).
+- **Lehrerliste optional** – standardmäßig ausgeblendet (übersichtlich); per Schalter
+  „Lehrer anzeigen" einblendbar. Das Hervorheben funktioniert immer.
+- **Live-Timer** – die laufende Konferenz zeigt eine mitlaufende Dauer (Master + Beamer).
+- **Mobil-tauglich** – Anzeige/Beamer im Hochformat nutzbar; als Master am Handy gibt es eine
+  Steuerleiste unten (Fertig / Nächste / Beamer).
 - **Stand sichern / laden** – kompletter Plan als JSON exportier-/importierbar (manuelles Backup).
 - **Master/Client-Prinzip** – ein Steuergerät (Master) treibt den Tag, beliebig viele
   Anzeige-Geräte (Beamer, Schülerhandys) sehen den Stand live; Teilen per Link/QR.
@@ -73,6 +78,9 @@ Abteilung;Klasse;Langname;Klassenvorstand;StellvKV;Lehrer
 - **Nur Klassen mit Klassenvorstand** werden importiert; der Rest wird gemeldet und übersprungen.
 - `untisCSVTeacher()` liefert zusätzlich eine Lehrer→Klassen-Übersicht (optional).
 
+Eine **anonymisierte Beispiel-CSV** (keine echten Personen) zum Ausprobieren des Formats liegt
+unter [`tools/beispiel_klassen_lehrer.csv`](tools/beispiel_klassen_lehrer.csv).
+
 > ⚠️ Die exportierten CSV-/Excel-Dateien enthalten echte Lehrer-/Klassendaten und sind
 > per `.gitignore` vom Repository ausgeschlossen.
 
@@ -83,9 +91,11 @@ Der Stand ist dreifach abgesichert:
 1. **Automatisch, gleiches Gerät:** Jede Änderung wird sofort im Browser gespeichert
    (`localStorage`). Nach Absturz/Reload ist der Stand sofort wieder da; eine laufende
    Live-Session des Tages wird automatisch fortgesetzt.
-2. **Automatisch, anderes Gerät:** Bei aktiver Supabase-Spiegelung liegt der letzte Stand
-   in der Cloud. Öffnet man den **Master-Link auf einem Ersatzgerät**, fragt das Tool beim
-   Start, ob der **neuere Cloud-Stand** übernommen werden soll → ein Klick, weiter geht's.
+2. **Automatisch / per Tap, anderes Gerät:** Bei aktiver Supabase-Spiegelung liegt der letzte
+   Stand in der Cloud. Öffnet man den **Master-Link auf einem anderen Gerät** (z. B. Handy),
+   fragt das Tool beim Start, ob der neuere Cloud-Stand übernommen werden soll – oder man tippt
+   jederzeit auf **„📱 Master übernehmen"**. So bereitet man am PC vor und steuert dann am Handy
+   weiter, ohne CSV/Datei zu übertragen.
 3. **Manuell:** Mit **💾 Stand sichern** jederzeit ein JSON-Backup ziehen und mit
    **↺ Stand laden** auf jedem Gerät wiederherstellen.
 
