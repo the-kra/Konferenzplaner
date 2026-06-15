@@ -196,11 +196,11 @@ tbody tr.mine td:nth-child(3)::after{content:" ★";color:var(--mine)}
 #beamerView>.beamer-scope,#beamerView>.beamer-art{z-index:0;position:absolute}
 /* Technik-Skizzen im Beamer (hinter den Karten) */
 .beamer-art{position:absolute;pointer-events:none;fill:none;stroke:#34507e;stroke-opacity:.28;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.ba-coil{top:62%;left:6%;width:190px;height:44px}
-.ba-gear{top:7%;right:3%;width:130px;height:130px;animation:spin 80s linear infinite}
+.ba-coil{top:48%;left:6%;width:190px;height:44px}
+.ba-gear{top:20%;right:5%;width:130px;height:130px;animation:spin 80s linear infinite}
 .ba-gear2{bottom:8%;right:9%;width:90px;height:90px;animation:spin 60s linear infinite reverse}
 .ba-chip{bottom:9%;left:3%;width:100px;height:100px}
-.ba-res{top:5%;left:4%;width:170px;height:42px}
+.ba-res{top:38%;left:4%;width:170px;height:42px}
 .ba-diode{bottom:30%;left:5%;width:150px;height:48px}
 .ba-trans{top:30%;right:5%;width:110px;height:110px}
 .ba-cap{top:54%;right:20%;width:110px;height:64px}
@@ -607,7 +607,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
       </div>
 
       <div class="row two">
-        <div><label for="startTime">Startzeit</label><input id="startTime" type="time" value="07:45"></div>
+        <div><label for="startTime">Startzeit</label><input id="startTime" type="time" value="13:00"></div>
         <div><label for="slotMinutes">Dauer/Konferenz (Min.)</label><input id="slotMinutes" type="number" min="5" max="180" value="15"></div>
       </div>
 
@@ -746,7 +746,7 @@ const DEPARTMENT_DEFAULTS = [
 ];
 
 const state = {
-  startTime:"07:45", slotMinutes:15, hideDone:false, showTeachers:false, teacherCode:"",
+  startTime:"13:00", slotMinutes:15, hideDone:false, showTeachers:false, teacherCode:"",
   departments: structuredClone(DEPARTMENT_DEFAULTS),
   conferences: [], revision:0
 };
@@ -786,7 +786,7 @@ function init(){
 function bindEvents(){
   dom.teacherInput.addEventListener("input",()=>{ state.teacherCode=dom.teacherInput.value.trim(); if(dom.bTeacherInput) dom.bTeacherInput.value=state.teacherCode; renderConferenceTable(); persistLocal(); });
   dom.bTeacherInput.addEventListener("input",()=>{ state.teacherCode=dom.bTeacherInput.value.trim(); renderBeamer(); });
-  dom.startTime.addEventListener("change",()=>{ state.startTime=dom.startTime.value||"07:45"; rebuildSchedule(); });
+  dom.startTime.addEventListener("change",()=>{ state.startTime=dom.startTime.value||"13:00"; rebuildSchedule(); });
   dom.slotMinutes.addEventListener("change",()=>{ const n=Number(dom.slotMinutes.value); state.slotMinutes=Number.isFinite(n)?Math.max(5,Math.min(180,n)):15; dom.slotMinutes.value=String(state.slotMinutes); rebuildSchedule(); });
   dom.excelInput.addEventListener("change",async()=>{
     const f=dom.excelInput.files?.[0]; if(!f) return;
@@ -1216,7 +1216,7 @@ function tickTimers(){
   const b=$("bElapsed");   if(b) b.textContent=txt;
 }
 function dateLong(){ return new Date().toLocaleDateString("de-AT",{weekday:"long",day:"2-digit",month:"long",year:"numeric"}); }
-function timeToToday(hhmm){ const [h,m]=String(hhmm).split(":").map(Number); const d=new Date(); d.setHours(Number.isFinite(h)?h:7,Number.isFinite(m)?m:45,0,0); return d; }
+function timeToToday(hhmm){ const [h,m]=String(hhmm).split(":").map(Number); const d=new Date(); d.setHours(Number.isFinite(h)?h:13,Number.isFinite(m)?m:0,0,0); return d; }
 function fmt(ts){ if(!ts) return "--:--"; return new Date(ts).toLocaleTimeString("de-AT",{hour:"2-digit",minute:"2-digit",hour12:false}); }
 function escapeHtml(t){ return String(t).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
 
