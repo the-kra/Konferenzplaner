@@ -20,7 +20,7 @@
   --brand:#0891b2;  /* feste Button-/Fokusfarbe (NICHT an Abteilung gekoppelt) */
 }
 *{box-sizing:border-box}
-html,body{margin:0;color:var(--ink);font-family:'Lexend',ui-sans-serif,system-ui,sans-serif;font-weight:400;background:transparent;min-height:100%;overflow-x:hidden;max-width:100%}
+html,body{margin:0;color:var(--ink);font-family:'Lexend',ui-sans-serif,system-ui,sans-serif;font-weight:400;background:transparent;min-height:100%;overflow-x:clip;max-width:100%}
 .bg{position:fixed;inset:0;z-index:-2;overflow:hidden;
   background:
     repeating-linear-gradient(0deg,  transparent 0 43px, rgba(86,108,150,.05) 43px 44px),
@@ -196,8 +196,13 @@ tbody tr.mine td:nth-child(3)::after{content:" ★";color:var(--mine)}
 /* Technik-Skizzen im Beamer (hinter den Karten) */
 .beamer-art{position:absolute;pointer-events:none;fill:none;stroke:#34507e;stroke-opacity:.2;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ba-gear{top:7%;right:3%;width:130px;height:130px;animation:spin 80s linear infinite}
+.ba-gear2{bottom:8%;right:9%;width:90px;height:90px;animation:spin 60s linear infinite reverse}
 .ba-chip{bottom:9%;left:3%;width:100px;height:100px}
 .ba-res{top:5%;left:4%;width:170px;height:42px}
+.ba-diode{bottom:30%;left:5%;width:150px;height:48px}
+.ba-trans{top:30%;right:5%;width:110px;height:110px}
+.ba-cap{top:54%;right:20%;width:110px;height:64px}
+.ba-arm{bottom:6%;left:24%;width:140px;height:140px}
 @media(prefers-reduced-motion:reduce){.beamer-scope{animation:none}.ba-gear{animation:none}}
 @media(max-width:760px){.beamer-art{display:none}}
 #beamerView.on{display:flex}
@@ -314,7 +319,8 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   /* Beamer/Anzeige: GANZE Ansicht scrollt (kein Zoom-Out nötig), Kopf stapeln */
   #beamerView{padding:12px 12px 20px;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .beamer-scope{display:none}                 /* am Handy aus, hält es ruhig */
-  .beamer-top{flex-wrap:wrap;gap:10px 14px;padding-right:0}
+  .beamer-top{flex-wrap:wrap;gap:10px 14px;padding-right:0;position:sticky;top:0;z-index:6;margin:-12px -12px 0;padding:12px;border-radius:0 0 18px 18px;
+    background:rgba(245,248,252,.78);backdrop-filter:blur(12px) saturate(1.3);-webkit-backdrop-filter:blur(12px) saturate(1.3)}
   .beamer-top .logo-badge svg{height:46px}
   .beamer-top .btitle{font-size:19px;flex:1 1 auto;margin-right:0}
   .beamer-top .btitle small{font-size:11px}
@@ -418,6 +424,25 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   </svg>
   <svg class="beamer-art ba-res" viewBox="0 0 200 48" aria-hidden="true">
     <path d="M6,24 H56 l8,-14 l14,28 l14,-28 l14,28 l8,-14 H194"/>
+  </svg>
+  <svg class="beamer-art ba-gear2" viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="24"/><circle cx="50" cy="50" r="9"/>
+    <line x1="74" y1="50" x2="82" y2="50"/><line x1="67" y1="67" x2="72.7" y2="72.7"/><line x1="50" y1="74" x2="50" y2="82"/><line x1="33" y1="67" x2="27.3" y2="72.7"/>
+    <line x1="26" y1="50" x2="18" y2="50"/><line x1="33" y1="33" x2="27.3" y2="27.3"/><line x1="50" y1="26" x2="50" y2="18"/><line x1="67" y1="33" x2="72.7" y2="27.3"/>
+  </svg>
+  <svg class="beamer-art ba-diode" viewBox="0 0 170 54" aria-hidden="true">
+    <path d="M6,27 H64"/><path d="M64,10 L64,44 L98,27 Z"/><line x1="98" y1="10" x2="98" y2="44"/><path d="M98,27 H164"/>
+  </svg>
+  <svg class="beamer-art ba-trans" viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="30"/><line x1="20" y1="50" x2="40" y2="50"/><line x1="40" y1="34" x2="40" y2="66"/>
+    <line x1="40" y1="42" x2="70" y2="26"/><line x1="40" y1="58" x2="70" y2="74"/><line x1="70" y1="26" x2="70" y2="14"/><line x1="70" y1="74" x2="70" y2="86"/>
+  </svg>
+  <svg class="beamer-art ba-cap" viewBox="0 0 120 70" aria-hidden="true">
+    <line x1="6" y1="35" x2="50" y2="35"/><line x1="50" y1="10" x2="50" y2="60"/><line x1="70" y1="10" x2="70" y2="60"/><line x1="70" y1="35" x2="114" y2="35"/>
+  </svg>
+  <svg class="beamer-art ba-arm" viewBox="0 0 100 100" aria-hidden="true">
+    <rect x="34" y="84" width="32" height="10" rx="2"/><line x1="50" y1="84" x2="50" y2="58"/><circle cx="50" cy="58" r="5"/>
+    <line x1="50" y1="58" x2="78" y2="40"/><circle cx="78" cy="40" r="5"/><line x1="78" y1="40" x2="70" y2="20"/><line x1="70" y1="20" x2="62" y2="24"/><line x1="70" y1="20" x2="80" y2="18"/>
   </svg>
   <div class="beamer-top">
     <span class="logo-badge" id="bLogo"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 432.46 202.88" class="htl-logo-anim" role="img" aria-label="HTL1 Klagenfurt">
@@ -582,7 +607,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
         <input id="excelInput" type="file" accept=".csv,.xlsx,.xls,text/csv,text/comma-separated-values,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream">
         <button id="loadDemoBtn" class="ghost" type="button">Demo-Daten</button>
         <button id="clearBtn" class="ghost" type="button" title="Alle Konferenzen entfernen (leere Liste)">Leeren</button>
-        <button id="rebuildBtn" type="button">Plan aufbauen</button>
+        <button id="rebuildBtn" type="button" title="Reihenfolge (Abteilung 1–4, Klasse alphabetisch) und geplante Zeiten neu berechnen – z. B. nach „Vorverlegen“">Plan zurücksetzen</button>
         <button id="exportBtn" class="ghost" type="button" title="Aktuellen Stand als Datei sichern">Stand sichern</button>
         <label class="file-btn" id="importLabel" for="importInput" title="Gesicherten Stand laden">Stand laden</label>
         <input id="importInput" type="file" accept=".json">

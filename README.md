@@ -16,8 +16,12 @@ Design & Technik sind bewusst an das Schwesterprojekt
   Mechatronik (grün), Abendschule (dunkelblau). Farben und Startnummer (1–4) frei einstellbar.
 - **Chronologische Steuerung** – Abteilungen in Reihenfolge der Startnummer,
   Klassen innerhalb alphabetisch. Startzeit + Dauer je Konferenz frei wählbar.
-- **Live-Steuerung** (Master) – pro Konferenz **Start**, **Fertig**, **Vorverlegen**;
-  dazu „Aktuelle fertig" / „Nächste starten".
+  Der Plan wird beim Import/Hinzufügen/Ändern **automatisch** aufgebaut.
+- **„Plan zurücksetzen"** – sortiert die Liste wieder nach Abteilung (1–4) + Klasse
+  und vergibt die geplanten Zeiten ab der Startzeit neu. Nützlich z. B. nachdem man
+  per **„Vorverlegen"** manuell umsortiert hat. (Löscht **keine** Daten – dafür ist „Leeren".)
+- **Live-Steuerung** (Main) – pro Konferenz **Start**, **Fertig**, **Vorverlegen**;
+  dazu „Aktuelle fertig" / „Nächste starten". Die tatsächlichen Uhrzeiten entstehen erst hier.
 - **Klassen verwalten** – per **+ Hinzufügen** neue Klasse anlegen, per **✕** entfernen.
 - **Klassenvorstand (KV)** – wird importiert, in der Liste angezeigt und ist pro Klasse
   direkt in der Tabelle **editierbar** (Kürzel-Feld). Nur Klassen mit KV werden importiert.
@@ -42,7 +46,7 @@ Design & Technik sind bewusst an das Schwesterprojekt
 
 1. `index.html` im Browser öffnen.
 2. **Excel/CSV laden** (WebUntis-Export) oder **Demo-Daten** klicken.
-3. Abteilungs-Reihenfolge/Farben & Startzeit prüfen → **Plan aufbauen**.
+3. Abteilungs-Reihenfolge/Farben & Startzeit prüfen (der Plan baut sich dabei automatisch auf).
 4. Am Konferenztag: per **Start/Fertig** durchsteuern. **🖥 Beamer-Ansicht** für die Projektion.
 
 Ohne weitere Konfiguration läuft alles lokal auf einem Gerät (Tabs im selben Browser
@@ -62,7 +66,7 @@ Lehrer-Tabelle live aus den Stundenplänen auf).
 4. Warten, bis in der Konsole **„✓ Fertig!"** steht (scannt Woche für Woche, dauert etwas).
 5. `untisCSV()` in die Konsole tippen → **Enter** → die Datei
    **`webuntis_klassen_lehrer_kv_SS.csv`** wird heruntergeladen.
-6. Im Konferenztool (Master) auf **📄 Excel/CSV laden** → diese CSV auswählen → **Plan aufbauen**.
+6. Im Konferenztool (Main) auf **CSV laden** → diese CSV auswählen (der Plan wird automatisch aufgebaut).
 
 Die CSV hat die Spalten:
 
