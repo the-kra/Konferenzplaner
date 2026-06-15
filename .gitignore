@@ -14,7 +14,8 @@
 !tools/
 tools/*
 !tools/untis-export.js
-!tools/beispiel_klassen_lehrer.csv   # anonymisierte BEISPIEL-Daten (keine echten Personen)
+# anonymisierte BEISPIEL-Daten (keine echten Personen):
+!tools/beispiel_klassen_lehrer.csv
 
 # ------------------------------------------------------------
 # Bewusst NICHT im Repo (lokale Daten / Müll):
