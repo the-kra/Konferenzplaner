@@ -1327,7 +1327,7 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
   const OWNER_TIMEOUT = 9000;     // ms ohne Heartbeat -> Owner gilt als weg
   let amOwner = false;            // wird durch initOwnership() korrekt gesetzt
   let claimTs = 0;
-  window.__kfPullCloud = ()=>refetchAndClaim();   // Button „📱 Master übernehmen"
+  window.__kfPullCloud = ()=>refetchAndClaim();   // Button "Master uebernehmen"
 
   let sessionActive=false, sessionDate=null, lastSent="";
   const panel=document.createElement("div"); panel.id="livePanel"; panel.classList.add("show");
