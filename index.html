@@ -415,6 +415,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
       </div>
 
       <div class="button-row">
+        <button id="cloudLoadBtn" class="small" type="button" title="Den vom PC vorbereiteten Stand aus der Cloud auf dieses Gerät holen und hier weitersteuern">📱 Master übernehmen</button>
         <button id="exportBtn" class="ghost small" type="button" title="Aktuellen Stand als Datei sichern">💾 Stand sichern</button>
         <label class="file-btn small" for="importInput" title="Gesicherten Stand laden">↺ Stand laden</label>
         <input id="importInput" type="file" accept=".json">
@@ -551,7 +552,7 @@ const $ = id => document.getElementById(id);
 const dom = {};
 ["teacherInput","startTime","slotMinutes","deptConfig","excelInput","loadDemoBtn","rebuildBtn","hideDone",
  "conferenceBody","liveNow","liveNext","finishCurrentBtn","startNextBtn","clockTime","clockDate","syncHint",
- "addDept","addClass","addKv","addTeachers","addBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","showTeachers","bQRWrap","bQR",
+ "addDept","addClass","addKv","addTeachers","addBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","cloudLoadBtn","showTeachers","bQRWrap","bQR",
  "beamerView","bClose","bCurrent","bNext","bList","bDate","bClockTime","ruheView","bTeacher","bTeacherInput"].forEach(k=>dom[k]=$(k));
 
 let clockTimer=null;
@@ -615,6 +616,7 @@ function bindEvents(){
 
   dom.exportBtn.addEventListener("click",exportState);
   dom.importInput.addEventListener("change",async()=>{ const f=dom.importInput.files?.[0]; if(f) await importStateFile(f); dom.importInput.value=""; });
+  dom.cloudLoadBtn.addEventListener("click",()=>{ if(window.__kfPullCloud) window.__kfPullCloud(); else alert("Cloud nicht aktiv.\n\nDazu den Master als Live-Link öffnen:\n…?mode=master&key=…"); });
 
   dom.openBeamerBtn.addEventListener("click",()=>openBeamer(true));
   dom.bClose.addEventListener("click",()=>openBeamer(false));
@@ -666,7 +668,7 @@ function renderAll(){
 function applyRoleUi(){
   const master=isMaster();
   dom.rolePill.textContent = master?"Master":(ROLE==="locked"?"Gesperrt":"Anzeige");
-  [dom.finishCurrentBtn,dom.startNextBtn,dom.addBtn,dom.loadDemoBtn,dom.rebuildBtn].forEach(b=>b.disabled=!master);
+  [dom.finishCurrentBtn,dom.startNextBtn,dom.addBtn,dom.loadDemoBtn,dom.rebuildBtn,dom.cloudLoadBtn].forEach(b=>b.disabled=!master);
   [dom.startTime,dom.slotMinutes,dom.addClass,dom.addKv,dom.addTeachers,dom.addDept,dom.excelInput,dom.importInput,dom.hideDone,dom.showTeachers].forEach(i=>i.disabled=!master);
   // Teacher-Filter bleibt für ALLE nutzbar (Lehrer/Schüler an Anzeige-Geräten); Export ebenso.
   dom.teacherInput.disabled=false;
@@ -1128,12 +1130,24 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
       const {data}=await SB.from("live_state").select("payload").eq("id",ROW_ID).maybeSingle();
       const pl=data&&data.payload&&data.payload.snapshot;
       if(pl && (pl.revision||0) > (window.__kfCurrentRevision?window.__kfCurrentRevision():0)){
-        if(confirm("In der Cloud liegt ein neuerer Konferenz-Stand (vermutlich vom vorherigen Master-Gerät).\n\nDiesen Stand übernehmen?")){
+        if(confirm("In der Cloud liegt ein neuerer Konferenz-Stand (vom PC/vorherigen Master).\n\nHier übernehmen und weitersteuern?")){
           window.__kfRestoreSnapshot(pl);
         }
       }
     }catch(e){}
   })();
+
+  // Button „📱 Master übernehmen": holt den aktuellen Stand (vom PC) aus der Cloud auf dieses Gerät.
+  window.__kfPullCloud = async ()=>{
+    try{
+      const {data}=await SB.from("live_state").select("payload").eq("id",ROW_ID).maybeSingle();
+      const pl=data&&data.payload&&data.payload.snapshot;
+      if(!pl){ alert("In der Cloud ist noch kein Stand gespeichert.\n\nZuerst am PC den Plan laden (und „Konferenztag starten“)."); return; }
+      if(confirm("Aktuellen Stand vom PC übernehmen und ab jetzt hier steuern?\n\nDer lokale Stand auf diesem Gerät wird ersetzt.")){
+        window.__kfRestoreSnapshot(pl);
+      }
+    }catch(e){ alert("Konnte den Cloud-Stand nicht laden: "+e.message); }
+  };
 
   let sessionActive=false, sessionDate=null, lastSent="";
   const panel=document.createElement("div"); panel.id="livePanel"; panel.classList.add("show");
