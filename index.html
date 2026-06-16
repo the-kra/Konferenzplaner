@@ -103,6 +103,8 @@ input,select{width:100%;min-width:0;font-family:inherit;font-size:14px;color:var
 .row.two>div{min-width:0}
 /* Einrichtung ein-/ausklappen (Burger) – nur am Handy sichtbar */
 .collapse-btn{display:none;align-items:center;justify-content:center;width:36px;height:36px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.7);color:var(--ink);font-size:16px;cursor:pointer}
+.add-toggle{margin-left:8px;flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 13px;border-radius:11px;border:none;background:var(--brand);color:#fff;cursor:pointer}
+.add-toggle:hover{filter:brightness(1.06)}
 /* Startzeit + Dauer einheitlich: zentriert, gleiche Höhe, ohne Spinner-Pfeile */
 #startTime,#slotMinutes{text-align:center;height:42px;appearance:textfield;-moz-appearance:textfield}
 #slotMinutes::-webkit-inner-spin-button,#slotMinutes::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
@@ -188,7 +190,7 @@ tbody tr.mine td:nth-child(3)::after{content:" ★";color:var(--mine)}
 .actions{display:flex;gap:6px}
 .kv-input{width:74px;padding:5px 7px;font-size:12.5px;text-transform:uppercase;border-radius:7px}
 .add-form{display:grid;grid-template-columns:150px 1fr 110px 1fr auto;gap:9px;margin-bottom:14px;align-items:end}
-@media(max-width:760px){.add-form{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.add-form{grid-template-columns:1fr}.row.two{grid-template-columns:1fr}}
 
 /* ---- Beamer / Anzeige Vollbild ---- */
 #beamerView{position:fixed;inset:0;z-index:9000;display:none;flex-direction:column;padding:3vh 4vw;gap:2.4vh;color:var(--ink);overflow:hidden;
@@ -603,7 +605,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 </svg></span>
     <div class="title-stack">
       <h1>Klassenkonferenz-Planung</h1>
-      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.6-b4</span></p>
+      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.6-b5</span></p>
     </div>
     <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
     <div class="clock">
@@ -660,8 +662,8 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
       </section>
 
       <section class="panel full">
-        <h2>Konferenzliste <span class="pill" id="countPill">0</span></h2>
-        <div class="add-form" id="addForm">
+        <h2>Konferenzliste <span class="pill" id="countPill">0</span><button class="add-toggle" id="addToggle" type="button" title="Klasse hinzufügen">+ Klasse</button></h2>
+        <div class="add-form" id="addForm" hidden>
           <div><label>Abteilung</label><select id="addDept"></select></div>
           <div><label>Klasse</label><input id="addClass" placeholder="z. B. 1AHET"></div>
           <div><label>KV (Kürzel)</label><input id="addKv" placeholder="KRA" maxlength="12"></div>
@@ -856,11 +858,18 @@ function bindEvents(){
   const cp=$("controlsPanel"), ct=$("ctrlToggle"), ch=cp&&cp.querySelector("h2");
   if(ct&&cp){
     const sync=()=>{ ct.textContent=cp.classList.contains("collapsed")?"▸":"▾"; };
-    const toggle=e=>{ if(e.target.closest("input,select,.pill")) return; cp.classList.toggle("collapsed"); sync(); };
-    ct.addEventListener("click",toggle);
-    if(ch) ch.addEventListener("click",e=>{ if(matchMedia("(max-width:760px)").matches) toggle(e); });
+    const doToggle=()=>{ cp.classList.toggle("collapsed"); sync(); };
+    ct.addEventListener("click",e=>{ e.stopPropagation(); doToggle(); });   // Pfeil-Button toggelt direkt
+    if(ch) ch.addEventListener("click",e=>{ if(e.target.closest("input,select,.pill,button")) return; if(matchMedia("(max-width:760px)").matches) doToggle(); });
     try{ if(matchMedia("(max-width:760px)").matches) cp.classList.add("collapsed"); }catch(e){}
     sync();
+  }
+
+  // "Klasse hinzufügen"-Formular hinter "+"-Button einklappen (Standard: zu)
+  const af=$("addForm"), atg=$("addToggle");
+  if(af&&atg){
+    af.hidden=true;
+    atg.addEventListener("click",()=>{ if(!canControl())return; af.hidden=!af.hidden; if(!af.hidden && dom.addClass) dom.addClass.focus(); });
   }
 }
 
