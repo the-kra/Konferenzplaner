@@ -94,7 +94,10 @@ html,body{margin:0;color:var(--ink);font-family:'Lexend',ui-sans-serif,system-ui
 .panel h2 .pill.active{color:#06201c;background:color-mix(in srgb,var(--good) 26%,#fff)}
 .panel h2 .pill.active::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--good);margin-right:6px;vertical-align:1px}
 label{display:block;font-size:12px;color:var(--muted);font-weight:500;margin:0 0 5px}
-input,select{width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:#fbfcfe;border:1px solid var(--line);border-radius:10px;padding:9px 11px;outline:none}
+input,select{width:100%;min-width:0;font-family:inherit;font-size:14px;color:var(--ink);background:#fbfcfe;border:1px solid var(--line);border-radius:10px;padding:9px 11px;outline:none}
+.row.two>div{min-width:0}
+/* Einrichtung ein-/ausklappen (Burger) – nur am Handy sichtbar */
+.collapse-btn{display:none;align-items:center;justify-content:center;width:36px;height:36px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.7);color:var(--ink);font-size:16px;cursor:pointer}
 /* Startzeit + Dauer einheitlich: zentriert, gleiche Höhe, ohne Spinner-Pfeile */
 #startTime,#slotMinutes{text-align:center;height:42px;appearance:textfield;-moz-appearance:textfield}
 #slotMinutes::-webkit-inner-spin-button,#slotMinutes::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
@@ -319,6 +322,10 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   /* Master-Steuerleiste nur am Handy & nur als Master */
   body:not(.anzeige) .mobilebar{display:flex}
   body:not(.anzeige) .wrap{padding-bottom:96px}
+  /* Einrichtung am Handy einklappbar (Burger) – Live-Bedienung läuft über die Footer-Leiste */
+  .collapse-btn{display:inline-flex}
+  #controlsPanel.collapsed #ctrlBody{display:none}
+  #controlsPanel.collapsed{padding-bottom:16px}
   /* Startzeit/Dauer einheitlich zentriert ausrichten */
   #startTime,#slotMinutes{text-align:center}
 
@@ -598,8 +605,9 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   </header>
 
   <main class="layout">
-    <section class="panel controls">
-      <h2>Steuerung <span class="pill" id="rolePill">Main</span></h2>
+    <section class="panel controls" id="controlsPanel">
+      <h2>Steuerung <span class="pill" id="rolePill">Main</span><button class="collapse-btn" id="ctrlToggle" type="button" aria-label="Einrichtung ein-/ausklappen">⚙</button></h2>
+      <div id="ctrlBody">
 
       <div class="row">
         <label for="teacherInput">Kürzel oder Nachname (eigene Klassen hervorheben)</label>
@@ -629,6 +637,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
       <label class="inline"><input type="checkbox" id="hideDone"> Fertige Konferenzen ausblenden</label>
       <label class="inline"><input type="checkbox" id="showTeachers"> Lehrer anzeigen &amp; in Filter einbeziehen</label>
       <p class="hint" id="syncHint">—</p>
+      </div>
     </section>
 
     <div style="display:flex;flex-direction:column;gap:20px">
@@ -834,6 +843,13 @@ function bindEvents(){
   $("mFinish").addEventListener("click",()=>{ if(!isMaster())return; const r=getRunning(); if(r) finishConference(r.id); });
   $("mNext").addEventListener("click",()=>{ if(!isMaster())return; const n=getNextWaiting(); if(n) startConference(n.id); });
   $("mBeamer").addEventListener("click",()=>openBeamer(true));
+
+  // Einrichtung ein-/ausklappen (Handy); standardmäßig am Handy eingeklappt
+  const cp=$("controlsPanel"), ct=$("ctrlToggle");
+  if(ct&&cp){
+    ct.addEventListener("click",()=>{ cp.classList.toggle("collapsed"); ct.textContent=cp.classList.contains("collapsed")?"⚙":"✕"; });
+    try{ if(matchMedia("(max-width:760px)").matches) cp.classList.add("collapsed"); }catch(e){}
+  }
 }
 
 /* ---------------- Abteilungs-Konfig ---------------- */
