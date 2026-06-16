@@ -311,6 +311,10 @@ body.anzeige .wrap{display:none!important}
 .eta-cell .eta-delta{margin-left:5px;font-size:11px;font-weight:700;border-radius:6px;padding:1px 5px;line-height:1.5}
 .eta-cell .eta-delta.late{color:#b42318;background:rgba(214,52,32,.12)}
 .eta-cell .eta-delta.early{color:#177245;background:rgba(23,114,69,.12)}
+/* ETA-Zeile in der Beamer-Karte „Als Nächstes" */
+.bcard-eta{margin-top:10px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.bcard-eta .bce-lbl{font-size:clamp(10px,1.2vw,14px);letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.bcard-eta .bce-time{font-family:"DSEG7 Classic",ui-monospace,monospace;font-weight:700;font-size:clamp(22px,3.2vw,40px);color:var(--accent);letter-spacing:1px}
 
 /* ---- Live-Timer (mitlaufende Dauer der aktuellen Konferenz) ---- */
 .elapsed{font-weight:700;color:var(--accent)}
@@ -663,7 +667,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 </svg></span>
     <div class="title-stack">
       <h1>Klassenkonferenz-Planung</h1>
-      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.11-b15</span></p>
+      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.12-b16</span></p>
     </div>
     <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
     <div class="clock">
@@ -1244,11 +1248,13 @@ function actionsHtml(c,master){
 
 function renderLiveCards(){
   const r=getRunning(), n=getNextWaiting();
+  const etas=computeEtas();
+  const nEta = n ? fmt((etas[n.id]&&etas[n.id].eta!=null)?etas[n.id].eta:n.plannedStart) : "";
   dom.liveNow.innerHTML = r
     ? `<span class="live-tag">Aktuell</span><strong>${escapeHtml(r.className)} · ${escapeHtml(getDept(r.departmentKey).label)}</strong><small>${escapeHtml(r.kv||"—")} · seit ${fmt(r.actualStart)} · <span id="nowElapsed" class="elapsed"></span></small>`
     : `<span class="live-tag">Aktuell</span><strong>Noch keine Konferenz aktiv</strong><small>—</small>`;
   dom.liveNext.innerHTML = n
-    ? `<span class="live-tag">Als Nächstes</span><strong>${escapeHtml(n.className)} · ${escapeHtml(getDept(n.departmentKey).label)}</strong><small>Plan ${fmt(n.plannedStart)} · ${escapeHtml(n.kv||"—")}</small>`
+    ? `<span class="live-tag">Als Nächstes</span><strong>${escapeHtml(n.className)} · ${escapeHtml(getDept(n.departmentKey).label)}</strong><small>vorauss. ≈ ${nEta} · ${escapeHtml(n.kv||"—")}</small>`
     : `<span class="live-tag">Als Nächstes</span><strong>Keine offene Konferenz</strong><small>—</small>`;
   updateLiveControls(r,n);
   tickTimers();
@@ -1284,26 +1290,45 @@ function ensureBeamerQR(){
   const url=location.origin+location.pathname+"?mode=anzeige";
   try{ if(window.QRCode){ new QRCode(dom.bQR,{text:url,width:150,height:150,correctLevel:QRCode.CorrectLevel.M}); dom.bQR.dataset.done="1"; } }catch(e){}
 }
+// Beamer-/Lehrer-Ansicht zeigt immer die voraussichtliche Zeit (ETA): wartend = Schätzung ≈,
+// laufend/fertig = echte Startzeit.
+function bTime(c,m){
+  if(c.status==="running"||c.status==="done") return fmt(c.actualStart||c.plannedStart);
+  return "≈ "+fmt((m&&m.eta!=null)?m.eta:c.plannedStart);
+}
 function renderBeamer(){
   const r=getRunning(), n=getNextWaiting(), tc=state.teacherCode;
+  const etas=computeEtas();
+  const nEta = n ? fmt((etas[n.id]&&etas[n.id].eta!=null)?etas[n.id].eta:n.plannedStart) : "";
   paintBCard(dom.bCurrent,r,"Jetzt in Konferenz");
-  paintBCard(dom.bNext,n,"Als Nächstes");
+  paintBCard(dom.bNext,n,"Als Nächstes",nEta);
   const rows=state.conferences.filter(c=>!c.hidden && !(state.hideDone&&c.status==="done"));
   dom.bList.innerHTML=rows.map((c,i)=>{
     const d=getDept(c.departmentKey);
     const cls=["brow"]; if(r&&r.id===c.id)cls.push("current"); if(c.status==="done")cls.push("done"); if(matchesQuery(c,tc))cls.push("mine");
-    return `<div class="${cls.join(" ")}"><span class="bdot" style="background:${d.color}"></span><span class="btime">${fmt(c.plannedStart)}</span><strong class="bclass">${escapeHtml(c.className)}</strong><span class="bkv">${escapeHtml(c.kv||"—")}</span><span class="bteach">${escapeHtml(teacherKuerzel(c))}</span><span class="bstat">${statusBadge(c.status)}</span></div>`;
+    return `<div class="${cls.join(" ")}"><span class="bdot" style="background:${d.color}"></span><span class="btime" data-beta="${c.id}">${bTime(c,etas[c.id])}</span><strong class="bclass">${escapeHtml(c.className)}</strong><span class="bkv">${escapeHtml(c.kv||"—")}</span><span class="bteach">${escapeHtml(teacherKuerzel(c))}</span><span class="bstat">${statusBadge(c.status)}</span></div>`;
   }).join("") || `<div class="bempty">Keine Konferenzen geladen</div>`;
   tickTimers();
 }
-function paintBCard(el,c,label){
+// ETA in der Beamer-Ansicht im Sekundentakt mitlaufen lassen (Überziehen verschiebt die Schätzung)
+function refreshBeamerEtas(){
+  if(!dom.beamerView || !dom.beamerView.classList.contains("on")) return;
+  const etas=computeEtas();
+  if(dom.bList) dom.bList.querySelectorAll("[data-beta]").forEach(span=>{
+    const c=byId(span.getAttribute("data-beta")); if(c) span.textContent=bTime(c,etas[c.id]);
+  });
+  const ne=document.getElementById("bNextEta"), n=getNextWaiting();
+  if(ne&&n){ const m=etas[n.id]; ne.textContent=fmt((m&&m.eta!=null)?m.eta:n.plannedStart); }
+}
+function paintBCard(el,c,label,etaText){
   if(!c){ el.innerHTML=`<div class="blabel">${label}</div><div class="bname" style="color:#9aa6b6">—</div>`; el.style.borderColor=""; return; }
   const d=getDept(c.departmentKey);
   const timer = (c.status==="running"&&c.actualStart) ? `<div class="btimer">läuft <span id="bElapsed">00:00</span></div>` : "";
+  const eta = (etaText && c.status==="waiting") ? `<div class="bcard-eta"><span class="bce-lbl">vorauss.</span><span class="bce-time" id="bNextEta">${etaText}</span></div>` : "";
   el.innerHTML=`<div class="blabel">${label}</div><div class="bname">${escapeHtml(c.className)}</div>`
     +`<div class="bsub">${escapeHtml(c.kv||"—")}${c.kvName?" ("+escapeHtml(c.kvName)+")":""}</div>`
     +`<span class="bdept" style="background:${d.color}">${escapeHtml(d.label)}</span>`
-    +timer;
+    +timer+eta;
 }
 
 /* ---------------- Zeitplan & Sortierung ---------------- */
@@ -1563,7 +1588,8 @@ function tickTimers(){
   const txt = (r&&r.actualStart) ? fmtDur(Date.now()-r.actualStart) : "";
   const a=$("nowElapsed"); if(a) a.textContent=txt;
   const b=$("bElapsed");   if(b) b.textContent=txt;
-  refreshEtas(); // ETA mitlaufen lassen (Überziehen der laufenden Konferenz verschiebt die Schätzung)
+  refreshEtas();        // Tabelle (Master): ETA mitlaufen lassen
+  refreshBeamerEtas();  // Beamer/Lehrer-Ansicht: ETA mitlaufen lassen
 }
 function dateLong(){ return new Date().toLocaleDateString("de-AT",{weekday:"long",day:"2-digit",month:"long",year:"numeric"}); }
 function timeToToday(hhmm){ const [h,m]=String(hhmm).split(":").map(Number); const d=new Date(); d.setHours(Number.isFinite(h)?h:13,Number.isFinite(m)?m:0,0,0); return d; }
