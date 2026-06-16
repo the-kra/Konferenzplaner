@@ -55,7 +55,7 @@ html,body{margin:0;color:var(--ink);font-family:'Lexend',ui-sans-serif,system-ui
 .scope-wave{fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linecap:round;opacity:.6;transition:stroke .5s}
 .scope-dot{fill:var(--accent);filter:drop-shadow(0 0 7px var(--accent));transition:fill .5s}
 @media(prefers-reduced-motion:reduce){.hi-gear,.hi-gear2{animation:none}}
-@media(max-width:760px){.hero-art{display:none}.hero-scope{top:auto;bottom:16vh;opacity:.4}}
+@media(max-width:760px){.hero-art{stroke-opacity:.18}.hi-lowpass,.hi-arm{display:none}.hero-scope{top:auto;bottom:14vh;opacity:.4}}
 .wrap{max-width:1300px;margin:0 auto;padding:0 22px 90px;position:relative;z-index:1}
 
 /* ---- Kopf mit Logo + Uhr ---- */
@@ -216,7 +216,7 @@ tbody tr.mine td:nth-child(3)::after{content:" ★";color:var(--mine)}
 .ba-cap{top:54%;right:20%;width:110px;height:64px}
 .ba-arm{bottom:6%;left:24%;width:140px;height:140px}
 @media(prefers-reduced-motion:reduce){.beamer-scope{animation:none}.ba-gear{animation:none}}
-@media(max-width:760px){.beamer-art{display:none}}
+@media(max-width:760px){.beamer-art{stroke-opacity:.22}.ba-arm,.ba-cap{display:none}}
 #beamerView.on{display:flex}
 .beamer-top{display:flex;align-items:center;gap:24px;padding-right:160px}
 .beamer-top .logo-badge{background:transparent;border:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
@@ -330,6 +330,8 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   body:not(.anzeige) .mobilebar{display:flex}
   body:not(.anzeige) .wrap{padding-bottom:96px}
   /* Einrichtung am Handy einklappbar (Burger) – Live-Bedienung läuft über die Footer-Leiste */
+  /* Panels am Handy transparenter -> Blueprint/Technik scheint durch */
+  .panel{background:linear-gradient(155deg,rgba(255,255,255,.36),rgba(255,255,255,.18));backdrop-filter:blur(7px) saturate(1.4);-webkit-backdrop-filter:blur(7px) saturate(1.4)}
   .collapse-btn{display:inline-flex}
   #controlsPanel h2{cursor:pointer}
   #controlsPanel.collapsed #ctrlBody{display:none}
@@ -605,7 +607,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 </svg></span>
     <div class="title-stack">
       <h1>Klassenkonferenz-Planung</h1>
-      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.6-b5</span></p>
+      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.6-b6</span></p>
     </div>
     <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
     <div class="clock">
