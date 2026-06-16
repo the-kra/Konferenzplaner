@@ -409,6 +409,27 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   .beamer-teacher{position:static;margin:4px auto 8px;justify-content:center}
   .beamer-teacher input{flex:1;max-width:220px}
 }
+
+/* ---- WebUntis-Export-Modal ---- */
+.modal-overlay{position:fixed;inset:0;z-index:9100;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(20,30,50,.45);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.modal-overlay[hidden]{display:none}
+.modal-card{position:relative;width:min(520px,100%);max-height:90vh;overflow:auto;background:linear-gradient(155deg,rgba(255,255,255,.97),rgba(245,248,252,.97));border:1px solid var(--line);border-radius:20px;padding:22px 22px 18px;box-shadow:0 30px 80px -30px rgba(20,30,50,.6)}
+.modal-x{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:15px;cursor:pointer}
+.modal-card h3{margin:0 34px 6px 0;font-size:20px;font-weight:600}
+.modal-sub{color:var(--muted);font-size:12.5px;line-height:1.5;margin:0 0 16px}
+.modal-field{margin:0 0 16px}
+.modal-label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:7px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.seg-opt{padding:9px 17px;font-size:14px;font-weight:600;cursor:pointer;color:var(--muted);transition:background .15s,color .15s}
+.seg-opt+.seg-opt{border-left:1px solid var(--line)}
+.seg-opt input{position:absolute;opacity:0;width:0;height:0}
+.seg-opt.on{background:var(--brand);color:#fff}
+.modal-steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:11px;font-size:13.5px;line-height:1.45}
+.modal-steps b{font-weight:600}
+.btn-step{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;margin:1px 0;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:600;font-size:13px;cursor:pointer;color:var(--ink)}
+.btn-step:hover{border-color:var(--brand)}
+.btn-step.primary{background:var(--brand);color:#fff;border-color:transparent}
+.modal-hint{min-height:16px;margin:12px 0 0;font-size:12.5px;font-weight:600;color:var(--good)}
 </style>
 </head>
 <body>
@@ -642,7 +663,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 </svg></span>
     <div class="title-stack">
       <h1>Klassenkonferenz-Planung</h1>
-      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.10-b14</span></p>
+      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.11-b15</span></p>
     </div>
     <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
     <div class="clock">
@@ -672,6 +693,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
       <div class="btn-grid">
         <label class="file-btn cta" id="excelLabel" for="excelInput">CSV laden</label>
         <input id="excelInput" type="file" accept=".csv,.xlsx,.xls,text/csv,text/comma-separated-values,text/plain,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream">
+        <button id="untisBtn" class="btn-wide" type="button" title="Klassen, Lehrer & Klassenvorstände direkt aus WebUntis holen (Anleitung + Snippet zum Einfügen)"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg> Aus WebUntis holen</button>
         <button id="loadDemoBtn" class="ghost" type="button">Demo-Daten</button>
         <button id="clearBtn" class="ghost" type="button" title="Alle Konferenzen entfernen (leere Liste)">Leeren</button>
         <button id="rebuildBtn" type="button" title="Reihenfolge (Abteilung 1–4, Klasse alphabetisch) und geplante Zeiten neu berechnen – z. B. nach „Vorverlegen“">Plan zurücksetzen</button>
@@ -721,6 +743,159 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
     </div>
   </main>
 </div>
+
+<!-- WebUntis-Export-Assistent -->
+<div class="modal-overlay" id="untisModal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="untisTitle">
+    <button class="modal-x" id="untisClose" type="button" aria-label="Schließen">✕</button>
+    <h3 id="untisTitle">Aus WebUntis holen</h3>
+    <p class="modal-sub">Holt alle aktiven Klassen samt Lehrern und Klassenvorstand direkt aus WebUntis – ohne Sonderrechte. Browser dürfen aus Sicherheitsgründen kein Skript in WebUntis selbst starten, daher: <b>Snippet kopieren → in der WebUntis-Konsole einfügen</b>. Die CSV lädt danach automatisch herunter.</p>
+
+    <div class="modal-field">
+      <span class="modal-label">Welche Klassen exportieren?</span>
+      <div class="seg" id="untisScope">
+        <label class="seg-opt on"><input type="radio" name="untisScope" value="14" checked> Nur 1.–4.</label>
+        <label class="seg-opt"><input type="radio" name="untisScope" value="15"> Alle (inkl. 5.)</label>
+      </div>
+    </div>
+
+    <ol class="modal-steps">
+      <li><button class="btn-step" id="untisOpen" type="button">WebUntis öffnen ↗</button> und einloggen.</li>
+      <li>Dort <b>F12</b> drücken → Reiter <b>Konsole</b>.</li>
+      <li><button class="btn-step primary" id="untisCopy" type="button">Snippet kopieren</button> → in die Konsole einfügen (<b>Strg/Cmd + V</b>) → <b>Enter</b>.</li>
+      <li>Warten bis <b>„✓ Fertig!"</b> – die Datei <b>webuntis_klassen_lehrer_kv_SS.csv</b> wird automatisch gespeichert.</li>
+      <li>Hier auf <b>CSV laden</b> → diese Datei auswählen.</li>
+    </ol>
+    <p class="modal-hint" id="untisCopyHint"></p>
+  </div>
+</div>
+
+<!-- Parametrisiertes WebUntis-Snippet (Vorlage; __INCLUDE_5__ wird beim Kopieren gesetzt) -->
+<script type="text/plain" id="untisSnippet">/* HTL1 Konferenztool – WebUntis-Export. In WebUntis einloggen, F12 -> Konsole -> einfuegen -> Enter. Die CSV wird automatisch gespeichert. */
+(async () => {
+  const INCLUDE_5 = __INCLUDE_5__;   // true = inkl. 5. Klassen, false = nur 1.-4.
+  const BASE = location.origin + "/WebUntis";
+  const school = new URLSearchParams(location.search).get("school") || "htl1-klagenfurt";
+  const RPC_URL = BASE + "/jsonrpc.do?school=" + encodeURIComponent(school);
+
+  const SEM_START = 20260216;
+  const SEM_END = (() => { const d=new Date();
+    return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); })();
+
+  async function rpc(method, params = {}) {
+    const res = await fetch(RPC_URL, { method:"POST",
+      headers:{"Content-Type":"application/json"}, credentials:"include",
+      body: JSON.stringify({ id:"req", method, params, jsonrpc:"2.0" }) });
+    const json = await res.json();
+    if (json.error) throw new Error(method+": "+JSON.stringify(json.error));
+    return json.result;
+  }
+
+  function intToDate(i){const y=Math.floor(i/10000),m=Math.floor((i%10000)/100),d=i%100;return new Date(y,m-1,d);}
+  function dateToInt(dt){return dt.getFullYear()*10000+(dt.getMonth()+1)*100+dt.getDate();}
+  function buildWeeks(s,e){const w=[];let c=intToDate(s);const end=intToDate(e);
+    while(c<=end){const we=new Date(c);we.setDate(we.getDate()+6);
+      w.push([dateToInt(c),dateToInt(we>end?end:we)]);c.setDate(c.getDate()+7);}return w;}
+  const weeks = buildWeeks(SEM_START, SEM_END);
+
+  console.log("%cWebUntis Export | Schule: "+school+" | "+(INCLUDE_5?"inkl. 5.":"nur 1.-4."), "color:#0aa;font-weight:bold");
+
+  const deptRaw = await rpc("getDepartments");
+  const deptName = {}; deptRaw.forEach(d=>deptName[d.id]=d.longName||d.name);
+  function mapAbteilung(did){
+    if (did===3) return "Abendschule";
+    if (did===2||did===21) return "Elektrotechnik";
+    if (did===19) return "Mechatronik";
+    if (did===1||did===20||did===23) return "Maschinenbau";
+    return deptName[did] || ("Abt-ID "+did);
+  }
+
+  const teacherById = {};
+  function noteTeacher(t){
+    if (!t || t.id==null) return;
+    const kuerzel = (t.name||"").trim();
+    const name = (t.longname||t.longName||"").trim();
+    if (kuerzel === "---" || kuerzel === "") return;
+    if (!teacherById[t.id]) teacherById[t.id] = { kuerzel, name };
+    else { if (!teacherById[t.id].name && name) teacherById[t.id].name = name; }
+  }
+  function teacherLabel(id){
+    const t = teacherById[id];
+    if (!t) return "ID "+id;
+    return t.kuerzel + (t.name ? " ("+t.name+")" : "");
+  }
+
+  const klassenRaw = await rpc("getKlassen");
+  const klassen = klassenRaw.filter(k => k.active !== false && (INCLUDE_5 || !/^5/.test(k.name.trim())));
+  console.log("Klassen: "+klassenRaw.length+" gesamt -> "+klassen.length+" ("+(INCLUDE_5?"aktiv, inkl. 5.":"aktiv, ohne 5.")+") | Abteilungen: "+deptRaw.length);
+
+  const result = {}; let idx=0;
+  for (const k of klassen) {
+    idx++;
+    const entry = {
+      klasse: k.name, langname: k.longName||"",
+      abt: mapAbteilung(k.did),
+      teacher1: k.teacher1 || null,
+      teacher2: k.teacher2 || null,
+      lehrerIds: new Set(), aktiv:false,
+    };
+    for (const [ws,we] of weeks) {
+      try {
+        const tt = await rpc("getTimetable", { options:{
+          element:{id:k.id,type:1}, startDate:ws, endDate:we,
+          teacherFields:["id","name","longname"] }});
+        (tt||[]).forEach(lesson=>{
+          if (lesson.code === "cancelled") return;
+          entry.aktiv = true;
+          (lesson.te||[]).forEach(t=>{ noteTeacher(t);
+            if (t && t.id!=null && (t.name||"")!=="---") entry.lehrerIds.add(t.id); });
+        });
+      } catch(e){}
+      await new Promise(r=>setTimeout(r,60));
+    }
+    result[k.name]=entry;
+    if(idx%5===0||idx===klassen.length)
+      console.log("  ...verarbeitet: "+idx+"/"+klassen.length+"  (zuletzt: "+k.name+
+        " | "+entry.abt+" | "+entry.lehrerIds.size+" Lehrer)");
+  }
+
+  Object.values(result).forEach(e=>{
+    e.kv  = e.teacher1!=null ? teacherLabel(e.teacher1) : "";
+    e.kv2 = e.teacher2!=null ? teacherLabel(e.teacher2) : "";
+    e.lehrer = [...e.lehrerIds].map(teacherLabel).sort((a,b)=>a.localeCompare(b));
+  });
+
+  const aktive = Object.values(result).filter(e=>e.aktiv);
+  console.log("Aktive Klassen im Semester: "+aktive.length+" | erkannte Lehrer gesamt: "+Object.keys(teacherById).length);
+
+  const byDept={}; aktive.sort((a,b)=>a.klasse.localeCompare(b.klasse))
+    .forEach(e=>{(byDept[e.abt]=byDept[e.abt]||[]).push(e);});
+  const order=["Mechatronik","Elektrotechnik","Maschinenbau","Abendschule"];
+  const deps=Object.keys(byDept).sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
+
+  console.log("%c\n=== ERGEBNIS (aktive Klassen, "+(INCLUDE_5?"inkl. 5.":"ohne 5.")+") ===","color:#0a0;font-weight:bold");
+  deps.forEach(dep=>{ console.log("%c\n"+dep,"color:#06c;font-weight:bold;font-size:14px");
+    byDept[dep].forEach(e=>console.log("  "+e.klasse+"  [KV: "+(e.kv||"?")+"]  ("+e.lehrer.length+
+      " Lehrer) -> "+e.lehrer.join(", "))); });
+
+  let csv="Abteilung;Klasse;Langname;Klassenvorstand;StellvKV;Lehrer\n";
+  deps.forEach(dep=>byDept[dep].forEach(e=>{
+    const base=`"${e.abt}";"${e.klasse}";"${e.langname}";"${e.kv}";"${e.kv2}"`;
+    if(e.lehrer.length===0)csv+=base+`;""\n`; else e.lehrer.forEach(l=>csv+=base+`;"${l}"\n`); }));
+  const tv={}; aktive.forEach(e=>e.lehrer.forEach(l=>(tv[l]=tv[l]||new Set()).add(e.klasse)));
+  let csvT="Lehrer;Klassen;AnzahlKlassen\n";
+  Object.keys(tv).sort().forEach(l=>{const kl=[...tv[l]].sort();
+    csvT+=`"${l}";"${kl.join(", ")}";${kl.length}\n`;});
+
+  function dl(name,c){const b=new Blob(["﻿"+c],{type:"text/csv;charset=utf-8"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();}
+  window._untisData={byDept,result,aktive,deptName,teacherById,teacherView:tv,weeks};
+  window.untisCSV=()=>dl("webuntis_klassen_lehrer_kv_SS.csv",csv);
+  window.untisCSVTeacher=()=>dl("webuntis_lehrer_klassen_SS.csv",csvT);
+
+  try{ window.untisCSV(); console.log("%c\n⬇ CSV wird gespeichert: webuntis_klassen_lehrer_kv_SS.csv\n   (falls der Download blockiert wurde, in der Konsole erneut: untisCSV() )","color:#06c;font-weight:bold"); }catch(e){ console.warn("Download fehlgeschlagen – bitte untisCSV() ausfuehren.", e); }
+  console.log("%c\n✓ Fertig!","color:#0a0;font-weight:bold;font-size:14px");
+})();</script>
 
 <!-- Mobile Steuerleiste (nur am Handy & nur als Master sichtbar) -->
 <nav class="mobilebar" id="mobileBar">
@@ -819,11 +994,47 @@ const dom = {};
 ["teacherInput","startTime","slotMinutes","deptConfig","excelInput","loadDemoBtn","rebuildBtn","hideDone",
  "conferenceBody","liveNow","liveNext","finishCurrentBtn","startNextBtn","clockTime","clockDate","syncHint",
  "addDept","addClass","addKv","addTeachers","addBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","cloudLoadBtn","clearBtn","classDirBtn","letterDirBtn","excelLabel","showTeachers","bQRWrap","bQR",
+ "untisBtn","untisModal","untisClose","untisOpen","untisCopy","untisScope","untisCopyHint","untisSnippet",
  "beamerView","bClose","bCurrent","bNext","bList","bDate","bClockTime","ruheView","bTeacher","bTeacherInput"].forEach(k=>dom[k]=$(k));
 
 let clockTimer=null;
 
 init();
+
+/* WebUntis-Export-Assistent: Snippet (mit Klassen-Auswahl) in die Zwischenablage,
+   zum Einfügen in die WebUntis-Konsole. Auto-Download der CSV erledigt das Snippet selbst. */
+function bindUntisModal(){
+  const open =()=>{ if(!canControl()) return; dom.untisModal.hidden=false; dom.untisCopyHint.textContent=""; };
+  const close=()=>{ dom.untisModal.hidden=true; };
+  dom.untisBtn.addEventListener("click",open);
+  dom.untisClose.addEventListener("click",close);
+  dom.untisModal.addEventListener("click",e=>{ if(e.target===dom.untisModal) close(); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape" && !dom.untisModal.hidden) close(); });
+  dom.untisOpen.addEventListener("click",()=>{ window.open("https://htl1-klagenfurt.webuntis.com/","_blank","noopener"); });
+  dom.untisScope.addEventListener("click",e=>{
+    const opt=e.target.closest(".seg-opt"); if(!opt) return;
+    dom.untisScope.querySelectorAll(".seg-opt").forEach(o=>o.classList.remove("on"));
+    opt.classList.add("on");
+    const inp=opt.querySelector("input"); if(inp) inp.checked=true;
+  });
+  dom.untisCopy.addEventListener("click",async()=>{
+    const sel=dom.untisScope.querySelector("input:checked");
+    const incl5 = !!sel && sel.value==="15";
+    const code = dom.untisSnippet.textContent.replace("__INCLUDE_5__", incl5?"true":"false");
+    let msg = incl5 ? "✓ Snippet (inkl. 5. Klassen) kopiert – in der WebUntis-Konsole einfügen."
+                    : "✓ Snippet (nur 1.–4. Klassen) kopiert – in der WebUntis-Konsole einfügen.";
+    let okCopy=false;
+    try{ await navigator.clipboard.writeText(code); okCopy=true; }
+    catch(err){
+      const ta=document.createElement("textarea"); ta.value=code;
+      ta.style.cssText="position:fixed;top:0;left:0;opacity:0"; document.body.appendChild(ta); ta.focus(); ta.select();
+      try{ okCopy=document.execCommand("copy"); }catch(e2){}
+      ta.remove();
+    }
+    if(!okCopy) msg="⚠ Automatisches Kopieren ging nicht – Snippet aus tools/untis-export.js verwenden.";
+    dom.untisCopyHint.textContent=msg;
+  });
+}
 
 // WebKit/iOS wendet eingebettete data-URI-Schriften manchmal erst nach einem Repaint an
 // (DSEG7 „verschwindet" bei wackeligem Load). Schrift aktiv laden und danach neu zeichnen.
@@ -871,6 +1082,7 @@ function bindEvents(){
   dom.rebuildBtn.addEventListener("click",rebuildSchedule);
   dom.classDirBtn.addEventListener("click",()=>{ if(!canControl())return; state.classDir = state.classDir==="desc"?"asc":"desc"; rebuildSchedule(); });
   dom.letterDirBtn.addEventListener("click",()=>{ if(!canControl())return; state.letterDir = state.letterDir==="desc"?"asc":"desc"; rebuildSchedule(); });
+  bindUntisModal();
   dom.hideDone.addEventListener("change",()=>{ state.hideDone=dom.hideDone.checked; bumpRevision(); renderAll(); persistAndPublish(); });
   dom.showTeachers.addEventListener("change",()=>{ state.showTeachers=dom.showTeachers.checked; bumpRevision(); renderAll(); persistAndPublish(); });
   dom.finishCurrentBtn.addEventListener("click",()=>{ if(!isMaster())return; const r=getRunning(); if(r) finishConference(r.id); });
@@ -978,7 +1190,7 @@ function applyRoleUi(){
   dom.rolePill.classList.toggle("active", ROLE==="master" && !passiveMaster);
   // „Master übernehmen" bleibt auch für passiven Master klickbar:
   dom.cloudLoadBtn.disabled = ROLE!=="master";
-  [dom.finishCurrentBtn,dom.startNextBtn,dom.addBtn,dom.loadDemoBtn,dom.rebuildBtn,dom.clearBtn,dom.classDirBtn,dom.letterDirBtn].forEach(b=>b.disabled=!master);
+  [dom.finishCurrentBtn,dom.startNextBtn,dom.addBtn,dom.loadDemoBtn,dom.rebuildBtn,dom.clearBtn,dom.classDirBtn,dom.letterDirBtn,dom.untisBtn].forEach(b=>b.disabled=!master);
   [dom.startTime,dom.slotMinutes,dom.addClass,dom.addKv,dom.addTeachers,dom.addDept,dom.excelInput,dom.importInput,dom.hideDone,dom.showTeachers].forEach(i=>i.disabled=!master);
   // Teacher-Filter bleibt für ALLE nutzbar (Lehrer/Schüler an Anzeige-Geräten); Export ebenso.
   dom.teacherInput.disabled=false;

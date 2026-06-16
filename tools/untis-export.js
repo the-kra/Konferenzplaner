@@ -10,7 +10,7 @@
    - KV aus 'teacher1' (ID), aufgelöst über die selbstgebaute Lehrer-Tabelle
    - entfallene Stunden (code:"cancelled") werden ignoriert
    - Platzhalter-Lehrer "---" werden ignoriert
-   - nur aktive Klassen mit echtem Unterricht, 5. Klassen raus
+   - nur aktive Klassen mit echtem Unterricht; INCLUDE_5 steuert 5. Klassen (Default: raus)
    ----------------------------------------------------------------------------
    AUSFÜHREN: eingeloggt -> F12 -> Konsole -> einfügen -> Enter -> warten ->
               untisCSV() / untisCSVTeacher()
@@ -21,6 +21,7 @@
 ============================================================================ */
 
 (async () => {
+  const INCLUDE_5 = false;   // true = inkl. 5. Klassen, false = nur 1.-4.
   const BASE = location.origin + "/WebUntis";
   const school = new URLSearchParams(location.search).get("school") || "htl1-klagenfurt";
   const RPC_URL = BASE + "/jsonrpc.do?school=" + encodeURIComponent(school);
@@ -81,8 +82,8 @@
 
   // --- Klassen (aktiv, ohne 5.) ----------------------------------------------
   const klassenRaw = await rpc("getKlassen");
-  const klassen = klassenRaw.filter(k => k.active !== false && !/^5/.test(k.name.trim()));
-  console.log("Klassen: "+klassenRaw.length+" gesamt -> "+klassen.length+" (aktiv, ohne 5.) | Abteilungen: "+deptRaw.length);
+  const klassen = klassenRaw.filter(k => k.active !== false && (INCLUDE_5 || !/^5/.test(k.name.trim())));
+  console.log("Klassen: "+klassenRaw.length+" gesamt -> "+klassen.length+" ("+(INCLUDE_5?"aktiv, inkl. 5.":"aktiv, ohne 5.")+") | Abteilungen: "+deptRaw.length);
 
   // --- Scan: pro Klasse alle Wochen ------------------------------------------
   const result = {}; let idx=0;
@@ -152,6 +153,7 @@
   window.untisCSV=()=>dl("webuntis_klassen_lehrer_kv_SS.csv",csv);
   window.untisCSVTeacher=()=>dl("webuntis_lehrer_klassen_SS.csv",csvT);
 
+  try{ window.untisCSV(); console.log("%c\n⬇ CSV wird gespeichert: webuntis_klassen_lehrer_kv_SS.csv","color:#06c;font-weight:bold"); }catch(e){ console.warn("Download fehlgeschlagen – bitte untisCSV() ausfuehren.", e); }
   console.log("%c\n✓ Fertig!","color:#0a0;font-weight:bold;font-size:14px");
   console.log("  untisCSV()         -> Abteilung -> Klasse -> KV + Lehrer");
   console.log("  untisCSVTeacher()  -> Lehrer -> Klassen");

@@ -54,7 +54,14 @@ synchronisieren sich automatisch).
 
 ## Daten aus WebUntis holen (kompletter Ablauf)
 
-Das Skript [`tools/untis-export.js`](tools/untis-export.js) liest **alle aktiven Klassen
+**Einfachster Weg – Button im Tool:** Im Konferenztool (Main) auf **„Aus WebUntis holen"** klicken.
+Der Assistent lässt dich wählen, ob **nur 1.–4.** oder **alle inkl. 5. Klassen** exportiert werden,
+öffnet WebUntis und kopiert das passende Snippet in die Zwischenablage. Dort: **F12 → Konsole →
+einfügen (Strg/Cmd + V) → Enter**. Nach „✓ Fertig!" lädt die CSV **automatisch** herunter – diese
+dann hier über **CSV laden** auswählen. (Browser dürfen aus Sicherheitsgründen kein Skript in WebUntis
+selbst starten, daher der Zwischenschritt über die Konsole.)
+
+Manuell / unter der Haube: Das Skript [`tools/untis-export.js`](tools/untis-export.js) liest **alle aktiven Klassen
 samt Lehrern und Klassenvorstand** über das ganze Sommersemester aus WebUntis – ganz ohne
 Sonderrechte (es kommt ohne die gesperrte `getTeachers()`-Funktion aus und baut die
 Lehrer-Tabelle live aus den Stundenplänen auf).
