@@ -284,8 +284,11 @@ body.anzeige .wrap{display:none!important}
 #livePanel button,#livePanel input{cursor:auto}#livePanel button{cursor:pointer}
 #livePanel h4{margin:0 0 10px;font-size:14px;color:var(--ink);font-weight:600;display:flex;align-items:center;gap:8px;cursor:move;user-select:none}
 #livePanel h4 .lp-grip{color:var(--muted);font-size:13px;letter-spacing:1px}
-#livePanel .lp-dot{width:14px;height:14px;border-radius:50%;background:var(--bad);margin-left:auto;cursor:pointer}
-#livePanel.live .lp-dot{background:var(--good)}
+#livePanel .lp-state{margin-left:auto;font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--bad)}
+#livePanel.live .lp-state{color:var(--good)}
+#livePanel .lp-min{margin-left:8px;width:28px;height:28px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.65);color:var(--ink);font-size:13px;cursor:pointer}
+#livePanel .lp-min:hover{border-color:var(--brand)}
 #livePanel.min{width:auto;padding:9px 13px}
 #livePanel.min h4{margin:0}
 #livePanel.min .lp-main,#livePanel.min .lp-sub,#livePanel.min .lp-link,#livePanel.min #lpQR{display:none}
@@ -614,7 +617,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 </svg></span>
     <div class="title-stack">
       <h1>Klassenkonferenz-Planung</h1>
-      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.6-b7</span></p>
+      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.6-b8</span></p>
     </div>
     <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
     <div class="clock">
@@ -1364,7 +1367,7 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
   document.body.appendChild(status);
   function setStatus(live){
     if(role!=="master"){ status.classList.add("show"); status.classList.toggle("live",!!live); status.querySelector(".txt").textContent=live?"live":"getrennt"; }
-    const p=$id("livePanel"); if(p) p.classList.toggle("live",!!live);
+    const p=$id("livePanel"); if(p){ p.classList.toggle("live",!!live); const st=p.querySelector(".lp-state"); if(st) st.textContent=live?"live":"offline"; }
   }
 
   // ====================== ANZEIGE / LOCKED ======================
@@ -1430,7 +1433,7 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
 
   let sessionActive=false, sessionDate=null, lastSent="";
   const panel=document.createElement("div"); panel.id="livePanel"; panel.classList.add("show");
-  panel.innerHTML='<h4 title="Zum Verschieben ziehen"><span class="lp-grip">⠿</span> 🔴 Live-Spiegelung <span class="lp-dot"></span></h4>'
+  panel.innerHTML='<h4 title="Zum Verschieben ziehen"><span class="lp-grip">⠿</span> Live-Spiegelung <span class="lp-state">offline</span><button class="lp-min" type="button" title="Verkleinern / Vergrößern">▾</button></h4>'
     +'<button class="lp-main" id="lpToggle">▶ Konferenztag starten</button>'
     +'<div class="lp-sub">Anzeige-Link (Beamer / Handys):</div>'
     +'<div class="lp-link"><input id="lpUrl" readonly><button id="lpCopy">Kopieren</button></div>'
@@ -1456,11 +1459,12 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
   $id("lpToggle").onclick=()=>setActive(!sessionActive);
   try{ if(localStorage.getItem("kf_live_session")===viennaDate()) setActive(true); }catch(e){}
 
-  // grüner Punkt = minimieren
-  const dot=panel.querySelector(".lp-dot");
-  function setMin(m){ panel.classList.toggle("min",m); try{ localStorage.setItem("kf_livePanelMin",m?"1":"0"); }catch(e){} }
-  if(dot){ dot.title="minimieren"; dot.addEventListener("click",e=>{ e.stopPropagation(); setMin(!panel.classList.contains("min")); }); }
-  try{ if(localStorage.getItem("kf_livePanelMin")==="1") setMin(true); }catch(e){}
+  // Pfeil = verkleinern / vergrößern
+  const minBtn=panel.querySelector(".lp-min");
+  function setMin(m){ panel.classList.toggle("min",m); if(minBtn) minBtn.textContent=m?"▸":"▾"; try{ localStorage.setItem("kf_livePanelMin",m?"1":"0"); }catch(e){} }
+  if(minBtn){ minBtn.addEventListener("click",e=>{ e.stopPropagation(); setMin(!panel.classList.contains("min")); }); }
+  // Standard: am Handy minimiert; am Desktop gespeicherter Zustand
+  try{ if(matchMedia("(max-width:760px)").matches) setMin(true); else setMin(localStorage.getItem("kf_livePanelMin")==="1"); }catch(e){ setMin(false); }
 
   // Panel frei verschiebbar (Maus + Touch)
   (function dragPanel(){
