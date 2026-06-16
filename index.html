@@ -303,6 +303,15 @@ body.anzeige .wrap{display:none!important}
 #livePanel #lpQR{margin-top:10px;display:flex;justify-content:center;background:#fff;padding:8px;border-radius:10px}
 #livePanel #lpQR img,#livePanel #lpQR canvas{display:block}
 
+/* ---- ETA (voraussichtliche Startzeit) ---- */
+.eta-cell{white-space:nowrap}
+.eta-cell .eta-time{font-variant-numeric:tabular-nums;color:var(--ink)}
+.eta-cell .eta-muted{color:#9aa6b6}
+.eta-cell .eta-now{font-weight:700;color:var(--accent)}
+.eta-cell .eta-delta{margin-left:5px;font-size:11px;font-weight:700;border-radius:6px;padding:1px 5px;line-height:1.5}
+.eta-cell .eta-delta.late{color:#b42318;background:rgba(214,52,32,.12)}
+.eta-cell .eta-delta.early{color:#177245;background:rgba(23,114,69,.12)}
+
 /* ---- Live-Timer (mitlaufende Dauer der aktuellen Konferenz) ---- */
 .elapsed{font-weight:700;color:var(--accent)}
 .btimer{margin-top:10px;font-size:clamp(16px,2vw,26px);font-weight:600;color:var(--accent)}
@@ -619,7 +628,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 </svg></span>
     <div class="title-stack">
       <h1>Klassenkonferenz-Planung</h1>
-      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.6-b10</span></p>
+      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.7-b11</span></p>
     </div>
     <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
     <div class="clock">
@@ -652,6 +661,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
         <button id="loadDemoBtn" class="ghost" type="button">Demo-Daten</button>
         <button id="clearBtn" class="ghost" type="button" title="Alle Konferenzen entfernen (leere Liste)">Leeren</button>
         <button id="rebuildBtn" type="button" title="Reihenfolge (Abteilung 1–4, Klasse alphabetisch) und geplante Zeiten neu berechnen – z. B. nach „Vorverlegen“">Plan zurücksetzen</button>
+        <button id="classDirBtn" class="ghost" type="button" title="Klassen-Reihenfolge umdrehen: klein→groß (1AHET … 5AHET) bzw. groß→klein. Abteilungen bleiben immer 1→4.">Klassen klein→groß</button>
         <button id="exportBtn" class="ghost" type="button" title="Aktuellen Stand als Datei sichern">Stand sichern</button>
         <label class="file-btn" id="importLabel" for="importInput" title="Gesicherten Stand laden">Stand laden</label>
         <input id="importInput" type="file" accept=".json">
@@ -687,7 +697,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
         <div class="table-wrap">
           <table>
             <thead><tr>
-              <th>#</th><th>Abteilung</th><th>Klasse</th><th>KV</th><th>Lehrer</th><th>Plan</th><th>Live</th><th>Status</th><th>Aktionen</th>
+              <th>#</th><th>Abteilung</th><th>Klasse</th><th>KV</th><th>Lehrer</th><th>Plan</th><th title="Voraussichtliche Startzeit – live aus aktueller Uhrzeit, Status und geschätzter Dauer pro Konferenz">Vorauss.</th><th>Live</th><th>Status</th><th>Aktionen</th>
             </tr></thead>
             <tbody id="conferenceBody"></tbody>
           </table>
@@ -780,6 +790,7 @@ const DEPARTMENT_DEFAULTS = [
 
 const state = {
   startTime:"13:00", slotMinutes:15, hideDone:false, showTeachers:false, teacherCode:"",
+  classDir:"asc", // "asc" = Klassen klein→groß (alphabetisch), "desc" = groß→klein
   departments: structuredClone(DEPARTMENT_DEFAULTS),
   conferences: [], revision:0
 };
@@ -791,7 +802,7 @@ const $ = id => document.getElementById(id);
 const dom = {};
 ["teacherInput","startTime","slotMinutes","deptConfig","excelInput","loadDemoBtn","rebuildBtn","hideDone",
  "conferenceBody","liveNow","liveNext","finishCurrentBtn","startNextBtn","clockTime","clockDate","syncHint",
- "addDept","addClass","addKv","addTeachers","addBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","cloudLoadBtn","clearBtn","excelLabel","showTeachers","bQRWrap","bQR",
+ "addDept","addClass","addKv","addTeachers","addBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","cloudLoadBtn","clearBtn","classDirBtn","excelLabel","showTeachers","bQRWrap","bQR",
  "beamerView","bClose","bCurrent","bNext","bList","bDate","bClockTime","ruheView","bTeacher","bTeacherInput"].forEach(k=>dom[k]=$(k));
 
 let clockTimer=null;
@@ -830,6 +841,7 @@ function bindEvents(){
   dom.loadDemoBtn.addEventListener("click",()=>{ state.conferences=createDemoData(); rebuildSchedule(); });
   dom.clearBtn.addEventListener("click",clearAll);
   dom.rebuildBtn.addEventListener("click",rebuildSchedule);
+  dom.classDirBtn.addEventListener("click",()=>{ if(!canControl())return; state.classDir = state.classDir==="desc"?"asc":"desc"; rebuildSchedule(); });
   dom.hideDone.addEventListener("change",()=>{ state.hideDone=dom.hideDone.checked; bumpRevision(); renderAll(); persistAndPublish(); });
   dom.showTeachers.addEventListener("change",()=>{ state.showTeachers=dom.showTeachers.checked; bumpRevision(); renderAll(); persistAndPublish(); });
   dom.finishCurrentBtn.addEventListener("click",()=>{ if(!isMaster())return; const r=getRunning(); if(r) finishConference(r.id); });
@@ -919,6 +931,7 @@ function renderAll(){
   dom.slotMinutes.value=String(state.slotMinutes);
   dom.hideDone.checked=state.hideDone;
   dom.showTeachers.checked=state.showTeachers;
+  dom.classDirBtn.textContent = state.classDir==="desc" ? "Klassen groß→klein" : "Klassen klein→groß";
   document.body.classList.toggle("no-teachers",!state.showTeachers);
   // CSV-Button nur hervorheben, solange noch nichts geladen ist
   if(dom.excelLabel) dom.excelLabel.classList.toggle("cta", state.conferences.length===0);
@@ -935,7 +948,7 @@ function applyRoleUi(){
   dom.rolePill.classList.toggle("active", ROLE==="master" && !passiveMaster);
   // „Master übernehmen" bleibt auch für passiven Master klickbar:
   dom.cloudLoadBtn.disabled = ROLE!=="master";
-  [dom.finishCurrentBtn,dom.startNextBtn,dom.addBtn,dom.loadDemoBtn,dom.rebuildBtn,dom.clearBtn].forEach(b=>b.disabled=!master);
+  [dom.finishCurrentBtn,dom.startNextBtn,dom.addBtn,dom.loadDemoBtn,dom.rebuildBtn,dom.clearBtn,dom.classDirBtn].forEach(b=>b.disabled=!master);
   [dom.startTime,dom.slotMinutes,dom.addClass,dom.addKv,dom.addTeachers,dom.addDept,dom.excelInput,dom.importInput,dom.hideDone,dom.showTeachers].forEach(i=>i.disabled=!master);
   // Teacher-Filter bleibt für ALLE nutzbar (Lehrer/Schüler an Anzeige-Geräten); Export ebenso.
   dom.teacherInput.disabled=false;
@@ -947,6 +960,7 @@ function applyRoleUi(){
 
 function renderConferenceTable(){
   const rows=getVisible();
+  const etas=computeEtas();
   const running=getRunning(), next=getNextWaiting();
   const tc=state.teacherCode, master=canControl();
   dom.countPill.textContent=String(state.conferences.length);
@@ -968,6 +982,7 @@ function renderConferenceTable(){
       `<td>${kvCell}</td>`,
       `<td>${escapeHtml(teacherKuerzel(c))}</td>`,
       `<td>${fmt(c.plannedStart)}–${fmt(c.plannedEnd)}</td>`,
+      `<td class="eta-cell" data-eta="${c.id}">${etaInner(c,etas[c.id])}</td>`,
       `<td>${liveText(c)}</td>`,
       `<td>${statusBadge(c.status)}</td>`,
       `<td>${actionsHtml(c,master)}</td>`
@@ -1058,12 +1073,44 @@ function rebuildSchedule(){
 }
 function cmpOrder(a,b){
   const da=getDept(a.departmentKey), db=getDept(b.departmentKey);
-  if(da.order!==db.order) return da.order-db.order;
-  return a.className.localeCompare(b.className,"de",{sensitivity:"base"});
+  if(da.order!==db.order) return da.order-db.order; // Abteilungen immer 1→4
+  const cmp=a.className.localeCompare(b.className,"de",{sensitivity:"base"});
+  return state.classDir==="desc" ? -cmp : cmp; // Klassen klein→groß bzw. groß→klein
 }
 function retimeWaiting(){
   let cur=Date.now();
   for(const c of state.conferences){ if(c.status!=="waiting")continue; c.plannedStart=cur; c.plannedEnd=cur+state.slotMinutes*60000; cur=c.plannedEnd; }
+}
+/* Voraussichtliche Startzeiten (ETA): live aus aktueller Uhrzeit, Status & geschätzter Dauer.
+   Laufende Konferenz überzieht → alle wartenden rücken entsprechend nach. */
+function computeEtas(){
+  const slot=state.slotMinutes*60000, now=Date.now();
+  const running=getRunning();
+  let cur;
+  if(running && running.actualStart){ cur=Math.max(running.actualStart+slot, now); } // erwartetes Ende der laufenden (mind. jetzt)
+  else { const fw=state.conferences.find(c=>c.status==="waiting"); cur = fw ? Math.max(now, fw.plannedStart||now) : now; }
+  const map={};
+  for(const c of state.conferences){
+    if(c.status==="done"){ map[c.id]={done:true}; continue; }
+    if(c.status==="running"){ map[c.id]={running:true, eta:c.actualStart}; continue; }
+    map[c.id]={eta:cur, delta:cur-(c.plannedStart||cur)}; cur+=slot;
+  }
+  return map;
+}
+function etaInner(c,m){
+  if(!m||m.done) return '<span class="eta-muted">—</span>';
+  if(m.running) return '<span class="eta-now">läuft</span>';
+  const dmin=Math.round((m.delta||0)/60000);
+  const tag = Math.abs(dmin)>=1 ? `<small class="eta-delta ${dmin>0?'late':'early'}">${dmin>0?'+':''}${dmin}</small>` : "";
+  return `<span class="eta-time">≈ ${fmt(m.eta)}</span>${tag}`;
+}
+function refreshEtas(){
+  if(!dom.conferenceBody) return;
+  const etas=computeEtas();
+  dom.conferenceBody.querySelectorAll("[data-eta]").forEach(td=>{
+    const c=byId(td.getAttribute("data-eta")); if(!c) return;
+    td.innerHTML=etaInner(c,etas[c.id]);
+  });
 }
 
 /* ---------------- Aktionen ---------------- */
@@ -1268,6 +1315,7 @@ function tickTimers(){
   const txt = (r&&r.actualStart) ? fmtDur(Date.now()-r.actualStart) : "";
   const a=$("nowElapsed"); if(a) a.textContent=txt;
   const b=$("bElapsed");   if(b) b.textContent=txt;
+  refreshEtas(); // ETA mitlaufen lassen (Überziehen der laufenden Konferenz verschiebt die Schätzung)
 }
 function dateLong(){ return new Date().toLocaleDateString("de-AT",{weekday:"long",day:"2-digit",month:"long",year:"numeric"}); }
 function timeToToday(hhmm){ const [h,m]=String(hhmm).split(":").map(Number); const d=new Date(); d.setHours(Number.isFinite(h)?h:13,Number.isFinite(m)?m:0,0,0); return d; }
@@ -1291,6 +1339,7 @@ function hydrateFromRemote(r,render=true){
   state.slotMinutes=Number(r.slotMinutes)||state.slotMinutes;
   state.hideDone=!!r.hideDone;
   state.showTeachers=!!r.showTeachers;
+  state.classDir = r.classDir==="desc" ? "desc" : "asc";
   state.departments=Array.isArray(r.departments)&&r.departments.length?r.departments:structuredClone(DEPARTMENT_DEFAULTS);
   state.conferences=(Array.isArray(r.conferences)?r.conferences:[]).map(c=>({...c, teachers:normalizeTeachers(c.teachers), kv:String(c.kv||"").toUpperCase(), kvName:c.kvName||"", stellvKv:String(c.stellvKv||"").toUpperCase(), stellvKvName:c.stellvKvName||"", hidden:!!c.hidden}));
   state.revision=Number(r.revision)||0;
@@ -1303,7 +1352,7 @@ function hydrateFromRemote(r,render=true){
 /* Daten für die geräteübergreifende Spiegelung */
 window.__kfSnapshot = ()=>({
   v:2, startTime:state.startTime, slotMinutes:state.slotMinutes, hideDone:state.hideDone, showTeachers:state.showTeachers,
-  departments:state.departments, conferences:state.conferences, revision:state.revision
+  classDir:state.classDir, departments:state.departments, conferences:state.conferences, revision:state.revision
 });
 window.__kfApplyRemote = pl=>{
   if(!pl) return;
