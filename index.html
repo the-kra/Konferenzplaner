@@ -106,9 +106,15 @@ input,select{width:100%;min-width:0;font-family:inherit;font-size:14px;color:var
 .add-toggle{margin-left:8px;flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 13px;border-radius:11px;border:none;background:var(--brand);color:#fff;cursor:pointer}
 .add-toggle:hover{filter:brightness(1.06)}
 /* Startzeit + Dauer einheitlich: zentriert, gleiche Höhe, ohne Spinner-Pfeile */
-#startTime,#slotMinutes{text-align:center;height:42px;appearance:textfield;-moz-appearance:textfield}
-#slotMinutes::-webkit-inner-spin-button,#slotMinutes::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-#startTime::-webkit-date-and-time-value{text-align:center}
+/* Startzeit + Dauer: coole, dicke Digital-Schrift (DSEG7 wie die Uhr) */
+#startTime,#slotMinutes{text-align:center;text-align-last:center;height:46px;font-family:"DSEG7 Classic",ui-monospace,monospace;font-weight:700;font-size:21px;letter-spacing:1px;color:var(--ink)}
+#startTime::-webkit-date-and-time-value{text-align:center;font-family:"DSEG7 Classic",ui-monospace,monospace;font-weight:700}
+/* Dauer + Nr. als Auswahlrad (select): native Optik aus + eigener Chevron */
+#slotMinutes,.ord-input{appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237c879a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+/* Add-Form erst sichtbar nach Klick auf "+ Klasse" (hidden-Attribut greift sonst nicht wegen display:grid) */
+.add-form[hidden]{display:none}
 input:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent)}
 .row{margin-bottom:14px}
 .row.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -146,8 +152,9 @@ button.icon{padding:6px 9px;border-radius:8px;line-height:1}
 .swatch-input::-moz-color-swatch{border:none;border-radius:7px}
 .ord-wrap{display:flex;align-items:center;gap:7px}
 .ord-wrap .ord-lbl{font-size:11px;color:var(--muted);font-weight:600}
-.ord-input{width:54px;text-align:center;font-weight:600;border-radius:10px;padding:7px;appearance:textfield;-moz-appearance:textfield}
-.ord-input::-webkit-inner-spin-button,.ord-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.ord-input{width:64px;text-align:center;text-align-last:center;border-radius:10px;padding:7px 6px;height:42px;
+  font-family:"DSEG7 Classic",ui-monospace,monospace;font-weight:700;font-size:18px;color:var(--ink);
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;cursor:pointer}
 /* Add-Form: Abteilung-Auswahl gleich hoch & zentriert wie die Nachbarfelder */
 .add-form select,.add-form input{text-align:center;text-align-last:center}
 /* alle Add-Form-Felder + Button exakt gleiche Höhe + runde Ecken */
@@ -607,7 +614,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 </svg></span>
     <div class="title-stack">
       <h1>Klassenkonferenz-Planung</h1>
-      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.6-b6</span></p>
+      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.6-b7</span></p>
     </div>
     <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
     <div class="clock">
@@ -628,7 +635,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 
       <div class="row two">
         <div><label for="startTime">Startzeit</label><input id="startTime" type="time" value="13:00"></div>
-        <div><label for="slotMinutes">Dauer/Konferenz (Min.)</label><input id="slotMinutes" type="number" min="5" max="180" value="15"></div>
+        <div><label for="slotMinutes">Dauer/Konferenz (Min.)</label><select id="slotMinutes"><option>5</option><option>10</option><option selected>15</option><option>20</option><option>25</option><option>30</option><option>40</option><option>45</option><option>60</option><option>90</option></select></div>
       </div>
 
       <div class="dept-head">Abteilungen · Farbe + Startnummer (1–4)</div>
@@ -886,7 +893,8 @@ function renderDepartmentConfig(){
     const lbl=document.createElement("span"); lbl.textContent=dept.label;
     name.append(color,lbl);
     const ordWrap=document.createElement("div"); ordWrap.className="ord-wrap";
-    const ord=document.createElement("input"); ord.type="number"; ord.className="ord-input"; ord.min="1"; ord.max="9"; ord.value=String(dept.order);
+    const ord=document.createElement("select"); ord.className="ord-input";
+    [1,2,3,4].forEach(n=>{ const o=document.createElement("option"); o.value=String(n); o.textContent=String(n); if(n===dept.order) o.selected=true; ord.appendChild(o); });
     ord.addEventListener("change",()=>{ const n=Number(ord.value); dept.order=Number.isFinite(n)?Math.max(1,n):dept.order; rebuildSchedule(); });
     ordWrap.innerHTML='<span class="ord-lbl">Nr.</span>'; ordWrap.appendChild(ord);
     row.append(name,ordWrap);
