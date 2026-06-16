@@ -628,7 +628,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 </svg></span>
     <div class="title-stack">
       <h1>Klassenkonferenz-Planung</h1>
-      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.7-b11</span></p>
+      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.8-b12</span></p>
     </div>
     <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
     <div class="clock">
@@ -661,7 +661,8 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
         <button id="loadDemoBtn" class="ghost" type="button">Demo-Daten</button>
         <button id="clearBtn" class="ghost" type="button" title="Alle Konferenzen entfernen (leere Liste)">Leeren</button>
         <button id="rebuildBtn" type="button" title="Reihenfolge (Abteilung 1–4, Klasse alphabetisch) und geplante Zeiten neu berechnen – z. B. nach „Vorverlegen“">Plan zurücksetzen</button>
-        <button id="classDirBtn" class="ghost" type="button" title="Klassen-Reihenfolge umdrehen: klein→groß (1AHET … 5AHET) bzw. groß→klein. Abteilungen bleiben immer 1→4.">Klassen klein→groß</button>
+        <button id="classDirBtn" class="ghost" type="button" title="Stufe (Zahl) umdrehen: 1→5 bzw. 5→1. Abteilungen bleiben immer 1→4.">Stufe 1→5</button>
+        <button id="letterDirBtn" class="ghost" type="button" title="Buchstaben innerhalb der Stufe umdrehen: A→Z bzw. Z→A (z. B. 4AHME vor 4CHME).">Buchstabe A→Z</button>
         <button id="exportBtn" class="ghost" type="button" title="Aktuellen Stand als Datei sichern">Stand sichern</button>
         <label class="file-btn" id="importLabel" for="importInput" title="Gesicherten Stand laden">Stand laden</label>
         <input id="importInput" type="file" accept=".json">
@@ -790,7 +791,8 @@ const DEPARTMENT_DEFAULTS = [
 
 const state = {
   startTime:"13:00", slotMinutes:15, hideDone:false, showTeachers:false, teacherCode:"",
-  classDir:"asc", // "asc" = Klassen klein→groß (alphabetisch), "desc" = groß→klein
+  classDir:"asc",  // Stufe/Zahl: "asc" = 1→5, "desc" = 5→1
+  letterDir:"asc", // Buchstabe innerhalb der Stufe: "asc" = A→Z, "desc" = Z→A
   departments: structuredClone(DEPARTMENT_DEFAULTS),
   conferences: [], revision:0
 };
@@ -802,7 +804,7 @@ const $ = id => document.getElementById(id);
 const dom = {};
 ["teacherInput","startTime","slotMinutes","deptConfig","excelInput","loadDemoBtn","rebuildBtn","hideDone",
  "conferenceBody","liveNow","liveNext","finishCurrentBtn","startNextBtn","clockTime","clockDate","syncHint",
- "addDept","addClass","addKv","addTeachers","addBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","cloudLoadBtn","clearBtn","classDirBtn","excelLabel","showTeachers","bQRWrap","bQR",
+ "addDept","addClass","addKv","addTeachers","addBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","cloudLoadBtn","clearBtn","classDirBtn","letterDirBtn","excelLabel","showTeachers","bQRWrap","bQR",
  "beamerView","bClose","bCurrent","bNext","bList","bDate","bClockTime","ruheView","bTeacher","bTeacherInput"].forEach(k=>dom[k]=$(k));
 
 let clockTimer=null;
@@ -842,6 +844,7 @@ function bindEvents(){
   dom.clearBtn.addEventListener("click",clearAll);
   dom.rebuildBtn.addEventListener("click",rebuildSchedule);
   dom.classDirBtn.addEventListener("click",()=>{ if(!canControl())return; state.classDir = state.classDir==="desc"?"asc":"desc"; rebuildSchedule(); });
+  dom.letterDirBtn.addEventListener("click",()=>{ if(!canControl())return; state.letterDir = state.letterDir==="desc"?"asc":"desc"; rebuildSchedule(); });
   dom.hideDone.addEventListener("change",()=>{ state.hideDone=dom.hideDone.checked; bumpRevision(); renderAll(); persistAndPublish(); });
   dom.showTeachers.addEventListener("change",()=>{ state.showTeachers=dom.showTeachers.checked; bumpRevision(); renderAll(); persistAndPublish(); });
   dom.finishCurrentBtn.addEventListener("click",()=>{ if(!isMaster())return; const r=getRunning(); if(r) finishConference(r.id); });
@@ -931,7 +934,8 @@ function renderAll(){
   dom.slotMinutes.value=String(state.slotMinutes);
   dom.hideDone.checked=state.hideDone;
   dom.showTeachers.checked=state.showTeachers;
-  dom.classDirBtn.textContent = state.classDir==="desc" ? "Klassen groß→klein" : "Klassen klein→groß";
+  dom.classDirBtn.textContent  = state.classDir==="desc"  ? "Stufe 5→1"     : "Stufe 1→5";
+  dom.letterDirBtn.textContent = state.letterDir==="desc" ? "Buchstabe Z→A" : "Buchstabe A→Z";
   document.body.classList.toggle("no-teachers",!state.showTeachers);
   // CSV-Button nur hervorheben, solange noch nichts geladen ist
   if(dom.excelLabel) dom.excelLabel.classList.toggle("cta", state.conferences.length===0);
@@ -948,7 +952,7 @@ function applyRoleUi(){
   dom.rolePill.classList.toggle("active", ROLE==="master" && !passiveMaster);
   // „Master übernehmen" bleibt auch für passiven Master klickbar:
   dom.cloudLoadBtn.disabled = ROLE!=="master";
-  [dom.finishCurrentBtn,dom.startNextBtn,dom.addBtn,dom.loadDemoBtn,dom.rebuildBtn,dom.clearBtn,dom.classDirBtn].forEach(b=>b.disabled=!master);
+  [dom.finishCurrentBtn,dom.startNextBtn,dom.addBtn,dom.loadDemoBtn,dom.rebuildBtn,dom.clearBtn,dom.classDirBtn,dom.letterDirBtn].forEach(b=>b.disabled=!master);
   [dom.startTime,dom.slotMinutes,dom.addClass,dom.addKv,dom.addTeachers,dom.addDept,dom.excelInput,dom.importInput,dom.hideDone,dom.showTeachers].forEach(i=>i.disabled=!master);
   // Teacher-Filter bleibt für ALLE nutzbar (Lehrer/Schüler an Anzeige-Geräten); Export ebenso.
   dom.teacherInput.disabled=false;
@@ -1071,11 +1075,17 @@ function rebuildSchedule(){
   state.conferences.forEach(c=>{ c.plannedStart=cur; c.plannedEnd=cur+state.slotMinutes*60000; cur=c.plannedEnd; });
   bumpRevision(); renderAll(); persistAndPublish();
 }
+function classParts(name){
+  const m=String(name).match(/^(\d+)(.*)$/);
+  return { num: m?parseInt(m[1],10):0, rest: m?m[2]:String(name) };
+}
 function cmpOrder(a,b){
   const da=getDept(a.departmentKey), db=getDept(b.departmentKey);
   if(da.order!==db.order) return da.order-db.order; // Abteilungen immer 1→4
-  const cmp=a.className.localeCompare(b.className,"de",{sensitivity:"base"});
-  return state.classDir==="desc" ? -cmp : cmp; // Klassen klein→groß bzw. groß→klein
+  const pa=classParts(a.className), pb=classParts(b.className);
+  if(pa.num!==pb.num){ const d=pa.num-pb.num; return state.classDir==="desc"?-d:d; } // Stufe 1→5 bzw. 5→1
+  const c=pa.rest.localeCompare(pb.rest,"de",{sensitivity:"base"});
+  return state.letterDir==="desc" ? -c : c; // Buchstabe A→Z bzw. Z→A
 }
 function retimeWaiting(){
   let cur=Date.now();
@@ -1340,6 +1350,7 @@ function hydrateFromRemote(r,render=true){
   state.hideDone=!!r.hideDone;
   state.showTeachers=!!r.showTeachers;
   state.classDir = r.classDir==="desc" ? "desc" : "asc";
+  state.letterDir = r.letterDir==="desc" ? "desc" : "asc";
   state.departments=Array.isArray(r.departments)&&r.departments.length?r.departments:structuredClone(DEPARTMENT_DEFAULTS);
   state.conferences=(Array.isArray(r.conferences)?r.conferences:[]).map(c=>({...c, teachers:normalizeTeachers(c.teachers), kv:String(c.kv||"").toUpperCase(), kvName:c.kvName||"", stellvKv:String(c.stellvKv||"").toUpperCase(), stellvKvName:c.stellvKvName||"", hidden:!!c.hidden}));
   state.revision=Number(r.revision)||0;
@@ -1352,7 +1363,7 @@ function hydrateFromRemote(r,render=true){
 /* Daten für die geräteübergreifende Spiegelung */
 window.__kfSnapshot = ()=>({
   v:2, startTime:state.startTime, slotMinutes:state.slotMinutes, hideDone:state.hideDone, showTeachers:state.showTeachers,
-  classDir:state.classDir, departments:state.departments, conferences:state.conferences, revision:state.revision
+  classDir:state.classDir, letterDir:state.letterDir, departments:state.departments, conferences:state.conferences, revision:state.revision
 });
 window.__kfApplyRemote = pl=>{
   if(!pl) return;
