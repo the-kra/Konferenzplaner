@@ -400,10 +400,11 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 
   /* Liste fließt mit (kein eigener Scroll), kompakte Zeilen */
   .beamer-list{flex:none;overflow:visible;padding-bottom:6px}
-  .brow{grid-template-columns:54px 1fr auto auto;gap:10px;font-size:15px;padding:9px 2px}
+  .brow{grid-template-columns:auto 1fr auto auto;gap:10px;font-size:15px;padding:9px 2px}
   .brow .bdot{display:none}
   .brow .bteach{display:none}
-  body.no-teachers .brow{grid-template-columns:54px 1fr auto auto}
+  .brow .btime{white-space:nowrap}
+  body.no-teachers .brow{grid-template-columns:auto 1fr auto auto}
 
   /* QR + Kürzel-Feld laufen unten im Scroll mit (überdecken nichts mehr) */
   .beamer-foot{display:none}
@@ -667,7 +668,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 </svg></span>
     <div class="title-stack">
       <h1>Klassenkonferenz-Planung</h1>
-      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.12-b16</span></p>
+      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.13-b17</span></p>
     </div>
     <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
     <div class="clock">
