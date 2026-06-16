@@ -273,6 +273,7 @@ body.anzeige .wrap{display:none!important}
   background:rgba(27,35,48,.94);color:#fff;padding:11px 16px;font-weight:600;box-shadow:0 10px 30px -14px #000}
 #masterLock.show{display:flex}
 #masterLock button{background:var(--good);color:#06201c;border:none;border-radius:10px;padding:8px 15px;font-weight:700;cursor:pointer}
+#masterLock .ml-x{background:transparent;color:#fff;border:1px solid #ffffff55;padding:6px 11px;font-weight:600}
 #masterLock button:hover{filter:brightness(1.06)}
 #livePanel.passive{opacity:.55;filter:grayscale(.4)}
 #livePanel{position:fixed;right:16px;bottom:16px;z-index:8800;width:300px;color:var(--ink);
@@ -618,7 +619,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 </svg></span>
     <div class="title-stack">
       <h1>Klassenkonferenz-Planung</h1>
-      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.6-b9</span></p>
+      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.6-b10</span></p>
     </div>
     <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
     <div class="clock">
@@ -1017,6 +1018,8 @@ function liveText(c){
 function openBeamer(on){
   dom.beamerView.classList.toggle("on",on);
   if(ROLE==="master"){ dom.bClose.style.display=on?"block":"none"; }
+  // Übernehmen-Banner in der Beamer-Ansicht ausblenden (dort steuert man nicht)
+  const lb=document.getElementById("masterLock"); if(lb) lb.style.display=on?"none":"";
   if(on){ dom.bDate.textContent=dateLong(); ensureBeamerQR(); renderBeamer(); }
 }
 function ensureBeamerQR(){
@@ -1501,7 +1504,7 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
 
   // ---- Übernahme-/Sperr-Logik ----
   const lockBar=document.createElement("div"); lockBar.id="masterLock";
-  lockBar.innerHTML='<span class="ml-txt">Ein anderes Gerät steuert gerade.</span><button id="mlTake">Steuerung übernehmen</button>';
+  lockBar.innerHTML='<span class="ml-txt">Ein anderes Gerät steuert gerade.</span><button id="mlTake">Steuerung übernehmen</button><button id="mlDismiss" class="ml-x" title="Später / ausblenden">✕</button>';
   document.body.appendChild(lockBar);
   function ownerOther(o){ return !!(o && o.id && o.id!==MASTER_ID && (Date.now()-(o.ts||0))<OWNER_TIMEOUT); }
   function setOwner(on){
@@ -1513,6 +1516,7 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
     else setStatus(false);
   }
   $id("mlTake").onclick=()=>refetchAndClaim();
+  $id("mlDismiss").onclick=()=>lockBar.classList.remove("show");   // „Später" – Banner ausblenden (bleibt passiv)
   async function readCloud(){ try{ const {data}=await SB.from("live_state").select("payload").eq("id",ROW_ID).maybeSingle(); return (data&&data.payload)||null; }catch(e){ return null; } }
   async function refetchAndClaim(){
     const pl=await readCloud();
