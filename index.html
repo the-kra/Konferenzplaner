@@ -90,9 +90,9 @@ html,body{margin:0;color:var(--ink);font-family:'Lexend',ui-sans-serif,system-ui
 .layout>*{min-width:0}                 /* Grid-Spalten dürfen schrumpfen -> kein horizontaler Overflow */
 .layout>div{display:flex;flex-direction:column;gap:20px;min-width:0}
 @media(max-width:1000px){.layout{grid-template-columns:1fr}}
-.panel{background:linear-gradient(155deg,rgba(255,255,255,0.46),rgba(255,255,255,0.28));
-  backdrop-filter:blur(8px) saturate(1.4);-webkit-backdrop-filter:blur(8px) saturate(1.4);
-  border:1px solid rgba(255,255,255,0.55);border-radius:26px;padding:22px;
+.panel{background:linear-gradient(155deg,rgba(255,255,255,0.30),rgba(255,255,255,0.14));
+  backdrop-filter:blur(6px) saturate(1.4);-webkit-backdrop-filter:blur(6px) saturate(1.4);
+  border:1px solid rgba(255,255,255,0.5);border-radius:26px;padding:22px;
   box-shadow:0 28px 64px -34px rgba(20,30,50,.5),0 1px 0 rgba(255,255,255,.6) inset}
 .panel h2{margin:0 0 14px;font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
 .panel h2 .pill{font-size:11px;font-weight:600;color:var(--muted);background:var(--paper);border-radius:999px;padding:3px 9px;margin-left:auto}
@@ -248,6 +248,7 @@ tbody tr.mine td:nth-child(3)::after{content:" ★";color:var(--mine)}
 .brow.mine{background:linear-gradient(90deg,color-mix(in srgb,var(--mine) 26%,transparent),color-mix(in srgb,var(--mine) 7%,transparent));border-radius:12px;font-weight:600;box-shadow:inset 5px 0 0 var(--mine)}
 .brow.mine.current{background:linear-gradient(90deg,color-mix(in srgb,var(--mine) 36%,transparent),color-mix(in srgb,var(--mine) 10%,transparent))}
 .beamer-foot{text-align:center;color:var(--muted);font-size:13px}
+.bempty{opacity:.5;text-align:center;white-space:nowrap;padding:2.5vh 1vw;font-size:clamp(15px,1.8vw,22px);font-weight:500}
 .beamer-close{position:fixed;top:14px;right:16px;z-index:9100;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:600;color:var(--ink)}
 .beamer-teacher{position:fixed;bottom:14px;left:16px;z-index:9100;display:flex;gap:8px;align-items:center;background:#ffffffcc;border:1px solid var(--line);border-radius:12px;padding:7px 11px}
 .beamer-teacher input{width:120px;padding:6px 9px;font-size:13px}
@@ -341,7 +342,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   body:not(.anzeige) .wrap{padding-bottom:96px}
   /* Einrichtung am Handy einklappbar (Burger) – Live-Bedienung läuft über die Footer-Leiste */
   /* Panels am Handy transparenter -> Blueprint/Technik scheint durch */
-  .panel{background:linear-gradient(155deg,rgba(255,255,255,.36),rgba(255,255,255,.18));backdrop-filter:blur(7px) saturate(1.4);-webkit-backdrop-filter:blur(7px) saturate(1.4)}
+  .panel{background:linear-gradient(155deg,rgba(255,255,255,.26),rgba(255,255,255,.10));backdrop-filter:blur(5px) saturate(1.4);-webkit-backdrop-filter:blur(5px) saturate(1.4)}
   .collapse-btn{display:inline-flex}
   #controlsPanel h2{cursor:pointer}
   #controlsPanel.collapsed #ctrlBody{display:none}
@@ -617,7 +618,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 </svg></span>
     <div class="title-stack">
       <h1>Klassenkonferenz-Planung</h1>
-      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.6-b8</span></p>
+      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.6-b9</span></p>
     </div>
     <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
     <div class="clock">
@@ -1032,7 +1033,7 @@ function renderBeamer(){
     const d=getDept(c.departmentKey);
     const cls=["brow"]; if(r&&r.id===c.id)cls.push("current"); if(c.status==="done")cls.push("done"); if(matchesQuery(c,tc))cls.push("mine");
     return `<div class="${cls.join(" ")}"><span class="bdot" style="background:${d.color}"></span><span class="btime">${fmt(c.plannedStart)}</span><strong class="bclass">${escapeHtml(c.className)}</strong><span class="bkv">${escapeHtml(c.kv||"—")}</span><span class="bteach">${escapeHtml(teacherKuerzel(c))}</span><span class="bstat">${statusBadge(c.status)}</span></div>`;
-  }).join("") || `<div class="brow" style="opacity:.5">Keine Konferenzen geladen</div>`;
+  }).join("") || `<div class="bempty">Keine Konferenzen geladen</div>`;
   tickTimers();
 }
 function paintBCard(el,c,label){
