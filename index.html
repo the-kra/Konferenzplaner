@@ -642,7 +642,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 </svg></span>
     <div class="title-stack">
       <h1>Klassenkonferenz-Planung</h1>
-      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.9-b13</span></p>
+      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.10-b14</span></p>
     </div>
     <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
     <div class="clock">
@@ -825,7 +825,19 @@ let clockTimer=null;
 
 init();
 
+// WebKit/iOS wendet eingebettete data-URI-Schriften manchmal erst nach einem Repaint an
+// (DSEG7 „verschwindet" bei wackeligem Load). Schrift aktiv laden und danach neu zeichnen.
+function ensureDsegFont(){
+  try{
+    if(!(document.fonts && document.fonts.load)) return;
+    const repaint=()=>{ try{ renderAll(); }catch(e){} };
+    document.fonts.load('700 24px "DSEG7 Classic"').then(repaint).catch(()=>{});
+    document.fonts.ready.then(repaint).catch(()=>{});
+    if(document.fonts.addEventListener) document.fonts.addEventListener('loadingdone',repaint,{once:true});
+  }catch(e){}
+}
 function init(){
+  ensureDsegFont();
   loadState();
   bindEvents();
   renderDepartmentConfig();
