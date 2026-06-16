@@ -2,7 +2,10 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>HTL1 · Klassenkonferenz-Planung</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -324,6 +327,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   body:not(.anzeige) .wrap{padding-bottom:96px}
   /* Einrichtung am Handy einklappbar (Burger) – Live-Bedienung läuft über die Footer-Leiste */
   .collapse-btn{display:inline-flex}
+  #controlsPanel h2{cursor:pointer}
   #controlsPanel.collapsed #ctrlBody{display:none}
   #controlsPanel.collapsed{padding-bottom:16px}
   /* Startzeit/Dauer einheitlich zentriert ausrichten */
@@ -595,7 +599,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 </svg></span>
     <div class="title-stack">
       <h1>Klassenkonferenz-Planung</h1>
-      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit</p>
+      <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.6-b3</span></p>
     </div>
     <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
     <div class="clock">
@@ -845,10 +849,14 @@ function bindEvents(){
   $("mBeamer").addEventListener("click",()=>openBeamer(true));
 
   // Einrichtung ein-/ausklappen (Handy); standardmäßig am Handy eingeklappt
-  const cp=$("controlsPanel"), ct=$("ctrlToggle");
+  const cp=$("controlsPanel"), ct=$("ctrlToggle"), ch=cp&&cp.querySelector("h2");
   if(ct&&cp){
-    ct.addEventListener("click",()=>{ cp.classList.toggle("collapsed"); ct.textContent=cp.classList.contains("collapsed")?"⚙":"✕"; });
+    const sync=()=>{ ct.textContent=cp.classList.contains("collapsed")?"▸":"▾"; };
+    const toggle=e=>{ if(e.target.closest("input,select,.pill")) return; cp.classList.toggle("collapsed"); sync(); };
+    ct.addEventListener("click",toggle);
+    if(ch) ch.addEventListener("click",e=>{ if(matchMedia("(max-width:760px)").matches) toggle(e); });
     try{ if(matchMedia("(max-width:760px)").matches) cp.classList.add("collapsed"); }catch(e){}
+    sync();
   }
 }
 
