@@ -1972,9 +1972,21 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
 
   const q=new URLSearchParams(location.search);
   const mode=(q.get("mode")||"").toLowerCase();
-  const role = mode==="master" ? (q.get("key")===LIVE_KEY ? "master" : "locked") : (mode==="anzeige"?"anzeige":"master");
-  // Ohne ?mode bleibt es lokaler Master (Einzelgerät). Anzeige nur explizit per ?mode=anzeige.
-  window.__kfSetRole(role==="locked"?"locked":role);
+  // Sticky-Rolle: Ein einmal als Anzeige geöffnetes Gerät bleibt Anzeige – auch wenn der
+  // Browser den Tab ohne ?mode neu lädt (häufig am Handy). Sonst kippt es ungewollt ins Admin.
+  let stickyRole=""; try{ stickyRole=localStorage.getItem("kf_sticky_role")||""; }catch(e){}
+  let role;
+  if(mode==="master")       role = q.get("key")===LIVE_KEY ? "master" : "locked";
+  else if(mode==="anzeige") role = "anzeige";
+  else                      role = stickyRole==="anzeige" ? "anzeige" : "master";
+  try{
+    if(role==="anzeige")      localStorage.setItem("kf_sticky_role","anzeige");
+    else if(mode==="master")  localStorage.removeItem("kf_sticky_role");   // bewusst Master -> Sticky lösen
+  }catch(e){}
+  // Sicherheitsnetz: sollte die App beim Init gestolpert sein (kein __kfSetRole),
+  // wenigstens das Admin-Fenster verstecken, damit eine Anzeige nie ins Admin kippt.
+  if(typeof window.__kfSetRole==="function") window.__kfSetRole(role==="locked"?"locked":role);
+  else if(role!=="master") document.body.classList.add("anzeige");
 
   const haveSB = !!(window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY);
   const SB = haveSB ? window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY) : null;
