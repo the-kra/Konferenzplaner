@@ -479,6 +479,10 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 .cd-rm:hover{background:color-mix(in srgb,var(--bad) 12%,#fff);border-color:var(--bad)}
 .cd-you{font-size:10.5px;font-weight:700;color:var(--mine,#c4820e);letter-spacing:.5px;margin-left:4px}
 .cd-empty{color:#9aa6b6;font-size:13px;font-style:italic}
+/* Zusammenfass-Dialog */
+.mg-input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:11px;font-size:15px;background:#fff;color:var(--ink)}
+.mg-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+.mg-actions .btn-step{padding:9px 16px}
 .brow{cursor:pointer}
 #conferenceBody tr{cursor:pointer}
 #conferenceBody tr input,#conferenceBody tr select,#conferenceBody tr button{cursor:auto}
@@ -989,6 +993,18 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   </div>
 </div>
 
+<!-- Klassen zusammenfassen: Name + Abteilung wählen -->
+<div class="modal-overlay" id="mergeModal" hidden>
+  <div class="modal-card mg-card" role="dialog" aria-modal="true" aria-labelledby="mgTitle">
+    <button class="modal-x" id="mgClose" type="button" aria-label="Schließen">✕</button>
+    <h3 id="mgTitle">Klassen zusammenfassen</h3>
+    <p class="modal-sub" id="mgList"></p>
+    <div class="modal-field"><label class="modal-label" for="mgName">Neuer Name</label><input id="mgName" class="mg-input" type="text" maxlength="40" placeholder="z. B. 2AB"></div>
+    <div class="modal-field"><label class="modal-label" for="mgDept">Abteilung</label><select id="mgDept" class="mg-input"></select></div>
+    <div class="mg-actions"><button id="mgCancel" class="btn-step" type="button">Abbrechen</button><button id="mgConfirm" class="btn-step primary" type="button">Zusammenfassen</button></div>
+  </div>
+</div>
+
 <script>
 /* HTL1-Animationslogo (inline, selbstständig) */
 function runOrbitReveal(sfx){
@@ -1081,7 +1097,8 @@ const dom = {};
  "addDept","addClass","addKv","addTeachers","addBtn","mergeBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","cloudLoadBtn","clearBtn","classDirBtn","letterDirBtn","excelLabel","showTeachers","bQRWrap","bQR",
  "untisBtn","untisModal","untisClose","untisOpen","untisCopy","untisScope","untisCopyHint","untisSnippet",
  "beamerView","bClose","bCurrent","bNext","bList","bDate","bClockTime","ruheView","bTeacher","bTeacherInput",
- "classDetail","cdClose","cdDept","cdClass","cdMeta","cdMine","cdAttend","cdTeachers"].forEach(k=>dom[k]=$(k));
+ "classDetail","cdClose","cdDept","cdClass","cdMeta","cdMine","cdAttend","cdTeachers",
+ "mergeModal","mgClose","mgCancel","mgConfirm","mgName","mgDept","mgList"].forEach(k=>dom[k]=$(k));
 
 let clockTimer=null;
 const mergeSel = new Set();   // markierte Klassen-IDs zum Zusammenfassen
@@ -1177,6 +1194,12 @@ function bindEvents(){
   dom.startNextBtn.addEventListener("click",()=>{ if(!isMaster())return; const n=getNextWaiting(); if(n) startConference(n.id); });
   dom.addBtn.addEventListener("click",addClassFromForm);
   dom.mergeBtn.addEventListener("click",mergeSelected);
+  dom.mgConfirm.addEventListener("click",performMerge);
+  dom.mgCancel.addEventListener("click",closeMergeModal);
+  dom.mgClose.addEventListener("click",closeMergeModal);
+  dom.mergeModal.addEventListener("click",e=>{ if(e.target===dom.mergeModal) closeMergeModal(); });
+  dom.mgName.addEventListener("keydown",e=>{ if(e.key==="Enter") performMerge(); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape" && !dom.mergeModal.hidden) closeMergeModal(); });
   ["addClass","addTeachers","addKv"].forEach(k=>dom[k].addEventListener("keydown",e=>{ if(e.key==="Enter") addClassFromForm(); }));
 
   dom.conferenceBody.addEventListener("click",e=>{
@@ -1553,16 +1576,29 @@ function updateMergeBtn(){
 /* Mehrere Klassen zu EINER Konferenz zusammenfassen.
    Lehrer aller Klassen + ihre KV/StellvKV werden vereint, damit jeder Betroffene
    die (umbenannte) Konferenz in der Übersicht markiert sieht. */
+/* Zusammenfass-Dialog öffnen: Name + Abteilung wählen */
 function mergeSelected(){
   if(!canControl()) return;
   const ids=[...mergeSel].filter(id=>byId(id));
   if(ids.length<2){ updateMergeBtn(); return; }
   const sel=state.conferences.filter(c=>ids.includes(c.id));   // Reihenfolge wie in der Liste
+  const names=sel.map(c=>c.className);
+  dom.mgList.textContent="Zusammenfassen: "+names.join(", ");
+  dom.mgName.value=names.join("+");
+  // Abteilungs-Auswahl füllen (Vorauswahl = Abteilung der ersten Klasse)
+  dom.mgDept.innerHTML=state.departments.map(d=>`<option value="${escapeHtml(d.key)}"${d.key===sel[0].departmentKey?" selected":""}>${escapeHtml(d.label)}</option>`).join("");
+  dom.mergeModal.hidden=false;
+  setTimeout(()=>{ try{ dom.mgName.focus(); dom.mgName.select(); }catch(e){} },30);
+}
+function performMerge(){
+  if(!canControl()) return;
+  const ids=[...mergeSel].filter(id=>byId(id));
+  if(ids.length<2){ closeMergeModal(); return; }
+  const sel=state.conferences.filter(c=>ids.includes(c.id));
   const first=sel[0];
   const names=sel.map(c=>c.className);
-  const newName=prompt(`Neuer Name für die zusammengefasste Konferenz:\n(${names.join(", ")})`, names.join("+"));
-  if(newName===null) return;                                   // abgebrochen
-  const name=newName.trim()||first.className;
+  const name=(dom.mgName.value||"").trim()||first.className;
+  const deptKey=dom.mgDept.value||first.departmentKey;
   // Lehrer vereinen (nach Kürzel, Nachname + Fächer bewahren); KV/StellvKV jeder Klasse ergänzen
   const tmap=new Map();
   const addT=(k,n,faecher)=>{ k=String(k||"").toUpperCase().trim(); if(!k) return;
@@ -1570,17 +1606,18 @@ function mergeSelected(){
     normalizeFaecher(faecher).forEach(f=>r.faecher.add(f)); };
   sel.forEach(c=>{ c.teachers.forEach(t=>addT(t.k,t.n,t.faecher)); addT(c.kv,c.kvName); addT(c.stellvKv,c.stellvKvName); });
   const teachers=[...tmap].map(([k,r])=>({k,n:r.n,faecher:[...r.faecher]}));
-  const merged=createConference(first.departmentKey,name,teachers,{
+  const merged=createConference(deptKey,name,teachers,{
     kv:first.kv, kvName:first.kvName, stellvKv:first.stellvKv, stellvKvName:first.stellvKvName,
     langname:names.join(" + ")
   });
   const idx=state.conferences.findIndex(c=>c.id===first.id);
   state.conferences=state.conferences.filter(c=>!ids.includes(c.id));
   state.conferences.splice(Math.max(0,idx),0,merged);
-  mergeSel.clear();
+  mergeSel.clear(); closeMergeModal();
   rebuildSchedule();   // neu sortieren/takten + rendern + spiegeln
   updateMergeBtn();
 }
+function closeMergeModal(){ if(dom.mergeModal) dom.mergeModal.hidden=true; }
 /* ---------------- Klassen-Detail-Popup (Lehrer + Fächer) ---------------- */
 let cdRenderId=null;
 function openClassDetail(id){ if(!byId(id)) return; cdRenderId=id; renderClassDetail(); dom.classDetail.hidden=false; }
