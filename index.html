@@ -107,8 +107,9 @@ input,select{width:100%;min-width:0;font-family:inherit;font-size:14px;color:var
 .add-toggle:hover{filter:brightness(1.06)}
 /* Startzeit + Dauer einheitlich: zentriert, gleiche Höhe, ohne Spinner-Pfeile */
 /* Startzeit + Dauer: coole, dicke Digital-Schrift (DSEG7 wie die Uhr) */
-#startTime,#slotMinutes{text-align:center;text-align-last:center;height:46px;font-family:"DSEG7 Classic",ui-monospace,monospace;font-weight:700;font-size:21px;letter-spacing:1px;color:var(--ink)}
-#startTime::-webkit-date-and-time-value{text-align:center;font-family:"DSEG7 Classic",ui-monospace,monospace;font-weight:700}
+#startTime,#slotMinutes,#konfDate{text-align:center;text-align-last:center;height:46px;font-family:"DSEG7 Classic",ui-monospace,monospace;font-weight:700;font-size:21px;letter-spacing:1px;color:var(--ink)}
+#konfDate{font-size:16px;letter-spacing:0}
+#startTime::-webkit-date-and-time-value,#konfDate::-webkit-date-and-time-value{text-align:center;font-family:"DSEG7 Classic",ui-monospace,monospace;font-weight:700}
 /* Dauer + Nr. als Auswahlrad (select): native Optik aus + eigener Chevron */
 #slotMinutes,.ord-input{appearance:none;-webkit-appearance:none;-moz-appearance:none;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237c879a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
@@ -364,7 +365,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   /* Live-Spiegelung-Fenster am Handy fix über der Footer-Leiste (nicht mitten im Inhalt) */
   #livePanel{left:auto!important;right:10px!important;top:auto!important;bottom:88px!important;width:min(300px,calc(100vw - 20px))}
   /* Startzeit/Dauer einheitlich zentriert ausrichten */
-  #startTime,#slotMinutes{text-align:center}
+  #startTime,#slotMinutes,#konfDate{text-align:center}
 
   /* Header am Handy kompakt: weniger Luft, kleineres Logo, engere Schrift, Text+Version rechts */
   .topbar{gap:9px 10px;padding:8px 12px;margin:6px 0 0;border-radius:18px}
@@ -688,8 +689,13 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
       </div>
 
       <div class="row two">
+        <div><label for="konfDate">Konferenz-Datum</label><input id="konfDate" type="date" title="Leer = heute. Für Termine in der Zukunft das Datum setzen – Planzeiten & Beamer-Datum richten sich danach."></div>
         <div><label for="startTime">Startzeit</label><input id="startTime" type="time" value="13:00"></div>
+      </div>
+
+      <div class="row two">
         <div><label for="slotMinutes">Dauer/Konferenz (Min.)</label><select id="slotMinutes"><option>5</option><option>10</option><option selected>15</option><option>20</option><option>25</option><option>30</option><option>40</option><option>45</option><option>60</option><option>90</option></select></div>
+        <div></div>
       </div>
 
       <div class="dept-head">Abteilungen · Farbe + Startnummer (1–4)</div>
@@ -984,7 +990,7 @@ const DEPARTMENT_DEFAULTS = [
 ];
 
 const state = {
-  startTime:"13:00", slotMinutes:15, hideDone:false, showTeachers:false, teacherCode:"",
+  konfDate:"", startTime:"13:00", slotMinutes:15, hideDone:false, showTeachers:false, teacherCode:"",
   classDir:"asc",  // Stufe/Zahl: "asc" = 1→5, "desc" = 5→1
   letterDir:"asc", // Buchstabe innerhalb der Stufe: "asc" = A→Z, "desc" = Z→A
   departments: structuredClone(DEPARTMENT_DEFAULTS),
@@ -996,7 +1002,7 @@ let passiveMaster = false; // Master, der gerade NICHT steuert (anderes Gerät a
 const channel = "BroadcastChannel" in window ? new BroadcastChannel(CHANNEL_NAME) : null;
 const $ = id => document.getElementById(id);
 const dom = {};
-["teacherInput","startTime","slotMinutes","deptConfig","excelInput","loadDemoBtn","rebuildBtn","hideDone",
+["teacherInput","konfDate","startTime","slotMinutes","deptConfig","excelInput","loadDemoBtn","rebuildBtn","hideDone",
  "conferenceBody","liveNow","liveNext","finishCurrentBtn","startNextBtn","clockTime","clockDate","syncHint",
  "addDept","addClass","addKv","addTeachers","addBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","cloudLoadBtn","clearBtn","classDirBtn","letterDirBtn","excelLabel","showTeachers","bQRWrap","bQR",
  "untisBtn","untisModal","untisClose","untisOpen","untisCopy","untisScope","untisCopyHint","untisSnippet",
@@ -1074,6 +1080,7 @@ function init(){
 function bindEvents(){
   dom.teacherInput.addEventListener("input",()=>{ state.teacherCode=dom.teacherInput.value.trim(); if(dom.bTeacherInput) dom.bTeacherInput.value=state.teacherCode; renderConferenceTable(); persistLocal(); });
   dom.bTeacherInput.addEventListener("input",()=>{ state.teacherCode=dom.bTeacherInput.value.trim(); renderBeamer(); });
+  dom.konfDate.addEventListener("change",()=>{ state.konfDate=dom.konfDate.value||""; rebuildSchedule(); });
   dom.startTime.addEventListener("change",()=>{ state.startTime=dom.startTime.value||"13:00"; rebuildSchedule(); });
   dom.slotMinutes.addEventListener("change",()=>{ const n=Number(dom.slotMinutes.value); state.slotMinutes=Number.isFinite(n)?Math.max(5,Math.min(180,n)):15; dom.slotMinutes.value=String(state.slotMinutes); rebuildSchedule(); });
   dom.excelInput.addEventListener("change",async()=>{
@@ -1173,6 +1180,7 @@ function renderAddDeptOptions(){
 function renderAll(){
   dom.teacherInput.value=state.teacherCode;
   dom.bTeacherInput.value=state.teacherCode;
+  dom.konfDate.value=state.konfDate||"";
   dom.startTime.value=state.startTime;
   dom.slotMinutes.value=String(state.slotMinutes);
   dom.hideDone.checked=state.hideDone;
@@ -1196,7 +1204,7 @@ function applyRoleUi(){
   // „Master übernehmen" bleibt auch für passiven Master klickbar:
   dom.cloudLoadBtn.disabled = ROLE!=="master";
   [dom.finishCurrentBtn,dom.startNextBtn,dom.addBtn,dom.loadDemoBtn,dom.rebuildBtn,dom.clearBtn,dom.classDirBtn,dom.letterDirBtn,dom.untisBtn].forEach(b=>b.disabled=!master);
-  [dom.startTime,dom.slotMinutes,dom.addClass,dom.addKv,dom.addTeachers,dom.addDept,dom.excelInput,dom.importInput,dom.hideDone,dom.showTeachers].forEach(i=>i.disabled=!master);
+  [dom.konfDate,dom.startTime,dom.slotMinutes,dom.addClass,dom.addKv,dom.addTeachers,dom.addDept,dom.excelInput,dom.importInput,dom.hideDone,dom.showTeachers].forEach(i=>i.disabled=!master);
   // Teacher-Filter bleibt für ALLE nutzbar (Lehrer/Schüler an Anzeige-Geräten); Export ebenso.
   dom.teacherInput.disabled=false;
   dom.syncHint.textContent = master
@@ -1592,8 +1600,10 @@ function tickTimers(){
   refreshEtas();        // Tabelle (Master): ETA mitlaufen lassen
   refreshBeamerEtas();  // Beamer/Lehrer-Ansicht: ETA mitlaufen lassen
 }
-function dateLong(){ return new Date().toLocaleDateString("de-AT",{weekday:"long",day:"2-digit",month:"long",year:"numeric"}); }
-function timeToToday(hhmm){ const [h,m]=String(hhmm).split(":").map(Number); const d=new Date(); d.setHours(Number.isFinite(h)?h:13,Number.isFinite(m)?m:0,0,0); return d; }
+/* Basistag für Planzeiten & Anzeige: eingestelltes Konferenz-Datum, sonst heute. */
+function konfBaseDate(){ const s=state.konfDate; if(s){ const [y,mo,da]=String(s).split("-").map(Number); if(y&&mo&&da) return new Date(y,mo-1,da); } return new Date(); }
+function dateLong(){ return konfBaseDate().toLocaleDateString("de-AT",{weekday:"long",day:"2-digit",month:"long",year:"numeric"}); }
+function timeToToday(hhmm){ const [h,m]=String(hhmm).split(":").map(Number); const d=konfBaseDate(); d.setHours(Number.isFinite(h)?h:13,Number.isFinite(m)?m:0,0,0); return d; }
 function fmt(ts){ if(!ts) return "--:--"; return new Date(ts).toLocaleTimeString("de-AT",{hour:"2-digit",minute:"2-digit",hour12:false}); }
 function escapeHtml(t){ return String(t).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
 
@@ -1610,6 +1620,7 @@ function loadState(){
   catch(e){ state.conferences=createDemoData(); rebuildSchedule(); }
 }
 function hydrateFromRemote(r,render=true){
+  state.konfDate=typeof r.konfDate==="string"?r.konfDate:(state.konfDate||"");
   state.startTime=r.startTime||state.startTime;
   state.slotMinutes=Number(r.slotMinutes)||state.slotMinutes;
   state.hideDone=!!r.hideDone;
@@ -1627,7 +1638,7 @@ function hydrateFromRemote(r,render=true){
 
 /* Daten für die geräteübergreifende Spiegelung */
 window.__kfSnapshot = ()=>({
-  v:2, startTime:state.startTime, slotMinutes:state.slotMinutes, hideDone:state.hideDone, showTeachers:state.showTeachers,
+  v:2, konfDate:state.konfDate, startTime:state.startTime, slotMinutes:state.slotMinutes, hideDone:state.hideDone, showTeachers:state.showTeachers,
   classDir:state.classDir, letterDir:state.letterDir, departments:state.departments, conferences:state.conferences, revision:state.revision
 });
 window.__kfApplyRemote = pl=>{
@@ -1710,7 +1721,9 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
     let last=null;
     function applyPayload(pl){
       last=pl||null;
-      const active = pl && pl.sessionActive && pl.sessionDate===viennaDate() && pl.snapshot && pl.snapshot.conferences && pl.snapshot.conferences.length;
+      // Sofort live, sobald der Master „Konferenztag gestartet" hat – unabhängig vom Kalendertag.
+      // (Datum dient nur der Anzeige/Zeitberechnung; das frühere Tag-Gate sessionDate===heute entfällt bewusst.)
+      const active = pl && pl.sessionActive && pl.snapshot && pl.snapshot.conferences && pl.snapshot.conferences.length;
       if(active){
         window.__kfRuhe(false);
         window.__kfApplyRemote(pl.snapshot);
@@ -1780,13 +1793,13 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
   $id("lpCopy").onclick=()=>{ const i=$id("lpUrl"); i.select(); if(navigator.clipboard) navigator.clipboard.writeText(i.value); else{ try{document.execCommand("copy");}catch(e){} } $id("lpCopy").textContent="✓"; setTimeout(()=>$id("lpCopy").textContent="Kopieren",1200); };
 
   function setActive(a){ sessionActive=a; if(a) sessionDate=viennaDate();
-    try{ localStorage.setItem("kf_live_session",a?viennaDate():""); }catch(e){}
+    try{ localStorage.setItem("kf_live_session",a?"1":""); }catch(e){}
     panel.classList.toggle("active",a);
     $id("lpToggle").textContent=a?"■ Konferenztag beenden":"▶ Konferenztag starten";
     pushNow();
   }
   $id("lpToggle").onclick=()=>setActive(!sessionActive);
-  try{ if(localStorage.getItem("kf_live_session")===viennaDate()) setActive(true); }catch(e){}
+  try{ if(localStorage.getItem("kf_live_session")) setActive(true); }catch(e){}
 
   // Pfeil = verkleinern / vergrößern
   const minBtn=panel.querySelector(".lp-min");
