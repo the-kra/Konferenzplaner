@@ -197,6 +197,12 @@ tbody tr.mine td:nth-child(3)::after{content:" ★";color:var(--mine)}
 .badge.done{background:#b8c0cd}
 .actions{display:flex;gap:6px}
 .kv-input{width:74px;padding:5px 7px;font-size:12.5px;text-transform:uppercase;border-radius:7px}
+.cls-input{width:104px;padding:5px 7px;font-size:13px;font-weight:600;border-radius:7px}
+.row-sel{margin-right:7px;vertical-align:middle;cursor:pointer}
+.rownum{opacity:.75}
+.merge-btn{margin-left:8px;flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 13px;border-radius:11px;border:none;background:var(--good);color:#fff;cursor:pointer}
+.merge-btn[hidden]{display:none}
+.merge-btn:hover{filter:brightness(1.06)}
 .add-form{display:grid;grid-template-columns:150px 1fr 110px 1fr auto;gap:9px;margin-bottom:14px;align-items:end}
 @media(max-width:760px){.add-form{grid-template-columns:1fr}.row.two{grid-template-columns:1fr}}
 
@@ -734,7 +740,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
       </section>
 
       <section class="panel full">
-        <h2>Konferenzliste <span class="pill" id="countPill">0</span><button class="add-toggle" id="addToggle" type="button" title="Klasse hinzufügen">+ Klasse</button></h2>
+        <h2>Konferenzliste <span class="pill" id="countPill">0</span><button class="add-toggle" id="addToggle" type="button" title="Klasse hinzufügen">+ Klasse</button><button class="merge-btn" id="mergeBtn" type="button" hidden title="Markierte Klassen zu einer Konferenz zusammenfassen">⤵ Zusammenfassen</button></h2>
         <div class="add-form" id="addForm" hidden>
           <div><label>Abteilung</label><select id="addDept"></select></div>
           <div><label>Klasse</label><input id="addClass" placeholder="z. B. 1AHET"></div>
@@ -1004,11 +1010,12 @@ const $ = id => document.getElementById(id);
 const dom = {};
 ["teacherInput","konfDate","startTime","slotMinutes","deptConfig","excelInput","loadDemoBtn","rebuildBtn","hideDone",
  "conferenceBody","liveNow","liveNext","finishCurrentBtn","startNextBtn","clockTime","clockDate","syncHint",
- "addDept","addClass","addKv","addTeachers","addBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","cloudLoadBtn","clearBtn","classDirBtn","letterDirBtn","excelLabel","showTeachers","bQRWrap","bQR",
+ "addDept","addClass","addKv","addTeachers","addBtn","mergeBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","cloudLoadBtn","clearBtn","classDirBtn","letterDirBtn","excelLabel","showTeachers","bQRWrap","bQR",
  "untisBtn","untisModal","untisClose","untisOpen","untisCopy","untisScope","untisCopyHint","untisSnippet",
  "beamerView","bClose","bCurrent","bNext","bList","bDate","bClockTime","ruheView","bTeacher","bTeacherInput"].forEach(k=>dom[k]=$(k));
 
 let clockTimer=null;
+const mergeSel = new Set();   // markierte Klassen-IDs zum Zusammenfassen
 
 init();
 
@@ -1100,6 +1107,7 @@ function bindEvents(){
   dom.finishCurrentBtn.addEventListener("click",()=>{ if(!isMaster())return; const r=getRunning(); if(r) finishConference(r.id); });
   dom.startNextBtn.addEventListener("click",()=>{ if(!isMaster())return; const n=getNextWaiting(); if(n) startConference(n.id); });
   dom.addBtn.addEventListener("click",addClassFromForm);
+  dom.mergeBtn.addEventListener("click",mergeSelected);
   ["addClass","addTeachers","addKv"].forEach(k=>dom[k].addEventListener("keydown",e=>{ if(e.key==="Enter") addClassFromForm(); }));
 
   dom.conferenceBody.addEventListener("click",e=>{
@@ -1112,12 +1120,29 @@ function bindEvents(){
     else if(a==="close") closeConference(id);
     else if(a==="remove") removeConference(id);
   });
-  // KV inline ändern (Master): Kürzel direkt in der Tabelle editieren
+  // Inline-Bearbeitung in der Tabelle (Master): KV, Klassenname, Zusammenfass-Auswahl
   dom.conferenceBody.addEventListener("change",e=>{
-    const inp=e.target.closest("input[data-kv]"); if(!inp||!isMaster()) return;
-    const id=inp.closest("tr")?.dataset.id; const c=byId(id); if(!c) return;
-    const t=parseTeacher(inp.value); c.kv=t.k; if(t.n) c.kvName=t.n; else if(!inp.value.trim()) c.kvName="";
-    bumpRevision(); renderLiveCards(); if(dom.beamerView.classList.contains("on")) renderBeamer(); persistAndPublish();
+    if(!isMaster()) return;
+    const kvI=e.target.closest("input[data-kv]");
+    if(kvI){
+      const c=byId(kvI.closest("tr")?.dataset.id); if(!c) return;
+      const t=parseTeacher(kvI.value); c.kv=t.k; if(t.n) c.kvName=t.n; else if(!kvI.value.trim()) c.kvName="";
+      bumpRevision(); renderLiveCards(); if(dom.beamerView.classList.contains("on")) renderBeamer(); persistAndPublish();
+      return;
+    }
+    const nmI=e.target.closest("input[data-name]");
+    if(nmI){
+      const c=byId(nmI.closest("tr")?.dataset.id); if(!c) return;
+      const v=nmI.value.trim(); if(v) c.className=v; nmI.value=c.className;   // leerer Name → alter Name bleibt
+      bumpRevision(); renderLiveCards(); if(dom.beamerView.classList.contains("on")) renderBeamer(); persistAndPublish();
+      return;
+    }
+    const selI=e.target.closest("input[data-sel]");
+    if(selI){
+      const id=selI.closest("tr")?.dataset.id; if(!id) return;
+      if(selI.checked) mergeSel.add(id); else mergeSel.delete(id);
+      updateMergeBtn();
+    }
   });
 
   dom.exportBtn.addEventListener("click",exportState);
@@ -1230,10 +1255,16 @@ function renderConferenceTable(){
     const kvCell = master
       ? `<input class="kv-input" data-kv value="${escapeHtml(c.kv)}" maxlength="12" placeholder="Kürzel" title="${escapeHtml(c.kvName||"Klassenvorstand-Kürzel")}">`
       : escapeHtml(c.kv||"—");
+    const numCell = master
+      ? `<td><input type="checkbox" class="row-sel" data-sel ${mergeSel.has(c.id)?"checked":""} title="Zum Zusammenfassen markieren"><span class="rownum">${i+1}</span></td>`
+      : `<td>${i+1}</td>`;
+    const nameCell = master
+      ? `<td><input class="cls-input" data-name value="${escapeHtml(c.className)}" maxlength="40" title="Klassenname ändern – Lehrer & KV bleiben verbunden"></td>`
+      : `<td>${escapeHtml(c.className)}</td>`;
     tr.innerHTML=[
-      `<td>${i+1}</td>`,
+      numCell,
       `<td><span class="badge" style="background:${d.color}">${escapeHtml(d.label)}</span></td>`,
-      `<td>${escapeHtml(c.className)}</td>`,
+      nameCell,
       `<td>${kvCell}</td>`,
       `<td>${escapeHtml(teacherKuerzel(c))}</td>`,
       `<td>${fmt(c.plannedStart)}–${fmt(c.plannedEnd)}</td>`,
@@ -1244,6 +1275,7 @@ function renderConferenceTable(){
     ].join("");
     dom.conferenceBody.appendChild(tr);
   });
+  updateMergeBtn();
 }
 function actionsHtml(c,master){
   if(!master) return "—";
@@ -1430,6 +1462,42 @@ function addClassFromForm(){
   state.conferences.push(createConference(dept,name,teachers,{kv:kvT.k,kvName:kvT.n}));
   dom.addClass.value=""; dom.addTeachers.value=""; dom.addKv.value=""; dom.addClass.focus();
   rebuildSchedule();
+}
+function updateMergeBtn(){
+  if(!dom.mergeBtn) return;
+  for(const id of [...mergeSel]) if(!byId(id)) mergeSel.delete(id);   // verwaiste Auswahl entfernen
+  const n=mergeSel.size, show = canControl() && n>=2;
+  dom.mergeBtn.hidden=!show;
+  dom.mergeBtn.textContent = n>=2 ? `⤵ ${n} zusammenfassen` : "⤵ Zusammenfassen";
+}
+/* Mehrere Klassen zu EINER Konferenz zusammenfassen.
+   Lehrer aller Klassen + ihre KV/StellvKV werden vereint, damit jeder Betroffene
+   die (umbenannte) Konferenz in der Übersicht markiert sieht. */
+function mergeSelected(){
+  if(!canControl()) return;
+  const ids=[...mergeSel].filter(id=>byId(id));
+  if(ids.length<2){ updateMergeBtn(); return; }
+  const sel=state.conferences.filter(c=>ids.includes(c.id));   // Reihenfolge wie in der Liste
+  const first=sel[0];
+  const names=sel.map(c=>c.className);
+  const newName=prompt(`Neuer Name für die zusammengefasste Konferenz:\n(${names.join(", ")})`, names.join("+"));
+  if(newName===null) return;                                   // abgebrochen
+  const name=newName.trim()||first.className;
+  // Lehrer vereinen (nach Kürzel, Nachname bewahren); KV/StellvKV jeder Klasse als Lehrer ergänzen
+  const tmap=new Map();
+  const addT=(k,n)=>{ k=String(k||"").toUpperCase().trim(); if(!k) return; if(!tmap.get(k)&&n) tmap.set(k,n); else if(!tmap.has(k)) tmap.set(k,n||""); };
+  sel.forEach(c=>{ c.teachers.forEach(t=>addT(t.k,t.n)); addT(c.kv,c.kvName); addT(c.stellvKv,c.stellvKvName); });
+  const teachers=[...tmap].map(([k,n])=>({k,n}));
+  const merged=createConference(first.departmentKey,name,teachers,{
+    kv:first.kv, kvName:first.kvName, stellvKv:first.stellvKv, stellvKvName:first.stellvKvName,
+    langname:names.join(" + ")
+  });
+  const idx=state.conferences.findIndex(c=>c.id===first.id);
+  state.conferences=state.conferences.filter(c=>!ids.includes(c.id));
+  state.conferences.splice(Math.max(0,idx),0,merged);
+  mergeSel.clear();
+  rebuildSchedule();   // neu sortieren/takten + rendern + spiegeln
+  updateMergeBtn();
 }
 function removeConference(id){
   const c=byId(id); if(!c) return;
