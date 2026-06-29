@@ -110,10 +110,13 @@ input,select{width:100%;min-width:0;font-family:inherit;font-size:14px;color:var
 #startTime,#slotMinutes,#konfDate{text-align:center;text-align-last:center;height:46px;font-family:"DSEG7 Classic",ui-monospace,monospace;font-weight:700;font-size:21px;letter-spacing:1px;color:var(--ink)}
 #konfDate{font-size:16px;letter-spacing:0}
 #startTime::-webkit-date-and-time-value,#konfDate::-webkit-date-and-time-value{text-align:center;font-family:"DSEG7 Classic",ui-monospace,monospace;font-weight:700}
-/* Dauer + Nr. als Auswahlrad (select): native Optik aus + eigener Chevron */
-#slotMinutes,.ord-input{appearance:none;-webkit-appearance:none;-moz-appearance:none;
+/* Nr. als Auswahlrad (select): native Optik aus + eigener Chevron */
+.ord-input{appearance:none;-webkit-appearance:none;-moz-appearance:none;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237c879a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
   background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+/* Dauer: freies Zahlenfeld – Spinner-Pfeile ausblenden (cleaner DSEG7-Look) */
+#slotMinutes{-moz-appearance:textfield;appearance:textfield}
+#slotMinutes::-webkit-outer-spin-button,#slotMinutes::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 /* Add-Form erst sichtbar nach Klick auf "+ Klasse" (hidden-Attribut greift sonst nicht wegen display:grid) */
 .add-form[hidden]{display:none}
 input:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent)}
@@ -703,7 +706,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
       </div>
 
       <div class="row two">
-        <div><label for="slotMinutes">Dauer/Konferenz (Min.)</label><select id="slotMinutes"><option>5</option><option>10</option><option selected>15</option><option>20</option><option>25</option><option>30</option><option>40</option><option>45</option><option>60</option><option>90</option></select></div>
+        <div><label for="slotMinutes">Dauer/Konferenz (Min.)</label><input id="slotMinutes" type="number" min="1" max="999" step="1" value="15" inputmode="numeric" title="Beliebige Minutenzahl (1–999)"></div>
         <div></div>
       </div>
 
@@ -1092,7 +1095,7 @@ function bindEvents(){
   dom.bTeacherInput.addEventListener("input",()=>{ state.teacherCode=dom.bTeacherInput.value.trim(); renderBeamer(); });
   dom.konfDate.addEventListener("change",()=>{ state.konfDate=dom.konfDate.value||""; rebuildSchedule(); });
   dom.startTime.addEventListener("change",()=>{ state.startTime=dom.startTime.value||"13:00"; rebuildSchedule(); });
-  dom.slotMinutes.addEventListener("change",()=>{ const n=Number(dom.slotMinutes.value); state.slotMinutes=Number.isFinite(n)?Math.max(5,Math.min(180,n)):15; dom.slotMinutes.value=String(state.slotMinutes); rebuildSchedule(); });
+  dom.slotMinutes.addEventListener("change",()=>{ const n=Math.round(Number(dom.slotMinutes.value)); state.slotMinutes=Number.isFinite(n)&&n>=1?Math.min(999,n):15; dom.slotMinutes.value=String(state.slotMinutes); rebuildSchedule(); });
   dom.excelInput.addEventListener("change",async()=>{
     const f=dom.excelInput.files?.[0]; if(!f) return;
     const imported=await parseExcel(f);
