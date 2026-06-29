@@ -463,6 +463,9 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 .cd-mine[hidden]{display:none}
 .cd-mine .cdm-lbl{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700;display:block;margin-bottom:5px}
 .cd-mine .cdm-f{font-weight:700;color:var(--ink)}
+.cd-attend{display:block;width:100%;margin:0 0 15px;padding:11px 14px;border-radius:13px;border:1px solid var(--line);background:#fff;color:var(--muted);font-weight:700;font-size:13.5px;cursor:pointer;text-align:center}
+.cd-attend.on{background:color-mix(in srgb,var(--good) 14%,#fff);border-color:color-mix(in srgb,var(--good) 45%,transparent);color:var(--good)}
+.cd-attend[hidden]{display:none}
 .cd-tlabel{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 8px}
 .cd-teachers{display:flex;flex-direction:column;gap:8px}
 .cd-trow{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:#fff}
@@ -980,6 +983,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
     <div class="cd-top"><span class="cd-dept" id="cdDept"></span><h3 id="cdClass">—</h3></div>
     <p class="cd-meta" id="cdMeta"></p>
     <div class="cd-mine" id="cdMine" hidden></div>
+    <button class="cd-attend" id="cdAttend" type="button" hidden></button>
     <div class="cd-tlabel">Lehrer dieser Klasse</div>
     <div class="cd-teachers" id="cdTeachers"></div>
   </div>
@@ -1077,7 +1081,7 @@ const dom = {};
  "addDept","addClass","addKv","addTeachers","addBtn","mergeBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","cloudLoadBtn","clearBtn","classDirBtn","letterDirBtn","excelLabel","showTeachers","bQRWrap","bQR",
  "untisBtn","untisModal","untisClose","untisOpen","untisCopy","untisScope","untisCopyHint","untisSnippet",
  "beamerView","bClose","bCurrent","bNext","bList","bDate","bClockTime","ruheView","bTeacher","bTeacherInput",
- "classDetail","cdClose","cdDept","cdClass","cdMeta","cdMine","cdTeachers"].forEach(k=>dom[k]=$(k));
+ "classDetail","cdClose","cdDept","cdClass","cdMeta","cdMine","cdAttend","cdTeachers"].forEach(k=>dom[k]=$(k));
 
 let clockTimer=null;
 const mergeSel = new Set();   // markierte Klassen-IDs zum Zusammenfassen
@@ -1228,6 +1232,7 @@ function bindEvents(){
   dom.classDetail.addEventListener("click",e=>{ if(e.target===dom.classDetail) closeClassDetail(); });
   document.addEventListener("keydown",e=>{ if(e.key==="Escape" && !dom.classDetail.hidden) closeClassDetail(); });
   dom.cdTeachers.addEventListener("click",e=>{ const b=e.target.closest("[data-rm]"); if(b && canControl()) removeTeacherFromClass(cdRenderId,b.getAttribute("data-rm")); });
+  dom.cdAttend.addEventListener("click",()=>{ const c=byId(cdRenderId); if(!c) return; togglePersonalMine(c); renderConferenceTable(); if(dom.beamerView.classList.contains("on")) renderBeamer(); renderClassDetail(); });
 
   // Mobile Steuerleiste (gespiegelt auf die Hauptaktionen)
   $("mFinish").addEventListener("click",()=>{ if(!isMaster())return; const r=getRunning(); if(r) finishConference(r.id); });
@@ -1326,7 +1331,7 @@ function renderConferenceTable(){
     if(running&&running.id===c.id) tr.classList.add("current");
     if(next&&next.id===c.id) tr.classList.add("next");
     if(c.status==="done") tr.classList.add("done");
-    if(matchesQuery(c,tc)) tr.classList.add("mine");
+    if(isMine(c)) tr.classList.add("mine");
     const d=getDept(c.departmentKey);
     const kvCell = master
       ? `<input class="kv-input" data-kv value="${escapeHtml(c.kv)}" maxlength="12" placeholder="Kürzel" title="${escapeHtml(c.kvName||"Klassenvorstand-Kürzel")}">`
@@ -1422,7 +1427,7 @@ function renderBeamer(){
   const rows=state.conferences.filter(c=>!c.hidden && !(state.hideDone&&c.status==="done"));
   dom.bList.innerHTML=rows.map((c,i)=>{
     const d=getDept(c.departmentKey);
-    const cls=["brow"]; if(r&&r.id===c.id)cls.push("current"); if(c.status==="done")cls.push("done"); if(matchesQuery(c,tc))cls.push("mine");
+    const cls=["brow"]; if(r&&r.id===c.id)cls.push("current"); if(c.status==="done")cls.push("done"); if(isMine(c))cls.push("mine");
     return `<div class="${cls.join(" ")}" data-cid="${c.id}"><span class="bdot" style="background:${d.color}"></span><span class="btime" data-beta="${c.id}">${bTime(c,etas[c.id])}</span><strong class="bclass">${escapeHtml(c.className)}</strong><span class="bkv">${escapeHtml(c.kv||"—")}</span><span class="bteach">${escapeHtml(teacherKuerzel(c))}</span><span class="bstat">${statusBadge(c.status)}</span></div>`;
   }).join("") || `<div class="bempty">Keine Konferenzen geladen</div>`;
   tickTimers();
@@ -1601,6 +1606,14 @@ function renderClassDetail(){
     dom.cdMine.hidden=false;
     dom.cdMine.innerHTML=`<span class="cdm-lbl">Diese Klasse betrifft dich</span><span class="cdm-f">${isKv && !mineT ? "Du bist Klassenvorstand." : "Du bist hier eingetragen."}</span>`;
   }else dom.cdMine.hidden=true;
+  // Persönlicher Schalter „muss ich hin?" – nur wenn ein Kürzel gesetzt ist (lokal pro Gerät)
+  if(tc){
+    const mine=isMine(c);
+    dom.cdAttend.hidden=false;
+    dom.cdAttend.classList.toggle("on",mine);
+    dom.cdAttend.textContent = mine ? "✓ Ich muss in diese Konferenz – tippen, wenn nicht"
+                                    : "✕ Muss ich nicht – tippen, wenn doch";
+  }else dom.cdAttend.hidden=true;
   // Lehrerliste mit Fächern + (Master) Entfernen
   const master=canControl();
   if(!c.teachers.length){ dom.cdTeachers.innerHTML='<div class="cd-empty">Keine Lehrer hinterlegt.</div>'; return; }
@@ -1691,6 +1704,26 @@ function teacherMatches(t,q){
   q=String(q||"").trim().toLowerCase(); if(!q||!t) return false;
   const k=(t.k||"").toLowerCase(), n=(t.n||"").toLowerCase();
   return (!!k && k===q) || (!!n && (n===q || (q.length>=4 && n.startsWith(q))));
+}
+/* Persönliche Markierung – nur lokal auf DIESEM Gerät, nichts wird geteilt.
+   'no' = "ich muss hier NICHT hin", 'yes' = "doch hin"; sonst Auto-Erkennung übers Kürzel. */
+const PERSONAL_KEY="kf_personal_marks";
+let personalMark=(function(){ try{ const o=JSON.parse(localStorage.getItem(PERSONAL_KEY)||"{}"); return (o&&typeof o==="object")?o:{}; }catch(e){ return {}; } })();
+function savePersonalMarks(){ try{ localStorage.setItem(PERSONAL_KEY,JSON.stringify(personalMark)); }catch(e){} }
+function markKey(c){ return String(c.className||"").trim().toUpperCase(); }
+function isMine(c){
+  if(!state.teacherCode) return false;
+  const o=personalMark[markKey(c)];
+  if(o==="yes") return true;
+  if(o==="no")  return false;
+  return matchesQuery(c,state.teacherCode);
+}
+function togglePersonalMine(c){
+  const auto=!!state.teacherCode && matchesQuery(c,state.teacherCode);
+  const next=!isMine(c);
+  if(next===auto) delete personalMark[markKey(c)];      // entspricht Auto-Erkennung → Override entfernen
+  else personalMark[markKey(c)]= next ? "yes" : "no";
+  savePersonalMarks();
 }
 
 function createConference(departmentKey,className,teachers,opts){
