@@ -451,6 +451,35 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 .btn-step:hover{border-color:var(--brand)}
 .btn-step.primary{background:var(--brand);color:#fff;border-color:transparent}
 .modal-hint{min-height:16px;margin:12px 0 0;font-size:12.5px;font-weight:600;color:var(--good)}
+
+/* ---- Klassen-Detail-Popup (Lehrer + Fächer) ---- */
+.cd-overlay{z-index:9600}                 /* über Beamer (9000) */
+.cd-card{width:min(460px,100%)}
+.cd-top{display:flex;align-items:center;gap:11px;margin:0 34px 4px 0}
+.cd-top h3{margin:0;font-size:23px}
+.cd-dept{flex:0 0 auto;font-size:12px;font-weight:600;color:#fff;border-radius:999px;padding:3px 12px}
+.cd-meta{color:var(--muted);font-size:13px;margin:0 0 14px;line-height:1.5}
+.cd-mine{background:color-mix(in srgb,var(--mine,#f5a524) 16%,#fff);border:1px solid color-mix(in srgb,var(--mine,#f5a524) 45%,transparent);border-radius:13px;padding:10px 13px;margin:0 0 15px;font-size:14px}
+.cd-mine[hidden]{display:none}
+.cd-mine .cdm-lbl{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700;display:block;margin-bottom:5px}
+.cd-mine .cdm-f{font-weight:700;color:var(--ink)}
+.cd-tlabel{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 8px}
+.cd-teachers{display:flex;flex-direction:column;gap:8px}
+.cd-trow{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.cd-trow.mine{border-color:color-mix(in srgb,var(--mine,#f5a524) 55%,transparent);background:color-mix(in srgb,var(--mine,#f5a524) 10%,#fff)}
+.cd-tn{flex:0 0 auto;font-weight:700;font-size:14.5px}
+.cd-tn small{font-weight:500;color:var(--muted)}
+.cd-tf{flex:1 1 auto;display:flex;flex-wrap:wrap;gap:5px;min-width:0}
+.cd-chip{font-size:11.5px;font-weight:600;color:var(--brand);background:color-mix(in srgb,var(--brand) 11%,#fff);border:1px solid color-mix(in srgb,var(--brand) 22%,transparent);border-radius:7px;padding:2px 8px}
+.cd-nofa{font-size:12px;color:#9aa6b6;font-style:italic}
+.cd-rm{flex:0 0 auto;width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--bad);font-size:14px;font-weight:700;cursor:pointer;line-height:1}
+.cd-rm:hover{background:color-mix(in srgb,var(--bad) 12%,#fff);border-color:var(--bad)}
+.cd-you{font-size:10.5px;font-weight:700;color:var(--mine,#c4820e);letter-spacing:.5px;margin-left:4px}
+.cd-empty{color:#9aa6b6;font-size:13px;font-style:italic}
+.brow{cursor:pointer}
+#conferenceBody tr{cursor:pointer}
+#conferenceBody tr input,#conferenceBody tr select,#conferenceBody tr button{cursor:auto}
+#conferenceBody tr button{cursor:pointer}
 </style>
 </head>
 <body>
@@ -863,18 +892,25 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
       abt: mapAbteilung(k.did),
       teacher1: k.teacher1 || null,
       teacher2: k.teacher2 || null,
-      lehrerIds: new Set(), aktiv:false,
+      tmap: new Map(), aktiv:false,   // teacherId -> {weeks:Set, faecher:Set}
     };
-    for (const [ws,we] of weeks) {
+    for (let wi=0; wi<weeks.length; wi++) {
+      const [ws,we]=weeks[wi];
       try {
         const tt = await rpc("getTimetable", { options:{
           element:{id:k.id,type:1}, startDate:ws, endDate:we,
-          teacherFields:["id","name","longname"] }});
+          teacherFields:["id","name","longname"], subjectFields:["id","name","longname"] }});
         (tt||[]).forEach(lesson=>{
           if (lesson.code === "cancelled") return;
           entry.aktiv = true;
-          (lesson.te||[]).forEach(t=>{ noteTeacher(t);
-            if (t && t.id!=null && (t.name||"")!=="---") entry.lehrerIds.add(t.id); });
+          const subs = (lesson.su||[]).map(s=>(s.name||"").trim()).filter(x=>x && x!=="---");
+          (lesson.te||[]).forEach(t=>{
+            if (!t || t.id==null || (t.name||"")==="---") return;
+            if (t.orgid!=null) return;          // Vertretung: Vertreter NICHT der Klasse zurechnen
+            noteTeacher(t);
+            let rec=entry.tmap.get(t.id); if(!rec){ rec={weeks:new Set(),faecher:new Set()}; entry.tmap.set(t.id,rec); }
+            rec.weeks.add(wi); subs.forEach(s=>rec.faecher.add(s));
+          });
         });
       } catch(e){}
       await new Promise(r=>setTimeout(r,60));
@@ -882,13 +918,19 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
     result[k.name]=entry;
     if(idx%5===0||idx===klassen.length)
       console.log("  ...verarbeitet: "+idx+"/"+klassen.length+"  (zuletzt: "+k.name+
-        " | "+entry.abt+" | "+entry.lehrerIds.size+" Lehrer)");
+        " | "+entry.abt+" | "+entry.tmap.size+" Lehrer)");
   }
 
+  const MIN_WEEKS = 2;   // unter 2 Wochen = einmalige Vertretung/Aushilfe -> raus (KV bleibt immer)
   Object.values(result).forEach(e=>{
     e.kv  = e.teacher1!=null ? teacherLabel(e.teacher1) : "";
     e.kv2 = e.teacher2!=null ? teacherLabel(e.teacher2) : "";
-    e.lehrer = [...e.lehrerIds].map(teacherLabel).sort((a,b)=>a.localeCompare(b));
+    const kvIds=new Set([e.teacher1,e.teacher2].filter(x=>x!=null));
+    e.lehrerList = [...e.tmap.entries()]
+      .filter(([id,rec])=> rec.weeks.size>=MIN_WEEKS || kvIds.has(id))
+      .map(([id,rec])=>({ label:teacherLabel(id), faecher:[...rec.faecher].sort((a,b)=>a.localeCompare(b)) }))
+      .sort((a,b)=>a.label.localeCompare(b.label));
+    e.lehrer = e.lehrerList.map(l=>l.label);   // kompatibel zu bestehenden Logs
   });
 
   const aktive = Object.values(result).filter(e=>e.aktiv);
@@ -904,10 +946,11 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
     byDept[dep].forEach(e=>console.log("  "+e.klasse+"  [KV: "+(e.kv||"?")+"]  ("+e.lehrer.length+
       " Lehrer) -> "+e.lehrer.join(", "))); });
 
-  let csv="Abteilung;Klasse;Langname;Klassenvorstand;StellvKV;Lehrer\n";
+  let csv="Abteilung;Klasse;Langname;Klassenvorstand;StellvKV;Lehrer;Faecher\n";
   deps.forEach(dep=>byDept[dep].forEach(e=>{
     const base=`"${e.abt}";"${e.klasse}";"${e.langname}";"${e.kv}";"${e.kv2}"`;
-    if(e.lehrer.length===0)csv+=base+`;""\n`; else e.lehrer.forEach(l=>csv+=base+`;"${l}"\n`); }));
+    if(e.lehrerList.length===0)csv+=base+`;"";""\n`;
+    else e.lehrerList.forEach(l=>csv+=base+`;"${l.label}";"${l.faecher.join(", ")}"\n`); }));
   const tv={}; aktive.forEach(e=>e.lehrer.forEach(l=>(tv[l]=tv[l]||new Set()).add(e.klasse)));
   let csvT="Lehrer;Klassen;AnzahlKlassen\n";
   Object.keys(tv).sort().forEach(l=>{const kl=[...tv[l]].sort();
@@ -929,6 +972,18 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   <button id="mNext" type="button"><span class="mb-ico">▶</span><span class="mb-txt">Nächste</span></button>
   <button id="mBeamer" type="button"><span class="mb-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></span><span class="mb-txt">Beamer</span></button>
 </nav>
+
+<!-- Klassen-Detail: Lehrer + ihre Fächer (Tippen auf eine Klasse) -->
+<div class="modal-overlay cd-overlay" id="classDetail" hidden>
+  <div class="modal-card cd-card" role="dialog" aria-modal="true" aria-labelledby="cdClass">
+    <button class="modal-x" id="cdClose" type="button" aria-label="Schließen">✕</button>
+    <div class="cd-top"><span class="cd-dept" id="cdDept"></span><h3 id="cdClass">—</h3></div>
+    <p class="cd-meta" id="cdMeta"></p>
+    <div class="cd-mine" id="cdMine" hidden></div>
+    <div class="cd-tlabel">Lehrer dieser Klasse</div>
+    <div class="cd-teachers" id="cdTeachers"></div>
+  </div>
+</div>
 
 <script>
 /* HTL1-Animationslogo (inline, selbstständig) */
@@ -1021,7 +1076,8 @@ const dom = {};
  "conferenceBody","liveNow","liveNext","finishCurrentBtn","startNextBtn","clockTime","clockDate","syncHint",
  "addDept","addClass","addKv","addTeachers","addBtn","mergeBtn","countPill","rolePill","openBeamerBtn","exportBtn","importInput","cloudLoadBtn","clearBtn","classDirBtn","letterDirBtn","excelLabel","showTeachers","bQRWrap","bQR",
  "untisBtn","untisModal","untisClose","untisOpen","untisCopy","untisScope","untisCopyHint","untisSnippet",
- "beamerView","bClose","bCurrent","bNext","bList","bDate","bClockTime","ruheView","bTeacher","bTeacherInput"].forEach(k=>dom[k]=$(k));
+ "beamerView","bClose","bCurrent","bNext","bList","bDate","bClockTime","ruheView","bTeacher","bTeacherInput",
+ "classDetail","cdClose","cdDept","cdClass","cdMeta","cdMine","cdTeachers"].forEach(k=>dom[k]=$(k));
 
 let clockTimer=null;
 const mergeSel = new Set();   // markierte Klassen-IDs zum Zusammenfassen
@@ -1129,6 +1185,11 @@ function bindEvents(){
     else if(a==="close") closeConference(id);
     else if(a==="remove") removeConference(id);
   });
+  // Klick auf eine Tabellenzeile (nicht auf Steuerelemente) öffnet das Klassen-Detail
+  dom.conferenceBody.addEventListener("click",e=>{
+    if(e.target.closest("button,input,select,label,a")) return;
+    const id=e.target.closest("tr")?.dataset.id; if(id) openClassDetail(id);
+  });
   // Inline-Bearbeitung in der Tabelle (Master): KV, Klassenname, Zusammenfass-Auswahl
   dom.conferenceBody.addEventListener("change",e=>{
     if(!isMaster()) return;
@@ -1160,7 +1221,13 @@ function bindEvents(){
 
   dom.openBeamerBtn.addEventListener("click",()=>openBeamer(true));
   dom.bClose.addEventListener("click",()=>openBeamer(false));
-  document.addEventListener("keydown",e=>{ if(e.key==="Escape" && dom.beamerView.classList.contains("on") && ROLE==="master") openBeamer(false); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape" && dom.classDetail.hidden && dom.beamerView.classList.contains("on") && ROLE==="master") openBeamer(false); });
+  // Klassen-Detail-Popup: Beamer-/Anzeige-Zeile antippen → öffnen
+  dom.bList.addEventListener("click",e=>{ const r=e.target.closest("[data-cid]"); if(r) openClassDetail(r.dataset.cid); });
+  dom.cdClose.addEventListener("click",closeClassDetail);
+  dom.classDetail.addEventListener("click",e=>{ if(e.target===dom.classDetail) closeClassDetail(); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape" && !dom.classDetail.hidden) closeClassDetail(); });
+  dom.cdTeachers.addEventListener("click",e=>{ const b=e.target.closest("[data-rm]"); if(b && canControl()) removeTeacherFromClass(cdRenderId,b.getAttribute("data-rm")); });
 
   // Mobile Steuerleiste (gespiegelt auf die Hauptaktionen)
   $("mFinish").addEventListener("click",()=>{ if(!isMaster())return; const r=getRunning(); if(r) finishConference(r.id); });
@@ -1356,7 +1423,7 @@ function renderBeamer(){
   dom.bList.innerHTML=rows.map((c,i)=>{
     const d=getDept(c.departmentKey);
     const cls=["brow"]; if(r&&r.id===c.id)cls.push("current"); if(c.status==="done")cls.push("done"); if(matchesQuery(c,tc))cls.push("mine");
-    return `<div class="${cls.join(" ")}"><span class="bdot" style="background:${d.color}"></span><span class="btime" data-beta="${c.id}">${bTime(c,etas[c.id])}</span><strong class="bclass">${escapeHtml(c.className)}</strong><span class="bkv">${escapeHtml(c.kv||"—")}</span><span class="bteach">${escapeHtml(teacherKuerzel(c))}</span><span class="bstat">${statusBadge(c.status)}</span></div>`;
+    return `<div class="${cls.join(" ")}" data-cid="${c.id}"><span class="bdot" style="background:${d.color}"></span><span class="btime" data-beta="${c.id}">${bTime(c,etas[c.id])}</span><strong class="bclass">${escapeHtml(c.className)}</strong><span class="bkv">${escapeHtml(c.kv||"—")}</span><span class="bteach">${escapeHtml(teacherKuerzel(c))}</span><span class="bstat">${statusBadge(c.status)}</span></div>`;
   }).join("") || `<div class="bempty">Keine Konferenzen geladen</div>`;
   tickTimers();
 }
@@ -1491,11 +1558,13 @@ function mergeSelected(){
   const newName=prompt(`Neuer Name für die zusammengefasste Konferenz:\n(${names.join(", ")})`, names.join("+"));
   if(newName===null) return;                                   // abgebrochen
   const name=newName.trim()||first.className;
-  // Lehrer vereinen (nach Kürzel, Nachname bewahren); KV/StellvKV jeder Klasse als Lehrer ergänzen
+  // Lehrer vereinen (nach Kürzel, Nachname + Fächer bewahren); KV/StellvKV jeder Klasse ergänzen
   const tmap=new Map();
-  const addT=(k,n)=>{ k=String(k||"").toUpperCase().trim(); if(!k) return; if(!tmap.get(k)&&n) tmap.set(k,n); else if(!tmap.has(k)) tmap.set(k,n||""); };
-  sel.forEach(c=>{ c.teachers.forEach(t=>addT(t.k,t.n)); addT(c.kv,c.kvName); addT(c.stellvKv,c.stellvKvName); });
-  const teachers=[...tmap].map(([k,n])=>({k,n}));
+  const addT=(k,n,faecher)=>{ k=String(k||"").toUpperCase().trim(); if(!k) return;
+    let r=tmap.get(k); if(!r){ r={n:n||"",faecher:new Set()}; tmap.set(k,r); } else if(n&&!r.n) r.n=n;
+    normalizeFaecher(faecher).forEach(f=>r.faecher.add(f)); };
+  sel.forEach(c=>{ c.teachers.forEach(t=>addT(t.k,t.n,t.faecher)); addT(c.kv,c.kvName); addT(c.stellvKv,c.stellvKvName); });
+  const teachers=[...tmap].map(([k,r])=>({k,n:r.n,faecher:[...r.faecher]}));
   const merged=createConference(first.departmentKey,name,teachers,{
     kv:first.kv, kvName:first.kvName, stellvKv:first.stellvKv, stellvKvName:first.stellvKvName,
     langname:names.join(" + ")
@@ -1506,6 +1575,50 @@ function mergeSelected(){
   mergeSel.clear();
   rebuildSchedule();   // neu sortieren/takten + rendern + spiegeln
   updateMergeBtn();
+}
+/* ---------------- Klassen-Detail-Popup (Lehrer + Fächer) ---------------- */
+let cdRenderId=null;
+function openClassDetail(id){ if(!byId(id)) return; cdRenderId=id; renderClassDetail(); dom.classDetail.hidden=false; }
+function closeClassDetail(){ dom.classDetail.hidden=true; cdRenderId=null; }
+function renderClassDetail(){
+  const c=byId(cdRenderId); if(!c){ closeClassDetail(); return; }
+  const d=getDept(c.departmentKey);
+  dom.cdDept.textContent=d.label; dom.cdDept.style.background=d.color;
+  dom.cdClass.textContent=c.className;
+  const m=computeEtas()[c.id];
+  const when = c.status==="running" ? ("läuft seit "+fmt(c.actualStart))
+            : c.status==="done"    ? ("fertig "+fmt(c.actualStart)+"–"+fmt(c.actualEnd))
+            : ("vorauss. ≈ "+fmt((m&&m.eta!=null)?m.eta:c.plannedStart));
+  dom.cdMeta.innerHTML=`KV: <b>${escapeHtml(c.kv||"—")}${c.kvName?" ("+escapeHtml(c.kvName)+")":""}</b> · ${when}`;
+  // "Betrifft mich / meine Fächer" wenn das eingegebene Kürzel passt
+  const tc=state.teacherCode;
+  const mineT = tc ? c.teachers.find(t=>teacherMatches(t,tc)) : null;
+  const isKv  = tc && (teacherMatches({k:c.kv,n:c.kvName},tc) || teacherMatches({k:c.stellvKv,n:c.stellvKvName},tc));
+  if(mineT && mineT.faecher && mineT.faecher.length){
+    dom.cdMine.hidden=false;
+    dom.cdMine.innerHTML=`<span class="cdm-lbl">Deine Fächer in dieser Klasse</span><span class="cdm-f">${mineT.faecher.map(escapeHtml).join(", ")}</span>`;
+  }else if(mineT || isKv){
+    dom.cdMine.hidden=false;
+    dom.cdMine.innerHTML=`<span class="cdm-lbl">Diese Klasse betrifft dich</span><span class="cdm-f">${isKv && !mineT ? "Du bist Klassenvorstand." : "Du bist hier eingetragen."}</span>`;
+  }else dom.cdMine.hidden=true;
+  // Lehrerliste mit Fächern + (Master) Entfernen
+  const master=canControl();
+  if(!c.teachers.length){ dom.cdTeachers.innerHTML='<div class="cd-empty">Keine Lehrer hinterlegt.</div>'; return; }
+  dom.cdTeachers.innerHTML=c.teachers.map(t=>{
+    const isMine = tc && teacherMatches(t,tc);
+    const fa = (t.faecher&&t.faecher.length)
+      ? t.faecher.map(f=>`<span class="cd-chip">${escapeHtml(f)}</span>`).join("")
+      : `<span class="cd-nofa">keine Fächer</span>`;
+    const you = isMine ? `<span class="cd-you">DU</span>` : "";
+    const rm = master ? `<button class="cd-rm" data-rm="${escapeHtml(t.k)}" title="Lehrer aus dieser Klasse entfernen">✕</button>` : "";
+    return `<div class="cd-trow${isMine?" mine":""}"><span class="cd-tn">${escapeHtml(t.k)}${t.n?` <small>(${escapeHtml(t.n)})</small>`:""}${you}</span><span class="cd-tf">${fa}</span>${rm}</div>`;
+  }).join("");
+}
+function removeTeacherFromClass(id,k){
+  if(!canControl()) return;
+  const c=byId(id); if(!c) return;
+  c.teachers=c.teachers.filter(t=>t.k!==k);
+  bumpRevision(); renderAll(); persistAndPublish(); renderClassDetail();
 }
 function removeConference(id){
   const c=byId(id); if(!c) return;
@@ -1548,8 +1661,14 @@ function parseTeacher(s){
   if(m) return { k:m[1].trim().toUpperCase(), n:m[2].trim() };
   return { k:s.toUpperCase(), n:"" };
 }
+function normalizeFaecher(f){
+  if(Array.isArray(f)) return f.map(s=>String(s).trim()).filter(Boolean);
+  if(typeof f==="string") return f.split(/[,;/|]+/).map(s=>s.trim()).filter(Boolean);
+  return [];
+}
 function normalizeTeachers(arr){
-  return (arr||[]).map(t=> typeof t==="string" ? parseTeacher(t) : { k:String(t.k||"").toUpperCase(), n:t.n||"" })
+  return (arr||[]).map(t=> typeof t==="string" ? parseTeacher(t)
+                    : { k:String(t.k||"").toUpperCase(), n:t.n||"", faecher:normalizeFaecher(t.faecher) })
                   .filter(t=>t.k||t.n);
 }
 function splitTeachers(v){ return String(v).split(/[;,/|]+/).map(s=>s.trim()).filter(Boolean).map(parseTeacher); }
@@ -1566,6 +1685,12 @@ function matchesQuery(c,q){
   const hitN = n => { n=(n||"").toLowerCase(); return !!n && (n===q || (q.length>=4 && n.startsWith(q))); };
   if(hitK(c.kv)||hitN(c.kvName)||hitK(c.stellvKv)||hitN(c.stellvKvName)) return true;
   return c.teachers.some(t=>hitK(t.k)||hitN(t.n));
+}
+/* Passt ein einzelner Lehrer (oder KV-Paar als {k,n}) zur Eingabe? Gleiche Regeln wie matchesQuery. */
+function teacherMatches(t,q){
+  q=String(q||"").trim().toLowerCase(); if(!q||!t) return false;
+  const k=(t.k||"").toLowerCase(), n=(t.n||"").toLowerCase();
+  return (!!k && k===q) || (!!n && (n===q || (q.length>=4 && n.startsWith(q))));
 }
 
 function createConference(departmentKey,className,teachers,opts){
@@ -1611,6 +1736,7 @@ async function parseExcel(file){
     const langname=String(pick(row,["Langname","langname","Langbez"]));
     const kvRaw=String(pick(row,["Klassenvorstand","klassenvorstand","KV","kv"]));
     const stellvRaw=String(pick(row,["StellvKV","stellvkv","Stellv. KV","StellvertreterKV"]));
+    const faRaw=String(pick(row,["Faecher","Fächer","Faecher (Kuerzel)","Fach","Faecher/Fach","Subjects","subjects"]));
     let tRaw=pick(row,["Lehrer","Lehrerkuerzel","LehrerKürzel","Teacher","teachers"]);
     if(!tRaw){
       const cols=keys.filter(k=>!/abteilung|department|klasse|class|schultyp|schulform|langname|langbez|klassenvorstand|stellv|^kv$/i.test(k));
@@ -1622,7 +1748,13 @@ async function parseExcel(file){
     if(langname && !e.langname) e.langname=langname;
     if(kvRaw && !e.kv){ const t=parseTeacher(kvRaw); e.kv=t.k; e.kvName=t.n; }
     if(stellvRaw && !e.stellvKv){ const t=parseTeacher(stellvRaw); e.stellvKv=t.k; e.stellvKvName=t.n; }
-    splitTeachers(tRaw).forEach(t=>{ if(t.k && !e.teachers.has(t.k)) e.teachers.set(t.k,t); });
+    const faecher=normalizeFaecher(faRaw);
+    splitTeachers(tRaw).forEach(t=>{
+      if(!t.k) return;
+      if(!e.teachers.has(t.k)) e.teachers.set(t.k,{k:t.k,n:t.n,faecher:[]});
+      const ex=e.teachers.get(t.k); if(t.n && !ex.n) ex.n=t.n;
+      faecher.forEach(f=>{ if(!ex.faecher.includes(f)) ex.faecher.push(f); });   // Fächer dieser Zeile
+    });
   }
   const all=[...map.entries()];
   const withKv=all.filter(([,e])=>e.kv);
