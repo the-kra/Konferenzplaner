@@ -265,7 +265,7 @@ tbody tr.mine td:nth-child(3)::after{content:" ★";color:var(--mine)}
 .bempty{opacity:.5;text-align:center;white-space:nowrap;padding:2.5vh 1vw;font-size:clamp(15px,1.8vw,22px);font-weight:500}
 .beamer-close{position:fixed;top:14px;right:16px;z-index:9100;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:600;color:var(--ink)}
 .beamer-teacher{position:fixed;bottom:14px;left:16px;z-index:9100;display:flex;gap:8px;align-items:center;background:#ffffffcc;border:1px solid var(--line);border-radius:12px;padding:7px 11px}
-.beamer-teacher input{width:120px;padding:6px 9px;font-size:13px}
+.beamer-teacher input{width:250px;padding:6px 10px;font-size:13px}
 .beamer-teacher span{font-size:12px;color:var(--muted);font-weight:600}
 body.anzeige .wrap{display:none!important}
 
@@ -636,7 +636,7 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   </div>
   <div class="beamer-list" id="bList"></div>
   <div class="beamer-foot">Live-Ansicht · aktualisiert automatisch</div>
-  <div class="beamer-teacher" id="bTeacher" style="display:none"><span>Mein Kürzel:</span><input id="bTeacherInput" placeholder="z. B. KRA oder Name" maxlength="40"></div>
+  <div class="beamer-teacher" id="bTeacher" style="display:none"><span>Mein Kürzel:</span><input id="bTeacherInput" placeholder="Kürzel oder Name eingeben" maxlength="40"></div>
 </div>
 <button class="beamer-close" id="bClose" style="display:none">✕ Schließen</button>
 
