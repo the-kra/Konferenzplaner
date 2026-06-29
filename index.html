@@ -246,16 +246,16 @@ tbody tr.mine td:nth-child(3)::after{content:" ★";color:var(--mine)}
 .beamer-top .beamer-qr .bqr-label{font-size:11px;max-width:78px;line-height:1.15;text-align:left}
 .bclock .time{font-size:clamp(32px,3.6vw,50px)}
 .beamer-now{display:grid;grid-template-columns:1fr 1fr;gap:1.4vw}
-.bcard{border:1px solid rgba(255,255,255,.55);border-radius:20px;padding:1.3vh 1.6vw;
+.bcard{border:1px solid rgba(255,255,255,.55);border-radius:18px;padding:0.9vh 1.5vw;
   background:linear-gradient(155deg,rgba(255,255,255,0.44),rgba(255,255,255,0.24));backdrop-filter:blur(9px) saturate(1.4);-webkit-backdrop-filter:blur(9px) saturate(1.4);
-  box-shadow:0 22px 50px -34px rgba(20,30,50,.6),0 1px 0 rgba(255,255,255,.55) inset;min-height:8.5vh;display:flex;flex-direction:column;justify-content:center}
+  box-shadow:0 18px 44px -34px rgba(20,30,50,.6),0 1px 0 rgba(255,255,255,.55) inset;min-height:5.5vh;display:flex;flex-direction:column;justify-content:center}
 .bcard.current{border-color:var(--accent);background:linear-gradient(155deg,color-mix(in srgb,var(--accent) 16%,rgba(255,255,255,.6)),color-mix(in srgb,var(--accent) 8%,rgba(255,255,255,.4)))}
-.blabel{font-size:clamp(11px,1.1vw,15px);letter-spacing:3px;text-transform:uppercase;color:var(--muted);font-weight:600}
-.bname{font-size:clamp(26px,3.3vw,48px);font-weight:700;line-height:1.04;margin-top:3px}
-.bsub{font-size:clamp(13px,1.4vw,20px);color:var(--muted);margin-top:5px;font-weight:500}
-.bdept{display:inline-block;font-size:clamp(12px,1.1vw,16px);font-weight:600;color:#fff;border-radius:999px;padding:3px 13px;margin-top:7px}
+.blabel{font-size:clamp(10px,1vw,13px);letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.bname{font-size:clamp(21px,2.6vw,36px);font-weight:700;line-height:1.03;margin-top:2px}
+.bsub{font-size:clamp(12px,1.2vw,17px);color:var(--muted);margin-top:3px;font-weight:500}
+.bdept{display:inline-block;font-size:clamp(11px,1vw,15px);font-weight:600;color:#fff;border-radius:999px;padding:2px 11px;margin-top:5px}
 .beamer-list{flex:1;min-height:0;overflow:auto;border-top:1px solid var(--line);padding-top:1vh}
-.brow{display:grid;grid-template-columns:auto 110px 1.1fr 90px 1.4fr auto;gap:1.4vw;align-items:center;padding:1.25vh 0.4vw;border-bottom:1px solid var(--line);font-size:clamp(15px,1.6vw,24px)}
+.brow{display:grid;grid-template-columns:auto 110px 1.1fr 90px 1.4fr auto;gap:1.4vw;align-items:center;padding:1.35vh 0.4vw;border-bottom:1px solid var(--line);font-size:clamp(16px,1.75vw,27px)}
 .brow.current{background:var(--accent-soft);font-weight:600;border-radius:10px}
 .brow.done{opacity:.4}
 .brow .bdot{width:12px;height:12px;border-radius:4px}
@@ -326,10 +326,9 @@ body.anzeige .wrap{display:none!important}
 .eta-cell .eta-delta.late{color:#b42318;background:rgba(214,52,32,.12)}
 .eta-cell .eta-delta.early{color:#177245;background:rgba(23,114,69,.12)}
 /* ETA-Zeile in der Beamer-Karte „Als Nächstes" */
-.bcard-eta{margin-top:10px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.bcard-eta .bce-lbl{font-size:clamp(10px,1.2vw,14px);letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600}
-.bcard-eta{margin-top:6px}
-.bcard-eta .bce-time{font-family:"DSEG7 Classic",ui-monospace,monospace;font-weight:700;font-size:clamp(20px,2.5vw,34px);color:var(--accent);letter-spacing:1px}
+/* Zeit/Timer inline neben dem Klassennamen (spart die extra Zeile) */
+.bname-eta,.bname-timer{font-size:.6em;font-weight:700;color:var(--accent);margin-left:.45em;letter-spacing:1px;white-space:nowrap;vertical-align:baseline}
+.bname-eta #bNextEta,.bname-timer #bElapsed{font-family:"DSEG7 Classic",ui-monospace,monospace}
 
 /* ---- Live-Timer (mitlaufende Dauer der aktuellen Konferenz) ---- */
 .elapsed{font-weight:700;color:var(--accent)}
@@ -1374,12 +1373,11 @@ function refreshBeamerEtas(){
 function paintBCard(el,c,label,etaText){
   if(!c){ el.innerHTML=`<div class="blabel">${label}</div><div class="bname" style="color:#9aa6b6">—</div>`; el.style.borderColor=""; return; }
   const d=getDept(c.departmentKey);
-  const timer = (c.status==="running"&&c.actualStart) ? `<div class="btimer">läuft <span id="bElapsed">00:00</span></div>` : "";
-  const eta = (etaText && c.status==="waiting") ? `<div class="bcard-eta"><span class="bce-lbl">vorauss.</span><span class="bce-time" id="bNextEta">${etaText}</span></div>` : "";
-  el.innerHTML=`<div class="blabel">${label}</div><div class="bname">${escapeHtml(c.className)}</div>`
+  const timer = (c.status==="running"&&c.actualStart) ? ` <span class="bname-timer">läuft <span id="bElapsed">00:00</span></span>` : "";
+  const eta = (etaText && c.status==="waiting") ? ` <span class="bname-eta">≈ <span id="bNextEta">${etaText}</span></span>` : "";
+  el.innerHTML=`<div class="blabel">${label}</div><div class="bname">${escapeHtml(c.className)}${eta}${timer}</div>`
     +`<div class="bsub">${escapeHtml(c.kv||"—")}${c.kvName?" ("+escapeHtml(c.kvName)+")":""}</div>`
-    +`<span class="bdept" style="background:${d.color}">${escapeHtml(d.label)}</span>`
-    +timer+eta;
+    +`<span class="bdept" style="background:${d.color}">${escapeHtml(d.label)}</span>`;
 }
 
 /* ---------------- Zeitplan & Sortierung ---------------- */
@@ -1562,8 +1560,10 @@ function teacherKuerzel(c){ return c.teachers.map(t=>t.k).join(", "); }
    ob die Lehrerliste gerade angezeigt wird). Kürzel exakt, Nachname exakt/am Anfang. */
 function matchesQuery(c,q){
   q=String(q||"").trim().toLowerCase(); if(!q) return false;
-  const hitK = k => !!k && k.toLowerCase()===q;                         // Kürzel exakt
-  const hitN = n => { n=(n||"").toLowerCase(); return !!n && (n===q || (q.length>=3 && n.startsWith(q))); }; // Nachname exakt/Anfang
+  const hitK = k => !!k && k.toLowerCase()===q;                         // Kürzel immer exakt
+  // Nachname: exakt – oder Präfix ERST ab 4 Zeichen. So matcht ein 3-Zeichen-Kürzel
+  // wie "KRA" nicht mehr fremde Nachnamen (Kraiger, Krainer, Krall …).
+  const hitN = n => { n=(n||"").toLowerCase(); return !!n && (n===q || (q.length>=4 && n.startsWith(q))); };
   if(hitK(c.kv)||hitN(c.kvName)||hitK(c.stellvKv)||hitN(c.stellvKvName)) return true;
   return c.teachers.some(t=>hitK(t.k)||hitN(t.n));
 }
