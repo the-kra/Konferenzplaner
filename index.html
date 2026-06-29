@@ -413,13 +413,16 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   .brow .btime{white-space:nowrap}
   body.no-teachers .brow{grid-template-columns:auto 1fr auto auto}
 
-  /* QR + Kürzel-Feld laufen unten im Scroll mit (überdecken nichts mehr) */
+  /* Reihenfolge am Handy: Header · Kürzel-Feld · Live-Karten · Klassenliste · QR */
+  .beamer-teacher{position:static;order:1;width:100%;justify-content:center;margin:2px 0 6px}
+  .beamer-teacher input{flex:1;max-width:260px}
+  .beamer-now{order:2}
+  .beamer-list{order:3}
+  /* QR läuft unten im Scroll mit (überdeckt nichts mehr) */
   .beamer-foot{display:none}
-  .beamer-qr{position:static;display:flex;margin:10px auto 6px;box-shadow:0 10px 30px -20px rgba(20,30,50,.5)}
+  .beamer-qr{order:4;position:static;display:flex;margin:10px auto 6px;box-shadow:0 10px 30px -20px rgba(20,30,50,.5)}
   .beamer-qr .bqr-code,.beamer-qr .bqr-code img,.beamer-qr .bqr-code canvas{width:130px;height:130px}
   .beamer-close{top:10px;right:10px;padding:7px 10px;font-size:13px}
-  .beamer-teacher{position:static;margin:4px auto 8px;justify-content:center}
-  .beamer-teacher input{flex:1;max-width:220px}
 }
 
 /* ---- WebUntis-Export-Modal ---- */
