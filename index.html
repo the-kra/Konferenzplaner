@@ -427,7 +427,8 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   body.no-teachers .brow{grid-template-columns:auto 1fr auto auto}
 
   /* Reihenfolge am Handy: Header · Kürzel-Feld · Live-Karten · Klassenliste · QR */
-  .beamer-teacher{position:static;order:1;width:100%;justify-content:flex-start;margin:2px 0 6px}
+  .beamer-teacher{position:static;order:1;width:100%;justify-content:flex-start;margin:2px 0 6px;padding:8px 7px;gap:6px}
+  .beamer-teacher span{flex:0 0 auto}
   .beamer-teacher input{flex:1;max-width:none}
   .bt-hint{display:block}
   .beamer-now{order:2}
@@ -531,7 +532,7 @@ body.admin-locked .wrap{display:none!important}
   background:radial-gradient(circle at 50% 32%,#eef3f9,#dde5f0)}
 #adminLogin .al-card{width:min(360px,100%);background:#fff;border:1px solid var(--line);border-radius:20px;padding:26px 24px;text-align:center;box-shadow:0 30px 80px -30px rgba(20,30,50,.5)}
 #adminLogin .al-logo{display:block;margin:0 auto 12px}
-#adminLogin .al-logo svg{height:48px;width:auto;display:block;margin:0 auto}
+#adminLogin .al-logo svg,#adminLogin .al-logo img{height:48px;width:auto;display:block;margin:0 auto}
 #adminLogin h2{margin:0 0 4px;font-size:21px;font-weight:700}
 #adminLogin p{margin:0 0 16px;color:var(--muted);font-size:13px;line-height:1.4}
 #adminLogin input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-size:16px;text-align:center;box-sizing:border-box;background:#fff;color:var(--ink)}
@@ -2294,9 +2295,9 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
   function showLogin(){
     document.body.classList.add("admin-locked");
     if($id("adminLogin")) return;
-    const logo=document.querySelector(".topbar .logo-badge");
     const ov=document.createElement("div"); ov.id="adminLogin";
-    ov.innerHTML='<div class="al-card"><span class="al-logo">'+(logo?logo.innerHTML:"")+'</span>'
+    const logoSrc=(typeof PD_LOGO!=="undefined")?PD_LOGO:"";
+    ov.innerHTML='<div class="al-card"><span class="al-logo"><img src="'+logoSrc+'" alt="HTL1"></span>'
       +'<h2>Admin-Login</h2><p>Passwort eingeben, um die Konferenz zu steuern.</p>'
       +'<input id="alPwd" type="password" placeholder="Passwort" autocomplete="current-password" enterkeyhint="go">'
       +'<button id="alBtn" type="button">Anmelden</button><div class="al-err" id="alErr"></div>'
