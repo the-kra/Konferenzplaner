@@ -524,6 +524,26 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   #printDoc .pd-kv{margin-left:auto;color:#566;font-size:12.5px;font-weight:600}
   #printDoc .pd-foot{margin-top:12px;padding-top:8px;border-top:1.8px solid #16223e;font-size:11px;color:#8a93a3;text-align:right;font-weight:500}
 }
+
+/* ================= Admin-Login ================= */
+body.admin-locked .wrap{display:none!important}
+#adminLogin{position:fixed;inset:0;z-index:9700;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:radial-gradient(circle at 50% 32%,#eef3f9,#dde5f0)}
+#adminLogin .al-card{width:min(360px,100%);background:#fff;border:1px solid var(--line);border-radius:20px;padding:26px 24px;text-align:center;box-shadow:0 30px 80px -30px rgba(20,30,50,.5)}
+#adminLogin .al-logo{display:block;margin:0 auto 12px}
+#adminLogin .al-logo svg{height:48px;width:auto;display:block;margin:0 auto}
+#adminLogin h2{margin:0 0 4px;font-size:21px;font-weight:700}
+#adminLogin p{margin:0 0 16px;color:var(--muted);font-size:13px;line-height:1.4}
+#adminLogin input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-size:16px;text-align:center;box-sizing:border-box;background:#fff;color:var(--ink)}
+#adminLogin input:focus{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent);outline:none}
+#adminLogin button{width:100%;margin-top:12px;padding:12px;border:none;border-radius:12px;background:var(--brand);color:#fff;font-weight:700;font-size:15px;cursor:pointer}
+#adminLogin button:hover{filter:brightness(1.06)}
+#adminLogin .al-err{min-height:18px;margin-top:9px;color:var(--bad);font-size:13px;font-weight:600}
+#adminLogin .al-anz{display:inline-block;margin-top:4px;color:var(--muted);font-size:12.5px;text-decoration:none}
+#adminLogin .al-anz:hover{color:var(--brand)}
+.lp-logout{margin-top:10px;width:100%;padding:8px;border:1px solid var(--line);background:rgba(255,255,255,.7);color:var(--muted);border-radius:10px;font-size:12px;font-weight:600;cursor:pointer}
+.lp-logout:hover{border-color:var(--bad);color:var(--bad)}
+#livePanel.min .lp-logout{display:none}
 </style>
 </head>
 <body>
@@ -2047,7 +2067,11 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
 (function(){
   const SUPABASE_URL      = "https://excopftemuwsxmqwyxrn.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_sVjO2A8cq8Rr6SgpHl9_7A_sqtQFBZB";
-  const LIVE_KEY          = "HTL1-Lastenstrasse-KONF2026";   // muss zu set_konferenz_state in der DB passen
+  // Admin-Login: nur der SHA-256-HASH des Passworts steht im Code. Das Passwort selbst
+  // (= Steuer-Schlüssel, den Supabase serverseitig prüft) wird beim Login eingegeben + lokal gemerkt.
+  const LIVE_KEY_HASH     = "b67643f9204d4e224757c5c6d2b19801f91b41ac4b74ed562cd5db4ed8afae25";
+  let   masterKey=""; try{ masterKey=localStorage.getItem("kf_master_key")||""; }catch(e){}
+  async function sha256hex(s){ try{ const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(String(s))); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""); }catch(e){ return ""; } }
   const RPC_NAME          = "set_konferenz_state";
   const ROW_ID            = "konferenz";
   const TZ                = "Europe/Vienna";
@@ -2058,7 +2082,7 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
   // Browser den Tab ohne ?mode neu lädt (häufig am Handy). Sonst kippt es ungewollt ins Admin.
   let stickyRole=""; try{ stickyRole=localStorage.getItem("kf_sticky_role")||""; }catch(e){}
   let role;
-  if(mode==="master")       role = q.get("key")===LIVE_KEY ? "master" : "locked";
+  if(mode==="master")       role = "master";   // Steuerung erst nach Passwort-Login (unten)
   else if(mode==="anzeige") role = "anzeige";
   else                      role = stickyRole==="anzeige" ? "anzeige" : "master";
   try{
@@ -2134,7 +2158,8 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
     return;
   }
 
-  // ====================== MASTER ======================
+  // ====================== MASTER (mit Login-Sperre) ======================
+  function startMaster(){
   if(!haveSB){ window.__kfPush=()=>{}; return; }   // lokaler Einzelgerät-Master ohne Cloud
 
   // --- Master-Sperre: nur EIN aktiver Steuermaster gleichzeitig ---
@@ -2153,7 +2178,8 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
     +'<button class="lp-main" id="lpToggle">▶ Konferenztag starten</button>'
     +'<div class="lp-sub">Anzeige-Link (Beamer / Handys):</div>'
     +'<div class="lp-link"><input id="lpUrl" readonly><button id="lpCopy">Kopieren</button></div>'
-    +'<div id="lpQR"></div>';
+    +'<div id="lpQR"></div>'
+    +'<button class="lp-logout" id="lpLogout" type="button">🔒 Abmelden</button>';
   document.body.appendChild(panel);
   setStatus(false);
 
@@ -2165,6 +2191,7 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
   }
   refreshLink();
   $id("lpCopy").onclick=()=>{ const i=$id("lpUrl"); i.select(); if(navigator.clipboard) navigator.clipboard.writeText(i.value); else{ try{document.execCommand("copy");}catch(e){} } $id("lpCopy").textContent="✓"; setTimeout(()=>$id("lpCopy").textContent="Kopieren",1200); };
+  { const lo=$id("lpLogout"); if(lo) lo.onclick=()=>{ if(window.__kfLogout) window.__kfLogout(); }; }
 
   function setActive(a){ sessionActive=a; if(a) sessionDate=viennaDate();
     try{ localStorage.setItem("kf_live_session",a?"1":""); }catch(e){}
@@ -2207,7 +2234,7 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
       if(!amOwner) setOwner(true);                    // erste echte Steueraktion -> Kontrolle automatisch übernehmen
     }
     lastSent=cmp;
-    try{ await SB.rpc(RPC_NAME,{p_payload:pl,p_key:LIVE_KEY}); setStatus(true); }
+    try{ await SB.rpc(RPC_NAME,{p_payload:pl,p_key:masterKey}); setStatus(true); }
     catch(e){ setStatus(false); }
   }
   window.__kfPush=()=>pushNow(false);
@@ -2261,6 +2288,35 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
     .on("postgres_changes",{event:"*",schema:"public",table:"live_state",filter:"id=eq."+ROW_ID}, p=>handleCloud(p.new&&p.new.payload))
     .subscribe();
   setInterval(async ()=>{ if(!amOwner) handleCloud(await readCloud()); }, 5000); // Heartbeat-Ablauf erkennen
+  }   // Ende startMaster()
+
+  // --- Login-Gate: Admin/Steuerung nur mit Passwort ---
+  function showLogin(){
+    document.body.classList.add("admin-locked");
+    if($id("adminLogin")) return;
+    const logo=document.querySelector(".topbar .logo-badge");
+    const ov=document.createElement("div"); ov.id="adminLogin";
+    ov.innerHTML='<div class="al-card"><span class="al-logo">'+(logo?logo.innerHTML:"")+'</span>'
+      +'<h2>Admin-Login</h2><p>Passwort eingeben, um die Konferenz zu steuern.</p>'
+      +'<input id="alPwd" type="password" placeholder="Passwort" autocomplete="current-password" enterkeyhint="go">'
+      +'<button id="alBtn" type="button">Anmelden</button><div class="al-err" id="alErr"></div>'
+      +'<a class="al-anz" href="?mode=anzeige">Nur Anzeige öffnen →</a></div>';
+    document.body.appendChild(ov);
+    const go=async()=>{ const pwd=($id("alPwd").value||"");
+      if(await sha256hex(pwd)===LIVE_KEY_HASH){
+        masterKey=pwd; try{ localStorage.setItem("kf_master_key",pwd); }catch(e){}
+        ov.remove(); document.body.classList.remove("admin-locked"); startMaster();
+      }else{ $id("alErr").textContent="Falsches Passwort."; const i=$id("alPwd"); i.value=""; i.focus(); }
+    };
+    $id("alBtn").onclick=go;
+    $id("alPwd").addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
+    setTimeout(()=>{ try{ $id("alPwd").focus(); }catch(e){} },60);
+  }
+  window.__kfLogout=()=>{ try{ localStorage.removeItem("kf_master_key"); }catch(e){} location.reload(); };
+  (async function(){
+    if(masterKey && await sha256hex(masterKey)===LIVE_KEY_HASH) startMaster();
+    else showLogin();
+  })();
 })();
 </script>
 </body>

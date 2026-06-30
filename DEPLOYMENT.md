@@ -77,8 +77,9 @@ security definer
 set search_path = public
 as $$
 begin
-  -- Dieser Schlüssel MUSS mit LIVE_KEY in index.html übereinstimmen:
-  if p_key <> 'HTL1-Lastenstrasse-KONF2026' then
+  -- Dieser Schlüssel = das Admin-Passwort (im Browser per Login eingegeben).
+  -- Im index.html steht NUR der SHA-256-Hash davon, nicht das Passwort selbst.
+  if p_key <> 'HTL1-Lasten!2026' then
     raise exception 'invalid key';
   end if;
 
