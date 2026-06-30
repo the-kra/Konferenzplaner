@@ -504,8 +504,9 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   #printDoc .pd-qr .pd-qrbox{display:inline-block}
   #printDoc .pd-qr canvas,#printDoc .pd-qr img{width:74px!important;height:74px!important;display:block}
   #printDoc .pd-qr .pd-qrlbl{display:block;font-size:8.5px;color:#667;margin-top:2px;font-weight:600;letter-spacing:.2px}
-  #printDoc .pd-cols{column-count:3;column-gap:13px}
-  #printDoc .pd-dept{break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 11px;border:1px solid #e2e6ec;border-radius:9px;overflow:hidden}
+  #printDoc .pd-cols{display:flex;gap:16px;align-items:flex-start}
+  #printDoc .pd-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:11px}
+  #printDoc .pd-dept{break-inside:avoid;-webkit-column-break-inside:avoid;margin:0;border:1px solid #e2e6ec;border-radius:9px;overflow:hidden}
   #printDoc .pd-dept h3{margin:0;font-size:12.5px;font-weight:700;color:#fff;padding:5px 10px;display:flex;align-items:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   #printDoc .pd-cnt{margin-left:auto;font-weight:600;opacity:.9;font-size:11px}
   #printDoc .pd-row{display:flex;align-items:baseline;gap:8px;font-size:13px;padding:3px 10px;border-top:1px solid #f1f3f6}
@@ -1969,12 +1970,18 @@ function buildPrintDoc(){
   const numById={}; list.forEach((c,i)=>numById[c.id]=i+1);   // Nummer = Reihenfolge
   const depts=[...state.departments].sort((a,b)=>(a.order||0)-(b.order||0));
   const byDept=new Map(); list.forEach(c=>{ if(!byDept.has(c.departmentKey)) byDept.set(c.departmentKey,[]); byDept.get(c.departmentKey).push(c); });
-  let cols="";
-  depts.forEach(d=>{
-    const cs=byDept.get(d.key); if(!cs||!cs.length) return;
-    const rows=cs.map(c=>`<div class="pd-row"><span class="pd-num">${numById[c.id]}.</span><span class="pd-cls">${escapeHtml(c.className)}</span>${c.kv?`<span class="pd-kv">${escapeHtml(c.kv)}</span>`:""}</div>`).join("");
-    cols+=`<section class="pd-dept"><h3 style="background:${d.color}">${escapeHtml(d.label)}<span class="pd-cnt">${cs.length}</span></h3>${rows}</section>`;
+  const blocks=depts.map((d,i)=>({d,ord:i,cs:byDept.get(d.key)||[]})).filter(b=>b.cs.length);
+  const deptHtml=b=>{
+    const rows=b.cs.map(c=>`<div class="pd-row"><span class="pd-num">${numById[c.id]}.</span><span class="pd-cls">${escapeHtml(c.className)}</span>${c.kv?`<span class="pd-kv">${escapeHtml(c.kv)}</span>`:""}</div>`).join("");
+    return `<section class="pd-dept"><h3 style="background:${b.d.color}">${escapeHtml(b.d.label)}<span class="pd-cnt">${b.cs.length}</span></h3>${rows}</section>`;
+  };
+  // 2 feste Spalten, ganze Abteilungen: größte zuerst in die jeweils kürzere Spalte (ausgewogen),
+  // danach in jeder Spalte wieder in Abteilungs-Reihenfolge.
+  const colArr=[[],[]], colH=[0,0];
+  [...blocks].sort((a,b)=>b.cs.length-a.cs.length).forEach(b=>{
+    const i = colH[0]<=colH[1] ? 0 : 1; colArr[i].push(b); colH[i]+=b.cs.length+1.6;
   });
+  const cols=colArr.map(col=>`<div class="pd-col">${col.sort((a,b)=>a.ord-b.ord).map(deptHtml).join("")}</div>`).join("");
   const logo=document.querySelector(".topbar .logo-badge svg");
   const logoHtml=logo?logo.outerHTML:"";
   dom.printDoc.innerHTML=
