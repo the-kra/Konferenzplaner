@@ -201,8 +201,10 @@ tbody tr.mine td:nth-child(3)::after{content:" ★";color:var(--mine)}
 .actions{display:flex;gap:6px}
 .kv-input{width:74px;padding:5px 7px;font-size:12.5px;text-transform:uppercase;border-radius:7px}
 .cls-input{width:104px;padding:5px 7px;font-size:13px;font-weight:600;border-radius:7px}
-.row-sel{margin-right:7px;vertical-align:middle;cursor:pointer}
-.rownum{opacity:.75}
+.numcell{white-space:nowrap}
+table th:first-child,table td:first-child{width:70px}
+.row-sel{margin:0 7px 0 0;vertical-align:middle;cursor:pointer}
+.rownum{opacity:.7;font-variant-numeric:tabular-nums}
 .merge-btn{margin-left:8px;flex:0 0 auto;font-size:13px;font-weight:600;padding:7px 13px;border-radius:11px;border:none;background:var(--good);color:#fff;cursor:pointer}
 .merge-btn[hidden]{display:none}
 .merge-btn:hover{filter:brightness(1.06)}
@@ -1428,8 +1430,8 @@ function renderConferenceTable(){
       ? `<input class="kv-input" data-kv value="${escapeHtml(c.kv)}" maxlength="12" placeholder="Kürzel" title="${escapeHtml(c.kvName||"Klassenvorstand-Kürzel")}">`
       : escapeHtml(c.kv||"—");
     const numCell = master
-      ? `<td><input type="checkbox" class="row-sel" data-sel ${mergeSel.has(c.id)?"checked":""} title="Zum Zusammenfassen markieren"><span class="rownum">${i+1}</span></td>`
-      : `<td>${i+1}</td>`;
+      ? `<td class="numcell"><input type="checkbox" class="row-sel" data-sel ${mergeSel.has(c.id)?"checked":""} title="Zum Zusammenfassen markieren"><span class="rownum">${i+1}</span></td>`
+      : `<td class="numcell"><span class="rownum">${i+1}</span></td>`;
     const nameCell = master
       ? `<td><input class="cls-input" data-name value="${escapeHtml(c.className)}" maxlength="40" title="Klassenname ändern – Lehrer & KV bleiben verbunden"></td>`
       : `<td>${escapeHtml(c.className)}</td>`;
