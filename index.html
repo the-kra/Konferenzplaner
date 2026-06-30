@@ -427,8 +427,10 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   body.no-teachers .brow{grid-template-columns:auto 1fr auto auto}
 
   /* Reihenfolge am Handy: Header · Kürzel-Feld · Live-Karten · Klassenliste · QR */
-  .beamer-teacher{position:static;order:1;width:100%;justify-content:flex-start;margin:2px 0 6px;padding:8px 7px;gap:6px}
+  /* Kürzel-Zeile randlos -> Label bündig links wie Logo/Liste (kein Karten-Gap) */
+  .beamer-teacher{position:static;order:1;width:100%;justify-content:flex-start;margin:2px 0 10px;padding:4px 0;gap:8px;background:none;border:none;box-shadow:none}
   .beamer-teacher span{flex:0 0 auto}
+  .bt-hint{padding:0 2px}
   .beamer-teacher input{flex:1;max-width:none}
   .bt-hint{display:block}
   .beamer-now{order:2}
@@ -2296,13 +2298,18 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
     document.body.classList.add("admin-locked");
     if($id("adminLogin")) return;
     const ov=document.createElement("div"); ov.id="adminLogin";
-    const logoSrc=(typeof PD_LOGO!=="undefined")?PD_LOGO:"";
-    ov.innerHTML='<div class="al-card"><span class="al-logo"><img src="'+logoSrc+'" alt="HTL1"></span>'
+    // Animiertes Logo als eigene Instanz (Suffix hd) – sauber neu aufgebaut, nicht eingefroren
+    const src=document.querySelector(".topbar .logo-badge svg");
+    const logoMarkup = src ? src.outerHTML.replace(/hc/g,"hd")
+                           : ((typeof PD_LOGO!=="undefined") ? '<img src="'+PD_LOGO+'" alt="HTL1">' : "");
+    ov.innerHTML='<div class="al-card"><span class="al-logo">'+logoMarkup+'</span>'
       +'<h2>Admin-Login</h2><p>Passwort eingeben, um die Konferenz zu steuern.</p>'
       +'<input id="alPwd" type="password" placeholder="Passwort" autocomplete="current-password" enterkeyhint="go">'
       +'<button id="alBtn" type="button">Anmelden</button><div class="al-err" id="alErr"></div>'
       +'<a class="al-anz" href="?mode=anzeige">Nur Anzeige öffnen →</a></div>';
     document.body.appendChild(ov);
+    // Animation der hd-Instanz starten (Globus dreht, Orbit/Standfuß bauen sich auf)
+    try{ if(typeof startGlobe==="function") startGlobe("hd"); if(typeof runOrbitReveal==="function") runOrbitReveal("hd"); }catch(e){}
     const go=async()=>{ const pwd=($id("alPwd").value||"");
       if(await sha256hex(pwd)===LIVE_KEY_HASH){
         masterKey=pwd; try{ localStorage.setItem("kf_master_key",pwd); }catch(e){}
