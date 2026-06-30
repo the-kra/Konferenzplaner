@@ -497,8 +497,13 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
   @page{size:A4 portrait;margin:9mm}
   #printDoc .pd-head{display:flex;align-items:center;gap:15px;border-bottom:2.5px solid #16223e;padding-bottom:9px;margin-bottom:13px}
   #printDoc .pd-logo svg{height:50px;width:auto;display:block}
+  #printDoc .pd-htext{margin-right:auto}
   #printDoc .pd-title{font-size:24px;font-weight:700;line-height:1.05}
   #printDoc .pd-sub{font-size:12px;color:#555;margin-top:3px;font-weight:500}
+  #printDoc .pd-qr{flex:0 0 auto;text-align:center}
+  #printDoc .pd-qr .pd-qrbox{display:inline-block}
+  #printDoc .pd-qr canvas,#printDoc .pd-qr img{width:74px!important;height:74px!important;display:block}
+  #printDoc .pd-qr .pd-qrlbl{display:block;font-size:8.5px;color:#667;margin-top:2px;font-weight:600;letter-spacing:.2px}
   #printDoc .pd-cols{column-count:3;column-gap:13px}
   #printDoc .pd-dept{break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 11px;border:1px solid #e2e6ec;border-radius:9px;overflow:hidden}
   #printDoc .pd-dept h3{margin:0;font-size:12.5px;font-weight:700;color:#fff;padding:5px 10px;display:flex;align-items:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -1975,9 +1980,15 @@ function buildPrintDoc(){
   dom.printDoc.innerHTML=
      `<div class="pd-head"><span class="pd-logo">${logoHtml}</span>`
     +`<div class="pd-htext"><div class="pd-title">Notenkonferenz</div>`
-    +`<div class="pd-sub">${escapeHtml(dateLong())} · Beginn ${escapeHtml(state.startTime)} Uhr · ${list.length} Konferenzen</div></div></div>`
+    +`<div class="pd-sub">${escapeHtml(dateLong())} · Beginn ${escapeHtml(state.startTime)} Uhr · ${list.length} Konferenzen</div></div>`
+    +`<span class="pd-qr"><span class="pd-qrbox" id="pdQr"></span><span class="pd-qrlbl">Live mitschauen</span></span></div>`
     +`<div class="pd-cols">${cols}</div>`
     +`<div class="pd-foot">HTL1 Klagenfurt · Lastenstraße</div>`;
+  // QR auf den Anzeige-Link rendern
+  try{
+    const box=dom.printDoc.querySelector("#pdQr"), url=location.origin+location.pathname+"?mode=anzeige";
+    if(box && window.QRCode) new QRCode(box,{text:url,width:150,height:150,correctLevel:QRCode.CorrectLevel.M});
+  }catch(e){}
 }
 function printPdf(){ buildPrintDoc(); setTimeout(()=>{ try{ window.print(); }catch(e){} }, 80); }
 function exportState(){
