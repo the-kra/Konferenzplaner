@@ -785,6 +785,7 @@ body.admin-locked .wrap{display:none!important}
       <p class="sub"><b>Main</b> steuert · <b>Clients</b> (Beamer/Handy) zeigen live mit <span style="opacity:.5;font-size:11px">· v16.13-b17</span></p>
     </div>
     <button class="topbar-btn icon-only" id="openBeamerBtn" type="button" title="Beamer-Ansicht" aria-label="Beamer-Ansicht"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg></button>
+    <button class="topbar-btn icon-only" id="topLogout" type="button" title="Abmelden" aria-label="Abmelden" style="display:none"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
     <div class="clock">
       <div class="time"><span class="off">88:88:88</span><span class="lit" id="clockTime">00:00:00</span></div>
       <div class="meta"><span class="date" id="clockDate">—</span><span class="sep">·</span><span class="lbl">Live</span></div>
@@ -2196,6 +2197,7 @@ window.__kfEnableTeacherInput = ()=>{ dom.bTeacher.style.display="flex"; };
   refreshLink();
   $id("lpCopy").onclick=()=>{ const i=$id("lpUrl"); i.select(); if(navigator.clipboard) navigator.clipboard.writeText(i.value); else{ try{document.execCommand("copy");}catch(e){} } $id("lpCopy").textContent="✓"; setTimeout(()=>$id("lpCopy").textContent="Kopieren",1200); };
   { const lo=$id("lpLogout"); if(lo) lo.onclick=()=>{ if(window.__kfLogout) window.__kfLogout(); }; }
+  { const tl=$id("topLogout"); if(tl){ tl.style.display=""; tl.onclick=()=>{ if(window.__kfLogout) window.__kfLogout(); }; } }
 
   function setActive(a){ sessionActive=a; if(a) sessionDate=viennaDate();
     try{ localStorage.setItem("kf_live_session",a?"1":""); }catch(e){}
