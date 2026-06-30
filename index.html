@@ -493,27 +493,28 @@ body.no-teachers .brow{grid-template-columns:auto 110px 1.2fr 110px auto}
 @media print{
   html,body{background:#fff!important}
   body>*{display:none!important}
-  #printDoc{display:block!important;color:#16223e;font-family:'Lexend',Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printDoc{display:flex!important;flex-direction:column;min-height:271mm;color:#16223e;font-family:'Lexend',Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   @page{size:A4 portrait;margin:9mm}
-  #printDoc .pd-head{display:flex;align-items:center;gap:15px;border-bottom:2.5px solid #16223e;padding-bottom:9px;margin-bottom:13px}
-  #printDoc .pd-logo svg{height:50px;width:auto;display:block}
+  #printDoc .pd-head{display:flex;align-items:center;gap:15px;border-bottom:2.5px solid #16223e;padding-bottom:10px;margin-bottom:6px}
+  #printDoc .pd-logo svg{height:54px;width:auto;display:block}
   #printDoc .pd-htext{margin-right:auto}
-  #printDoc .pd-title{font-size:24px;font-weight:700;line-height:1.05}
-  #printDoc .pd-sub{font-size:12px;color:#555;margin-top:3px;font-weight:500}
+  #printDoc .pd-title{font-size:27px;font-weight:700;line-height:1.05}
+  #printDoc .pd-sub{font-size:13px;color:#555;margin-top:4px;font-weight:500}
   #printDoc .pd-qr{flex:0 0 auto;text-align:center}
   #printDoc .pd-qr .pd-qrbox{display:inline-block}
-  #printDoc .pd-qr canvas,#printDoc .pd-qr img{width:74px!important;height:74px!important;display:block}
-  #printDoc .pd-qr .pd-qrlbl{display:block;font-size:8.5px;color:#667;margin-top:2px;font-weight:600;letter-spacing:.2px}
-  #printDoc .pd-cols{display:flex;gap:16px;align-items:flex-start}
-  #printDoc .pd-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:11px}
-  #printDoc .pd-dept{break-inside:avoid;-webkit-column-break-inside:avoid;margin:0;border:1px solid #e2e6ec;border-radius:9px;overflow:hidden}
-  #printDoc .pd-dept h3{margin:0;font-size:12.5px;font-weight:700;color:#fff;padding:5px 10px;display:flex;align-items:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  #printDoc .pd-cnt{margin-left:auto;font-weight:600;opacity:.9;font-size:11px}
-  #printDoc .pd-row{display:flex;align-items:baseline;gap:8px;font-size:13px;padding:3px 10px;border-top:1px solid #f1f3f6}
-  #printDoc .pd-num{color:#9aa0aa;min-width:20px;text-align:right;font-variant-numeric:tabular-nums;font-size:11.5px}
+  #printDoc .pd-qr canvas,#printDoc .pd-qr img{width:80px!important;height:80px!important;display:block}
+  #printDoc .pd-qr .pd-qrlbl{display:block;font-size:9px;color:#667;margin-top:3px;font-weight:600;letter-spacing:.2px}
+  /* Spalten füllen die Seite, Blöcke gleichmäßig verteilt, Spalten unten bündig */
+  #printDoc .pd-cols{flex:1 1 auto;display:flex;gap:20px;align-items:stretch}
+  #printDoc .pd-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:16px}
+  #printDoc .pd-dept{break-inside:avoid;-webkit-column-break-inside:avoid;margin:0;border:1px solid #e2e6ec;border-radius:10px;overflow:hidden}
+  #printDoc .pd-dept h3{margin:0;font-size:14px;font-weight:700;color:#fff;padding:6px 12px;display:flex;align-items:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printDoc .pd-cnt{margin-left:auto;font-weight:600;opacity:.92;font-size:12px}
+  #printDoc .pd-row{display:flex;align-items:baseline;gap:9px;font-size:14.5px;padding:4px 12px;border-top:1px solid #eef1f5}
+  #printDoc .pd-num{color:#9aa0aa;min-width:22px;text-align:right;font-variant-numeric:tabular-nums;font-size:12.5px}
   #printDoc .pd-cls{font-weight:700;letter-spacing:.3px}
-  #printDoc .pd-kv{margin-left:auto;color:#566;font-size:11px;font-weight:600}
-  #printDoc .pd-foot{margin-top:10px;font-size:10px;color:#99a;text-align:right}
+  #printDoc .pd-kv{margin-left:auto;color:#566;font-size:12.5px;font-weight:600}
+  #printDoc .pd-foot{margin-top:12px;padding-top:8px;border-top:1.8px solid #16223e;font-size:11px;color:#8a93a3;text-align:right;font-weight:500}
 }
 </style>
 </head>
@@ -1205,9 +1206,9 @@ function init(){
 function bindEvents(){
   dom.teacherInput.addEventListener("input",()=>{ state.teacherCode=dom.teacherInput.value.trim(); if(dom.bTeacherInput) dom.bTeacherInput.value=state.teacherCode; renderConferenceTable(); persistLocal(); });
   dom.bTeacherInput.addEventListener("input",()=>{ state.teacherCode=dom.bTeacherInput.value.trim(); renderBeamer(); });
-  dom.konfDate.addEventListener("change",()=>{ state.konfDate=dom.konfDate.value||""; rebuildSchedule(); });
-  dom.startTime.addEventListener("change",()=>{ state.startTime=dom.startTime.value||"13:00"; rebuildSchedule(); });
-  dom.slotMinutes.addEventListener("change",()=>{ const n=Math.round(Number(dom.slotMinutes.value)); state.slotMinutes=Number.isFinite(n)&&n>=1?Math.min(999,n):15; dom.slotMinutes.value=String(state.slotMinutes); rebuildSchedule(); });
+  dom.konfDate.addEventListener("change",()=>{ state.konfDate=dom.konfDate.value||""; applyRetime(); });
+  dom.startTime.addEventListener("change",()=>{ state.startTime=dom.startTime.value||"13:00"; applyRetime(); });
+  dom.slotMinutes.addEventListener("change",()=>{ const n=Math.round(Number(dom.slotMinutes.value)); state.slotMinutes=Number.isFinite(n)&&n>=1?Math.min(999,n):15; dom.slotMinutes.value=String(state.slotMinutes); applyRetime(); });
   dom.excelInput.addEventListener("change",async()=>{
     const f=dom.excelInput.files?.[0]; if(!f) return;
     const imported=await parseExcel(f);
@@ -1588,6 +1589,9 @@ function retimeAll(){
   let cur=timeToToday(state.startTime).getTime();
   state.conferences.forEach(c=>{ if(c.status==="done"){return;} c.plannedStart=cur; c.plannedEnd=cur+state.slotMinutes*60000; cur=c.plannedEnd; });
 }
+/* Nur Zeiten neu berechnen – Reihenfolge bleibt (für Startzeit/Datum/Dauer).
+   So überschreibt eine Zeitänderung NICHT das manuelle „Vorverlegen". */
+function applyRetime(){ retimeAll(); bumpRevision(); renderAll(); persistAndPublish(); }
 function addClassFromForm(){
   if(!isMaster()) return;
   const name=dom.addClass.value.trim();
